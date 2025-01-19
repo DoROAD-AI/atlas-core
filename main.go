@@ -5,13 +5,12 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	v1 "github.com/DoROAD-AI/atlas/api/v1"
-	"github.com/DoROAD-AI/atlas/docs" // Import the docs package
-	"github.com/gin-contrib/cors"     // Import the cors package"
+	"github.com/DoROAD-AI/atlas/docs"
+	"github.com/gin-contrib/cors"
 )
 
 // @title       Atlas - Geographic Data API by DoROAD
@@ -47,21 +46,24 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	// Load country data from JSON
 	if err := v1.LoadCountriesSafe("countries.json"); err != nil {
 		log.Fatalf("Failed to initialize API: %v", err)
 	}
 
+	// Create Gin router with default middleware
 	router := gin.Default()
 
-	// Add CORS middleware
+	// Enable CORS
 	router.Use(cors.Default())
 
-	// Set Swagger host dynamically
+	// Dynamically set Swagger host
 	docs.SwaggerInfo.Host = getHost()
 
-	// API Groups for better organization
+	// v1 routes
 	v1Group := router.Group("/v1")
 	{
+		// Existing routes
 		v1Group.GET("/countries", v1.GetCountries)
 		v1Group.GET("/countries/:code", v1.GetCountryByCode)
 		v1Group.GET("/name/:name", v1.GetCountriesByName)
@@ -75,15 +77,21 @@ func main() {
 		v1Group.GET("/translation/:translation", v1.GetCountriesByTranslation)
 		v1Group.GET("/independent", v1.GetCountriesByIndependence)
 		v1Group.GET("/alpha/:code", v1.GetCountryByAlphaCode)
+		// New route for numeric ISO code
+		v1Group.GET("/ccn3/:code", v1.GetCountryByCCN3)
+		// Alias for "/v1/all" -> same as "/v1/countries"
+		v1Group.GET("/all", v1.GetCountries)
 	}
 
-	// Swagger documentation
+	// Swagger documentation endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Get the appropriate port
+	// Determine port, default to 3101
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3101"
 	}
+
+	// Start server
 	router.Run(":" + port)
 }

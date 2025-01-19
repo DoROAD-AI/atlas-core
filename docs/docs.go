@@ -63,7 +63,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -110,7 +110,51 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Country not found",
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ccn3/{code}": {
+            "get": {
+                "description": "Get details of a specific country by its numeric ISO code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Get country by numeric ISO code (CCN3)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Numeric code (e.g., 840)",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Country"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -156,7 +200,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -200,7 +244,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Country not found",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -247,7 +291,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Country not found",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -294,7 +338,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Country not found",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -304,7 +348,7 @@ const docTemplate = `{
         },
         "/independent": {
             "get": {
-                "description": "Get countries filtered by independence. If not specified, defaults to status=true.",
+                "description": "Get countries filtered by independence. Defaults to status=true if not specified.",
                 "consumes": [
                     "application/json"
                 ],
@@ -318,7 +362,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "true or false. Defaults to 'true' if not specified",
+                        "description": "true or false. Defaults to 'true'",
                         "name": "status",
                         "in": "query"
                     },
@@ -340,7 +384,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -387,7 +431,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Country not found",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -440,7 +484,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -487,7 +531,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Country not found",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -534,7 +578,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Country not found",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -581,7 +625,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Country not found",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
                         }
@@ -595,7 +639,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "latlng": {
-                    "description": "Latitude and longitude of the capital",
                     "type": "array",
                     "items": {
                         "type": "number"
@@ -611,12 +654,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "side": {
-                    "description": "Side of the road cars drive on",
                     "type": "string",
                     "example": "right"
                 },
                 "signs": {
-                    "description": "Signs used on license plates",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -631,12 +672,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "png": {
-                    "description": "PNG format URL of the coat of arms",
                     "type": "string",
                     "example": "https://mainfacts.com/media/images/coats_of_arms/us.png"
                 },
                 "svg": {
-                    "description": "SVG format URL of the coat of arms",
                     "type": "string",
                     "example": "https://mainfacts.com/media/images/coats_of_arms/us.svg"
                 }
@@ -649,12 +688,7 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        "US",
-                        "USA",
-                        "United States of America"
-                    ]
+                    }
                 },
                 "area": {
                     "type": "number",
@@ -664,11 +698,7 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        "CAN",
-                        "MEX"
-                    ]
+                    }
                 },
                 "capital": {
                     "type": "array",
@@ -709,10 +739,7 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        "North America"
-                    ]
+                    }
                 },
                 "currencies": {
                     "$ref": "#/definitions/v1.Currencies"
@@ -735,9 +762,6 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": {
                         "type": "number"
-                    },
-                    "example": {
-                        "2019": 39.7
                     }
                 },
                 "idd": {
@@ -755,20 +779,13 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
-                    },
-                    "example": {
-                        "eng": "English"
                     }
                 },
                 "latlng": {
                     "type": "array",
                     "items": {
                         "type": "number"
-                    },
-                    "example": [
-                        38,
-                        97
-                    ]
+                    }
                 },
                 "maps": {
                     "$ref": "#/definitions/v1.Maps"
@@ -803,20 +820,7 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        "UTC-12:00",
-                        "UTC-11:00",
-                        "UTC-10:00",
-                        "UTC-09:00",
-                        "UTC-08:00",
-                        "UTC-07:00",
-                        "UTC-06:00",
-                        "UTC-05:00",
-                        "UTC-04:00",
-                        "UTC+10:00",
-                        "UTC+12:00"
-                    ]
+                    }
                 },
                 "tld": {
                     "type": "array",
@@ -830,12 +834,10 @@ const docTemplate = `{
                         "type": "object",
                         "properties": {
                             "common": {
-                                "type": "string",
-                                "example": "Vereinigte Staaten"
+                                "type": "string"
                             },
                             "official": {
-                                "type": "string",
-                                "example": "Vereinigte Staaten von Amerika"
+                                "type": "string"
                             }
                         }
                     }
@@ -856,12 +858,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "description": "Name of the currency",
                     "type": "string",
                     "example": "US Dollar"
                 },
                 "symbol": {
-                    "description": "Symbol of the currency",
                     "type": "string",
                     "example": "$"
                 }
@@ -871,12 +871,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "f": {
-                    "description": "Feminine form of the demonym",
                     "type": "string",
                     "example": "American"
                 },
                 "m": {
-                    "description": "Masculine form of the demonym",
                     "type": "string",
                     "example": "American"
                 }
@@ -886,29 +884,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "eng": {
-                    "description": "English demonyms",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/v1.DemonymInfo"
-                        }
-                    ]
+                    "$ref": "#/definitions/v1.DemonymInfo"
                 },
                 "fra": {
-                    "description": "French demonyms (if available)",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/v1.DemonymInfo"
-                        }
-                    ]
+                    "$ref": "#/definitions/v1.DemonymInfo"
                 }
             }
         },
         "v1.ErrorResponse": {
-            "description": "Error response model",
             "type": "object",
             "properties": {
                 "message": {
-                    "description": "The error message\nRequired: true",
                     "type": "string",
                     "example": "Bad request"
                 }
@@ -918,17 +904,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "alt": {
-                    "description": "Alternative text description of the flag",
                     "type": "string",
-                    "example": "The flag of the United States of America is a..."
+                    "example": "Flag of the United States"
                 },
                 "png": {
-                    "description": "PNG format URL of the flag",
                     "type": "string",
                     "example": "https://restcountries.eu/data/usa.png"
                 },
                 "svg": {
-                    "description": "SVG format URL of the flag",
                     "type": "string",
                     "example": "https://restcountries.eu/data/usa.svg"
                 }
@@ -938,12 +921,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "root": {
-                    "description": "Root for the international dialing code.",
                     "type": "string",
                     "example": "+1"
                 },
                 "suffixes": {
-                    "description": "Suffixes for the international dialing code.",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -959,12 +940,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "googleMaps": {
-                    "description": "Google Maps URL",
                     "type": "string",
                     "example": "https://goo.gl/maps/..."
                 },
                 "openStreetMaps": {
-                    "description": "OpenStreetMaps URL",
                     "type": "string",
                     "example": "https://www.openstreetmap.org/..."
                 }
@@ -974,12 +953,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "common": {
-                    "description": "Common name of the country",
                     "type": "string",
                     "example": "United States"
                 },
                 "official": {
-                    "description": "Official name of the country",
                     "type": "string",
                     "example": "United States of America"
                 }
@@ -989,12 +966,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "format": {
-                    "description": "Format of the postal code",
                     "type": "string",
                     "example": "#####-####"
                 },
                 "regex": {
-                    "description": "Regex pattern for validating the postal code",
                     "type": "string",
                     "example": "^\\d{5}(-\\d{4})?$"
                 }

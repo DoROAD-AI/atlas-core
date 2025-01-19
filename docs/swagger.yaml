@@ -3,7 +3,6 @@ definitions:
   v1.CapitalInfo:
     properties:
       latlng:
-        description: Latitude and longitude of the capital
         example:
         - 38.8951
         - 77.0364
@@ -14,11 +13,9 @@ definitions:
   v1.Car:
     properties:
       side:
-        description: Side of the road cars drive on
         example: right
         type: string
       signs:
-        description: Signs used on license plates
         example:
         - USA
         items:
@@ -28,21 +25,15 @@ definitions:
   v1.CoatOfArms:
     properties:
       png:
-        description: PNG format URL of the coat of arms
         example: https://mainfacts.com/media/images/coats_of_arms/us.png
         type: string
       svg:
-        description: SVG format URL of the coat of arms
         example: https://mainfacts.com/media/images/coats_of_arms/us.svg
         type: string
     type: object
   v1.Country:
     properties:
       altSpellings:
-        example:
-        - US
-        - USA
-        - United States of America
         items:
           type: string
         type: array
@@ -50,9 +41,6 @@ definitions:
         example: 9372610
         type: number
       borders:
-        example:
-        - CAN
-        - MEX
         items:
           type: string
         type: array
@@ -82,8 +70,6 @@ definitions:
       coatOfArms:
         $ref: '#/definitions/v1.CoatOfArms'
       continents:
-        example:
-        - North America
         items:
           type: string
         type: array
@@ -102,8 +88,6 @@ definitions:
       gini:
         additionalProperties:
           type: number
-        example:
-          "2019": 39.7
         type: object
       idd:
         $ref: '#/definitions/v1.IDD'
@@ -116,13 +100,8 @@ definitions:
       languages:
         additionalProperties:
           type: string
-        example:
-          eng: English
         type: object
       latlng:
-        example:
-        - 38
-        - 97
         items:
           type: number
         type: array
@@ -148,18 +127,6 @@ definitions:
         example: North America
         type: string
       timezones:
-        example:
-        - UTC-12:00
-        - UTC-11:00
-        - UTC-10:00
-        - UTC-09:00
-        - UTC-08:00
-        - UTC-07:00
-        - UTC-06:00
-        - UTC-05:00
-        - UTC-04:00
-        - UTC+10:00
-        - UTC+12:00
         items:
           type: string
         type: array
@@ -171,10 +138,8 @@ definitions:
         additionalProperties:
           properties:
             common:
-              example: Vereinigte Staaten
               type: string
             official:
-              example: Vereinigte Staaten von Amerika
               type: string
           type: object
         type: object
@@ -189,69 +154,52 @@ definitions:
   v1.CurrencyInfo:
     properties:
       name:
-        description: Name of the currency
         example: US Dollar
         type: string
       symbol:
-        description: Symbol of the currency
         example: $
         type: string
     type: object
   v1.DemonymInfo:
     properties:
       f:
-        description: Feminine form of the demonym
         example: American
         type: string
       m:
-        description: Masculine form of the demonym
         example: American
         type: string
     type: object
   v1.Demonyms:
     properties:
       eng:
-        allOf:
-        - $ref: '#/definitions/v1.DemonymInfo'
-        description: English demonyms
+        $ref: '#/definitions/v1.DemonymInfo'
       fra:
-        allOf:
-        - $ref: '#/definitions/v1.DemonymInfo'
-        description: French demonyms (if available)
+        $ref: '#/definitions/v1.DemonymInfo'
     type: object
   v1.ErrorResponse:
-    description: Error response model
     properties:
       message:
-        description: |-
-          The error message
-          Required: true
         example: Bad request
         type: string
     type: object
   v1.Flags:
     properties:
       alt:
-        description: Alternative text description of the flag
-        example: The flag of the United States of America is a...
+        example: Flag of the United States
         type: string
       png:
-        description: PNG format URL of the flag
         example: https://restcountries.eu/data/usa.png
         type: string
       svg:
-        description: SVG format URL of the flag
         example: https://restcountries.eu/data/usa.svg
         type: string
     type: object
   v1.IDD:
     properties:
       root:
-        description: Root for the international dialing code.
         example: "+1"
         type: string
       suffixes:
-        description: Suffixes for the international dialing code.
         example:
         - "201"
         - "202"
@@ -262,33 +210,27 @@ definitions:
   v1.Maps:
     properties:
       googleMaps:
-        description: Google Maps URL
         example: https://goo.gl/maps/...
         type: string
       openStreetMaps:
-        description: OpenStreetMaps URL
         example: https://www.openstreetmap.org/...
         type: string
     type: object
   v1.Name:
     properties:
       common:
-        description: Common name of the country
         example: United States
         type: string
       official:
-        description: Official name of the country
         example: United States of America
         type: string
     type: object
   v1.PostalCode:
     properties:
       format:
-        description: Format of the postal code
         example: '#####-####'
         type: string
       regex:
-        description: Regex pattern for validating the postal code
         example: ^\d{5}(-\d{4})?$
         type: string
     type: object
@@ -332,7 +274,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "400":
-          description: Bad request
+          description: Bad Request
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by codes
@@ -363,10 +305,39 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "404":
-          description: Country not found
+          description: Not Found
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by capital
+      tags:
+      - Countries
+  /ccn3/{code}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific country by its numeric ISO code.
+      parameters:
+      - description: Numeric code (e.g., 840)
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.Country'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Get country by numeric ISO code (CCN3)
       tags:
       - Countries
   /countries:
@@ -393,7 +364,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "400":
-          description: Bad request
+          description: Bad Request
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get all countries
@@ -422,7 +393,7 @@ paths:
           schema:
             $ref: '#/definitions/v1.Country'
         "404":
-          description: Country not found
+          description: Not Found
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get country by code
@@ -453,7 +424,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "404":
-          description: Country not found
+          description: Not Found
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by currency
@@ -484,7 +455,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "404":
-          description: Country not found
+          description: Not Found
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by demonym
@@ -494,10 +465,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get countries filtered by independence. If not specified, defaults
-        to status=true.
+      description: Get countries filtered by independence. Defaults to status=true
+        if not specified.
       parameters:
-      - description: true or false. Defaults to 'true' if not specified
+      - description: true or false. Defaults to 'true'
         in: query
         name: status
         type: string
@@ -515,7 +486,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "400":
-          description: Bad request
+          description: Bad Request
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by independence status
@@ -546,7 +517,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "404":
-          description: Country not found
+          description: Not Found
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by language
@@ -582,7 +553,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "400":
-          description: Bad request
+          description: Bad Request
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by name
@@ -613,7 +584,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "404":
-          description: Country not found
+          description: Not Found
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by region
@@ -644,7 +615,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "404":
-          description: Country not found
+          description: Not Found
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by subregion
@@ -675,7 +646,7 @@ paths:
               $ref: '#/definitions/v1.Country'
             type: array
         "404":
-          description: Country not found
+          description: Not Found
           schema:
             $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by translation
