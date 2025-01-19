@@ -102,6 +102,15 @@ export ATLAS_ENV=production
 ```bash
 go run main.go
 ```
+or
+
+```bash
+go clean
+
+go build
+
+go run main.go
+```
 
 ### Docker Deployment
 
