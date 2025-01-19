@@ -74,6 +74,7 @@ func main() {
 		v1Group.GET("/subregion/:subregion", v1.GetCountriesBySubregion)
 		v1Group.GET("/translation/:translation", v1.GetCountriesByTranslation)
 		v1Group.GET("/independent", v1.GetCountriesByIndependence)
+		v1Group.GET("/alpha/:code", v1.GetCountryByAlphaCode)
 	}
 
 	// Swagger documentation

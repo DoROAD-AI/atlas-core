@@ -802,6 +802,27 @@ func GetCountriesByTranslation(c *gin.Context) {
 	}
 }
 
+// GetCountryByAlphaCode handles GET requests to /alpha/{code}
+func GetCountryByAlphaCode(c *gin.Context) {
+	code := c.Param("code")
+	fields := c.Query("fields")
+	for _, country := range Countries {
+		if strings.EqualFold(country.CCA2, code) ||
+			strings.EqualFold(country.CCA3, code) ||
+			strings.EqualFold(country.CCN3, code) ||
+			strings.EqualFold(country.CIOC, code) {
+			if fields != "" {
+				fieldList := strings.Split(fields, ",")
+				c.JSON(http.StatusOK, selectFields(country, fieldList))
+			} else {
+				c.JSON(http.StatusOK, country)
+			}
+			return
+		}
+	}
+	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Country not found"})
+}
+
 // GetCountriesByIndependence godoc
 // @Summary     Get countries by independence status
 // @Description Get countries filtered by independence. If not specified, defaults to status=true.
