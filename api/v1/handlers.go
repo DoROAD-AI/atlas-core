@@ -3,8 +3,8 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -142,7 +142,7 @@ var countries []Country
 
 // LoadCountries reads local JSON data into the global countries variable.
 func LoadCountries(filename string) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err) // Handle error appropriately in production environments.
 	}
@@ -773,7 +773,7 @@ func GetCountriesByIndependence(c *gin.Context) {
 
 // improve error handling during data loading
 func LoadCountriesSafe(filename string) error {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("failed to read countries file: %w", err)
 	}
