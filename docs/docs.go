@@ -1006,9 +1006,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "atlas.doroad.io",
+	Host:             "",
 	BasePath:         "/v1",
-	Schemes:          []string{"https"},
+	Schemes:          []string{"https", "http"},
 	Title:            "Atlas - Geographic Data API by DoROAD",
 	Description:      "A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.",
 	InfoInstanceName: "swagger",

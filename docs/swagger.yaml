@@ -292,7 +292,6 @@ definitions:
         example: ^\d{5}(-\d{4})?$
         type: string
     type: object
-host: atlas.doroad.io
 info:
   contact:
     email: support@doroad.ai
@@ -684,4 +683,5 @@ paths:
       - Countries
 schemes:
 - https
+- http
 swagger: "2.0"

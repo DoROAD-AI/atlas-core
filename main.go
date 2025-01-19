@@ -5,28 +5,27 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	v1 "github.com/DoROAD-AI/atlas/api/v1"
-	_ "github.com/DoROAD-AI/atlas/docs"
+	"github.com/DoROAD-AI/atlas/docs" // Import the docs package
+	"github.com/gin-contrib/cors"     // Import the cors package"
 )
 
 // @title       Atlas - Geographic Data API by DoROAD
 // @version     1.0
 // @description A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.
 // @termsOfService http://atlas.doroad.io/terms/
-
 // @contact.name  Atlas API Support
 // @contact.url   https://github.com/DoROAD-AI/atlas/issues
 // @contact.email support@doroad.ai
+// @license.name  MIT
+// @license.url   https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+// @BasePath      /v1
+// @schemes       https http
 
-// @license.name MIT
-// @license.url  https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
-
-// @host     atlas.doroad.io
-// @BasePath /v1
-// @schemes  https
 func getHost() string {
 	env := os.Getenv("ATLAS_ENV")
 	switch env {
@@ -34,6 +33,8 @@ func getHost() string {
 		return "atlas.doroad.io"
 	case "test":
 		return "atlas.doroad.dev"
+	case "dev":
+		return "localhost:3101"
 	default:
 		return "localhost:3101"
 	}
@@ -51,6 +52,12 @@ func main() {
 	}
 
 	router := gin.Default()
+
+	// Add CORS middleware
+	router.Use(cors.Default())
+
+	// Set Swagger host dynamically
+	docs.SwaggerInfo.Host = getHost()
 
 	// API Groups for better organization
 	v1Group := router.Group("/v1")
@@ -72,11 +79,10 @@ func main() {
 	// Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Get the appropriate host
+	// Get the appropriate port
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3101"
 	}
-
 	router.Run(":" + port)
 }
