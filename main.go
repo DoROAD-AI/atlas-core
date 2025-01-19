@@ -81,6 +81,8 @@ func main() {
 		v1Group.GET("/ccn3/:code", v1.GetCountryByCCN3)
 		// Alias for "/v1/all" -> same as "/v1/countries"
 		v1Group.GET("/all", v1.GetCountries)
+		// New route for calling code
+		v1Group.GET("/callingcode/:callingcode", v1.GetCountriesByCallingCode)
 	}
 
 	// Swagger documentation endpoint

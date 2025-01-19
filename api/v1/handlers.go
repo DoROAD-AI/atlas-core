@@ -827,3 +827,39 @@ func GetCountryByCCN3(c *gin.Context) {
 	}
 	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Country not found"})
 }
+
+// GetCountriesByCallingCode handles GET requests to /callingcode/{callingcode}.
+func GetCountriesByCallingCode(c *gin.Context) {
+	callingCode := c.Param("callingcode")
+	fields := c.Query("fields")
+	var filteredCountries []Country
+
+	for _, country := range Countries {
+		codeRoot := country.IDD.Root
+		for _, suffix := range country.IDD.Suffixes {
+			fullCode := strings.TrimSpace(codeRoot + suffix)
+			// Remove '+' for comparison
+			fullCode = strings.TrimPrefix(fullCode, "+")
+			if fullCode == callingCode {
+				filteredCountries = append(filteredCountries, country)
+				break
+			}
+		}
+	}
+
+	if len(filteredCountries) == 0 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Country not found"})
+		return
+	}
+
+	if fields != "" {
+		fieldList := strings.Split(fields, ",")
+		var result []map[string]interface{}
+		for _, country := range filteredCountries {
+			result = append(result, selectFields(country, fieldList))
+		}
+		c.JSON(http.StatusOK, result)
+	} else {
+		c.JSON(http.StatusOK, filteredCountries)
+	}
+}
