@@ -9,10 +9,12 @@ Atlas is a powerful, Go-based geographic information API that provides detailed 
 The fastest way to get started with Atlas is through our hosted API service:
 
 **Production Environment**
+
 - Base URL: `https://atlas.doroad.io`
 - Swagger Documentation: `https://atlas.doroad.io/swagger/index.html`
 
 **Test/Staging Environment**
+
 - Base URL: `https://atlas.doroad.dev`
 - Swagger Documentation: `https://atlas.doroad.dev/swagger/index.html`
 
@@ -32,6 +34,7 @@ curl https://atlas.doroad.io/v1/countries?fields=name,capital,currencies
 ## Features
 
 ### Current Features
+
 - **Complete Country Information**: Comprehensive country data worldwide
 - **Flexible Querying**: Multiple search criteria including:
   - Name (full/partial matching)
@@ -43,6 +46,7 @@ curl https://atlas.doroad.io/v1/countries?fields=name,capital,currencies
   - Translations
   - Demonyms
   - Independence status
+  - Calling code
 - **Field Filtering**: Optimize response payload size
 - **Modern API Design**: RESTful architecture with JSON responses
 - **Interactive Documentation**: Swagger UI for easy exploration
@@ -50,6 +54,7 @@ curl https://atlas.doroad.io/v1/countries?fields=name,capital,currencies
 - **Input Validation**: Built-in parameter validation
 
 ### Planned Features
+
 - Airport information
 - Geographic coordinate calculations
 - City data
@@ -63,82 +68,86 @@ curl https://atlas.doroad.io/v1/countries?fields=name,capital,currencies
 ## Self-Hosting Atlas
 
 ### Prerequisites
+
 - Go 1.20 or higher
 - Git
 - Docker (optional)
 
 ### Local Development Setup
 
-1. Clone and set up the project:
-```bash
-# Clone the repository
-git clone https://github.com/DoROAD-AI/atlas.git
-cd atlas
+1. **Clone and set up the project:**
 
-# Initialize the module
-go mod init github.com/DoROAD-AI/atlas
-go mod tidy
+   ```bash
+   # Clone the repository
+   git clone https://github.com/DoROAD-AI/atlas.git
+   cd atlas
 
-# Install Swagger tools
-go install github.com/swaggo/swag/cmd/swag@latest
+   # Initialize the module
+   go mod init github.com/DoROAD-AI/atlas
+   go mod tidy
 
-# Generate Swagger documentation
-swag init
-```
+   # Install Swagger tools
+   go install github.com/swaggo/swag/cmd/swag@latest
 
-2. Configure the environment:
-```bash
-# Development (localhost:8080)
-export ATLAS_ENV=development
+   # Generate Swagger documentation
+   swag init
+   ```
 
-# Test environment (atlas.doroad.dev)
-export ATLAS_ENV=test
+2. **Configure the environment:**
 
-# Production environment (atlas.doroad.io)
-export ATLAS_ENV=production
-```
+   ```bash
+   # Development (localhost:3101)
+   export ATLAS_ENV=development
 
-3. Run the server:
-```bash
-go run main.go
-```
-or
+   # Test environment (atlas.doroad.dev)
+   export ATLAS_ENV=test
 
-```bash
-go clean
+   # Production environment (atlas.doroad.io)
+   export ATLAS_ENV=production
+   ```
 
-go build
+3. **Run the server:**
 
-go run main.go
-```
+   ```bash
+   go run main.go
+   ```
+
+   or
+
+   ```bash
+   go clean
+   go build
+   go run main.go
+   ```
 
 ### Docker Deployment
 
+Create a `Dockerfile`:
+
 ```dockerfile
 FROM golang:1.20-alpine
-
 WORKDIR /app
 COPY . .
-
 RUN go mod download
 RUN go build -o atlas
-
-EXPOSE 8080
+EXPOSE 3101
 CMD ["./atlas"]
 ```
 
-Build and run:
+Build and run the Docker image:
+
 ```bash
 docker build -t atlas .
-docker run -p 8080:8080 -e ATLAS_ENV=production atlas
+docker run -p 3101:3101 -e ATLAS_ENV=production atlas
 ```
 
 ## API Documentation
 
 Complete API documentation is available through our Swagger UI:
-- Production: https://atlas.doroad.io/swagger/index.html
-- Test: https://atlas.doroad.dev/swagger/index.html
-- Local: http://localhost:8080/swagger/index.html
+
+- **Production**: https://atlas.doroad.io/swagger/index.html
+- **Test**: https://atlas.doroad.dev/swagger/index.html
+- **Local**: http://localhost:3101/swagger/index.html
 
 ## Contributing
 
@@ -167,7 +176,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## About DoROAD AI
 
-DoROAD AI specializes in building intelligent infrastructure for modern applications. Visit [our GitHub](https://github.com/DoROAD-AI) to explore more of our open-source projects.
+DoROAD (DoRoad B.V.) is a pioneering travel technology company headquartered in The Netherlands. DoROAD is revolutionizing the travel technology market through advanced technology and unwavering security and privacy protection.
+
+Today, DoROAD stands at the forefront of travel technology innovation, combining advanced artificial intelligence with an unwavering commitment to privacy. Our platform serves both individual travelers and businesses, offering personalized experiences while maintaining the highest standards of data protection.
+
+Looking ahead, we're not just adapting to the future of travel—we're creating it. Our vision extends beyond traditional travel technology, aiming to establish new standards for personalization, security, and efficiency in global travel management.
 
 ---
+
 Made with ❤️ by DoROAD's Roadman Team
