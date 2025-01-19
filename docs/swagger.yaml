@@ -1,0 +1,501 @@
+basePath: /
+definitions:
+  v1.Country:
+    properties:
+      altSpellings:
+        items:
+          type: string
+        type: array
+      area:
+        type: number
+      borders:
+        items:
+          type: string
+        type: array
+      capital:
+        items:
+          type: string
+        type: array
+      capitalInfo:
+        properties:
+          latlng:
+            items:
+              type: number
+            type: array
+        type: object
+      car:
+        properties:
+          side:
+            type: string
+          signs:
+            items:
+              type: string
+            type: array
+        type: object
+      cca2:
+        type: string
+      cca3:
+        type: string
+      ccn3:
+        type: string
+      cioc:
+        type: string
+      coatOfArms:
+        properties:
+          png:
+            type: string
+          svg:
+            type: string
+        type: object
+      continents:
+        items:
+          type: string
+        type: array
+      currencies:
+        $ref: '#/definitions/v1.Currencies'
+      demonyms:
+        properties:
+          eng:
+            properties:
+              f:
+                type: string
+              m:
+                type: string
+            type: object
+          fra:
+            properties:
+              f:
+                type: string
+              m:
+                type: string
+            type: object
+        type: object
+      fifa:
+        type: string
+      flag:
+        type: string
+      flags:
+        properties:
+          alt:
+            type: string
+          png:
+            type: string
+          svg:
+            type: string
+        type: object
+      gini:
+        additionalProperties:
+          type: number
+        type: object
+      idd:
+        properties:
+          root:
+            type: string
+          suffixes:
+            items:
+              type: string
+            type: array
+        type: object
+      independent:
+        type: boolean
+      landlocked:
+        type: boolean
+      languages:
+        additionalProperties:
+          type: string
+        type: object
+      latlng:
+        items:
+          type: number
+        type: array
+      maps:
+        properties:
+          googleMaps:
+            type: string
+          openStreetMaps:
+            type: string
+        type: object
+      name:
+        properties:
+          common:
+            type: string
+          official:
+            type: string
+        type: object
+      population:
+        type: integer
+      postalCode:
+        properties:
+          format:
+            type: string
+          regex:
+            type: string
+        type: object
+      region:
+        type: string
+      startOfWeek:
+        type: string
+      status:
+        type: string
+      subregion:
+        type: string
+      timezones:
+        items:
+          type: string
+        type: array
+      tld:
+        items:
+          type: string
+        type: array
+      translations:
+        additionalProperties:
+          properties:
+            common:
+              type: string
+            official:
+              type: string
+          type: object
+        type: object
+      unMember:
+        type: boolean
+    type: object
+  v1.Currencies:
+    additionalProperties:
+      $ref: '#/definitions/v1.CurrencyInfo'
+    type: object
+  v1.CurrencyInfo:
+    properties:
+      name:
+        type: string
+      symbol:
+        type: string
+    type: object
+host: atlas.doroad.io
+info:
+  contact:
+    name: Atlas API Support
+    url: https://github.com/DoROAD-AI/atlas/issues
+  description: A comprehensive REST API providing detailed country information worldwide.
+    This modern, high-performance service offers extensive data about countries, including
+    demographics, geography, and international codes.
+  license:
+    name: MIT
+    url: https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+  title: Atlas - Geographic Data API by DoROAD
+  version: "1.0"
+paths:
+  /v1/alpha:
+    get:
+      description: Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC)
+      operationId: get-countries-by-codes
+      parameters:
+      - description: Comma-separated list of country codes (CCA2, CCN3, CCA3, CIOC)
+        in: query
+        name: codes
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+      summary: Get countries by codes
+  /v1/capital/{capital}:
+    get:
+      description: Get countries matching a capital city name
+      operationId: get-countries-by-capital
+      parameters:
+      - description: Capital city name
+        in: path
+        name: capital
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+      summary: Get countries by capital
+  /v1/countries:
+    get:
+      description: Get details of all countries, with optional filters
+      operationId: get-countries
+      parameters:
+      - description: Filter by independent status (true or false)
+        in: query
+        name: independent
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all countries
+  /v1/countries/{code}:
+    get:
+      description: Get details of a specific country by its code (CCA2 or CCA3)
+      operationId: get-country-by-code
+      parameters:
+      - description: Country Code (CCA2 or CCA3)
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.Country'
+        "404":
+          description: Country not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get country by code
+  /v1/currency/{currency}:
+    get:
+      description: Get countries matching a currency code or name
+      operationId: get-countries-by-currency
+      parameters:
+      - description: Currency code or name
+        in: path
+        name: currency
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+      summary: Get countries by currency
+  /v1/demonym/{demonym}:
+    get:
+      description: Get countries matching a demonym
+      operationId: get-countries-by-demonym
+      parameters:
+      - description: Demonym
+        in: path
+        name: demonym
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+      summary: Get countries by demonym
+  /v1/independent:
+    get:
+      description: Get countries filtered by independence. If not specified, defaults
+        to status=true.
+      operationId: get-countries-by-independence
+      parameters:
+      - description: true or false. Defaults to 'true' if not specified
+        in: query
+        name: status
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get countries by independence status
+  /v1/lang/{language}:
+    get:
+      description: Get countries matching a language code or name
+      operationId: get-countries-by-language
+      parameters:
+      - description: Language code or name
+        in: path
+        name: language
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+      summary: Get countries by language
+  /v1/name/{name}:
+    get:
+      description: Get countries matching a name query (common or official). Use fullText=true
+        for exact name match.
+      operationId: get-countries-by-name
+      parameters:
+      - description: Country name (common or official)
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Exact match for full name (true/false)
+        in: query
+        name: fullText
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get countries by name
+  /v1/region/{region}:
+    get:
+      description: Get countries matching a region
+      operationId: get-countries-by-region
+      parameters:
+      - description: Region name
+        in: path
+        name: region
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+      summary: Get countries by region
+  /v1/subregion/{subregion}:
+    get:
+      description: Get countries matching a subregion
+      operationId: get-countries-by-subregion
+      parameters:
+      - description: Subregion name
+        in: path
+        name: subregion
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+      summary: Get countries by subregion
+  /v1/translation/{translation}:
+    get:
+      description: Get countries matching a translation
+      operationId: get-countries-by-translation
+      parameters:
+      - description: Translation
+        in: path
+        name: translation
+        required: true
+        type: string
+      - description: Comma-separated list of fields to include in the response
+        in: query
+        name: fields
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.Country'
+            type: array
+      summary: Get countries by translation
+swagger: "2.0"

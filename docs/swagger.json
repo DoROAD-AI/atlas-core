@@ -1,0 +1,753 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.",
+        "title": "Atlas - Geographic Data API by DoROAD",
+        "contact": {
+            "name": "Atlas API Support",
+            "url": "https://github.com/DoROAD-AI/atlas/issues"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/DoROAD-AI/atlas/blob/main/LICENSE"
+        },
+        "version": "1.0"
+    },
+    "host": "atlas.doroad.io",
+    "basePath": "/",
+    "paths": {
+        "/v1/alpha": {
+            "get": {
+                "description": "Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC)",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by codes",
+                "operationId": "get-countries-by-codes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of country codes (CCA2, CCN3, CCA3, CIOC)",
+                        "name": "codes",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capital/{capital}": {
+            "get": {
+                "description": "Get countries matching a capital city name",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by capital",
+                "operationId": "get-countries-by-capital",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Capital city name",
+                        "name": "capital",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/countries": {
+            "get": {
+                "description": "Get details of all countries, with optional filters",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all countries",
+                "operationId": "get-countries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by independent status (true or false)",
+                        "name": "independent",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/countries/{code}": {
+            "get": {
+                "description": "Get details of a specific country by its code (CCA2 or CCA3)",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get country by code",
+                "operationId": "get-country-by-code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country Code (CCA2 or CCA3)",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Country"
+                        }
+                    },
+                    "404": {
+                        "description": "Country not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/currency/{currency}": {
+            "get": {
+                "description": "Get countries matching a currency code or name",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by currency",
+                "operationId": "get-countries-by-currency",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Currency code or name",
+                        "name": "currency",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/demonym/{demonym}": {
+            "get": {
+                "description": "Get countries matching a demonym",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by demonym",
+                "operationId": "get-countries-by-demonym",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Demonym",
+                        "name": "demonym",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/independent": {
+            "get": {
+                "description": "Get countries filtered by independence. If not specified, defaults to status=true.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by independence status",
+                "operationId": "get-countries-by-independence",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "true or false. Defaults to 'true' if not specified",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/lang/{language}": {
+            "get": {
+                "description": "Get countries matching a language code or name",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by language",
+                "operationId": "get-countries-by-language",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Language code or name",
+                        "name": "language",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/name/{name}": {
+            "get": {
+                "description": "Get countries matching a name query (common or official). Use fullText=true for exact name match.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by name",
+                "operationId": "get-countries-by-name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country name (common or official)",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Exact match for full name (true/false)",
+                        "name": "fullText",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/region/{region}": {
+            "get": {
+                "description": "Get countries matching a region",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by region",
+                "operationId": "get-countries-by-region",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Region name",
+                        "name": "region",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/subregion/{subregion}": {
+            "get": {
+                "description": "Get countries matching a subregion",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by subregion",
+                "operationId": "get-countries-by-subregion",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subregion name",
+                        "name": "subregion",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/translation/{translation}": {
+            "get": {
+                "description": "Get countries matching a translation",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get countries by translation",
+                "operationId": "get-countries-by-translation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Translation",
+                        "name": "translation",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of fields to include in the response",
+                        "name": "fields",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.Country"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "v1.Country": {
+            "type": "object",
+            "properties": {
+                "altSpellings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "area": {
+                    "type": "number"
+                },
+                "borders": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "capital": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "capitalInfo": {
+                    "type": "object",
+                    "properties": {
+                        "latlng": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                },
+                "car": {
+                    "type": "object",
+                    "properties": {
+                        "side": {
+                            "type": "string"
+                        },
+                        "signs": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "cca2": {
+                    "type": "string"
+                },
+                "cca3": {
+                    "type": "string"
+                },
+                "ccn3": {
+                    "type": "string"
+                },
+                "cioc": {
+                    "type": "string"
+                },
+                "coatOfArms": {
+                    "type": "object",
+                    "properties": {
+                        "png": {
+                            "type": "string"
+                        },
+                        "svg": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "continents": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "currencies": {
+                    "$ref": "#/definitions/v1.Currencies"
+                },
+                "demonyms": {
+                    "type": "object",
+                    "properties": {
+                        "eng": {
+                            "type": "object",
+                            "properties": {
+                                "f": {
+                                    "type": "string"
+                                },
+                                "m": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "fra": {
+                            "type": "object",
+                            "properties": {
+                                "f": {
+                                    "type": "string"
+                                },
+                                "m": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "fifa": {
+                    "type": "string"
+                },
+                "flag": {
+                    "type": "string"
+                },
+                "flags": {
+                    "type": "object",
+                    "properties": {
+                        "alt": {
+                            "type": "string"
+                        },
+                        "png": {
+                            "type": "string"
+                        },
+                        "svg": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "gini": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                "idd": {
+                    "type": "object",
+                    "properties": {
+                        "root": {
+                            "type": "string"
+                        },
+                        "suffixes": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "independent": {
+                    "type": "boolean"
+                },
+                "landlocked": {
+                    "type": "boolean"
+                },
+                "languages": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "latlng": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "maps": {
+                    "type": "object",
+                    "properties": {
+                        "googleMaps": {
+                            "type": "string"
+                        },
+                        "openStreetMaps": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "name": {
+                    "type": "object",
+                    "properties": {
+                        "common": {
+                            "type": "string"
+                        },
+                        "official": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "population": {
+                    "type": "integer"
+                },
+                "postalCode": {
+                    "type": "object",
+                    "properties": {
+                        "format": {
+                            "type": "string"
+                        },
+                        "regex": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "region": {
+                    "type": "string"
+                },
+                "startOfWeek": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "subregion": {
+                    "type": "string"
+                },
+                "timezones": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tld": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "translations": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "common": {
+                                "type": "string"
+                            },
+                            "official": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "unMember": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "v1.Currencies": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/v1.CurrencyInfo"
+            }
+        },
+        "v1.CurrencyInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
