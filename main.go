@@ -35,7 +35,7 @@ func getHost() string {
 	case "test":
 		return "atlas.doroad.dev"
 	default:
-		return "localhost:8080"
+		return "localhost:3101"
 	}
 }
 
