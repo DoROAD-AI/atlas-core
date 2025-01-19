@@ -12,8 +12,10 @@ import (
 
 // CurrencyInfo defines the structure for each currency in the currencies map.
 type CurrencyInfo struct {
-	Name   string `json:"name"`
-	Symbol string `json:"symbol"`
+	// Name of the currency
+	Name string `json:"name" example:"US Dollar"`
+	// Symbol of the currency
+	Symbol string `json:"symbol" example:"$"`
 }
 
 // Currencies is a custom map type that can handle both map and array JSON representations.
@@ -50,113 +52,167 @@ func (c *Currencies) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("cannot unmarshal currencies: %s", string(data))
 }
 
+// Name represents the name of a country.
+type Name struct {
+	// Common name of the country
+	Common string `json:"common" example:"United States"`
+	// Official name of the country
+	Official string `json:"official" example:"United States of America"`
+}
+
+// IDD represents the International Direct Dialing info for a country.
+type IDD struct {
+	// Root for the international dialing code.
+	Root string `json:"root" example:"+1"`
+	// Suffixes for the international dialing code.
+	Suffixes []string `json:"suffixes" example:"201,202"`
+}
+
+// Maps represents the map URLs for a country.
+type Maps struct {
+	// Google Maps URL
+	GoogleMaps string `json:"googleMaps" example:"https://goo.gl/maps/..."`
+	// OpenStreetMaps URL
+	OpenStreetMaps string `json:"openStreetMaps" example:"https://www.openstreetmap.org/..."`
+}
+
+// Gini represents the Gini coefficient of a country.
+type Gini struct {
+	// Year the Gini coefficient is from
+	Year int `json:"year" example:"2018"`
+	// Gini coefficient value
+	Coefficient float64 `json:"coefficient" example:"41.4"`
+}
+
+// Car represents the car information for a country.
+type Car struct {
+	// Signs used on license plates
+	Signs []string `json:"signs" example:"USA"`
+	// Side of the road cars drive on
+	Side string `json:"side" example:"right"`
+}
+
+// Flags represents the flag URLs for a country.
+type Flags struct {
+	// SVG format URL of the flag
+	Svg string `json:"svg" example:"https://restcountries.eu/data/usa.svg"`
+	// PNG format URL of the flag
+	Png string `json:"png" example:"https://restcountries.eu/data/usa.png"`
+	// Alternative text description of the flag
+	Alt string `json:"alt,omitempty" example:"The flag of the United States of America is a..."`
+}
+
+// CoatOfArms represents the coat of arms URLs for a country.
+type CoatOfArms struct {
+	// SVG format URL of the coat of arms
+	Svg string `json:"svg" example:"https://mainfacts.com/media/images/coats_of_arms/us.svg"`
+	// PNG format URL of the coat of arms
+	Png string `json:"png" example:"https://mainfacts.com/media/images/coats_of_arms/us.png"`
+}
+
+// CapitalInfo represents the capital information for a country.
+type CapitalInfo struct {
+	// Latitude and longitude of the capital
+	Latlng []float64 `json:"latlng" example:"38.8951,77.0364"`
+}
+
+// PostalCode represents the postal code information for a country.
+type PostalCode struct {
+	// Format of the postal code
+	Format string `json:"format" example:"#####-####"`
+	// Regex pattern for validating the postal code
+	Regex string `json:"regex" example:"^\\d{5}(-\\d{4})?$"`
+}
+
+// Demonyms represents the demonyms for a country.
+type Demonyms struct {
+	// English demonyms
+	Eng DemonymInfo `json:"eng"`
+	// French demonyms (if available)
+	Fra *DemonymInfo `json:"fra,omitempty"`
+}
+
+// DemonymInfo represents the demonym information with gender-specific forms.
+type DemonymInfo struct {
+	// Feminine form of the demonym
+	F string `json:"f" example:"American"`
+	// Masculine form of the demonym
+	M string `json:"m" example:"American"`
+}
+
 // Country is the main data structure to match your RestCountries-like JSON.
 type Country struct {
-	Name struct {
-		Common   string `json:"common"`
-		Official string `json:"official"`
-	} `json:"name"`
+	Name         Name               `json:"name"`
+	TLD          []string           `json:"tld,omitempty"`
+	CCA2         string             `json:"cca2" example:"US"`
+	CCN3         string             `json:"ccn3,omitempty" example:"840"`
+	CCA3         string             `json:"cca3" example:"USA"`
+	CIOC         string             `json:"cioc,omitempty" example:"USA"`
+	FIFA         string             `json:"fifa,omitempty" example:"USA"`
+	Independent  bool               `json:"independent" example:"true"`
+	Status       string             `json:"status,omitempty" example:"officially-assigned"`
+	UNMember     bool               `json:"unMember" example:"true"`
+	Currencies   Currencies         `json:"currencies,omitempty"`
+	IDD          IDD                `json:"idd"`
+	Capital      []string           `json:"capital,omitempty" example:"Washington, D.C."`
+	AltSpellings []string           `json:"altSpellings,omitempty" example:"US,USA,United States of America"`
+	Latlng       []float64          `json:"latlng,omitempty" example:"38,97"`
+	Landlocked   bool               `json:"landlocked" example:"false"`
+	Borders      []string           `json:"borders,omitempty" example:"CAN,MEX"`
+	Area         float64            `json:"area" example:"9372610"`
+	Flag         string             `json:"flag,omitempty" example:"🇺🇸"`
+	Region       string             `json:"region" example:"Americas"`
+	Subregion    string             `json:"subregion,omitempty" example:"North America"`
+	Maps         Maps               `json:"maps"`
+	Population   int                `json:"population" example:"334805269"`
+	Gini         map[string]float64 `json:"gini,omitempty" example:"2019:39.7"`
+	Car          Car                `json:"car"`
+	Timezones    []string           `json:"timezones" example:"UTC-12:00,UTC-11:00,UTC-10:00,UTC-09:00,UTC-08:00,UTC-07:00,UTC-06:00,UTC-05:00,UTC-04:00,UTC+10:00,UTC+12:00"`
+	Continents   []string           `json:"continents" example:"North America"`
+	Flags        Flags              `json:"flags"`
+	CoatOfArms   CoatOfArms         `json:"coatOfArms"`
+	StartOfWeek  string             `json:"startOfWeek" example:"sunday"`
+	CapitalInfo  CapitalInfo        `json:"capitalInfo"`
+	PostalCode   PostalCode         `json:"postalCode,omitempty"`
+	Demonyms     Demonyms           `json:"demonyms"`
 
-	TLD         []string `json:"tld,omitempty"`
-	CCA2        string   `json:"cca2,omitempty"`
-	CCN3        string   `json:"ccn3,omitempty"`
-	CCA3        string   `json:"cca3,omitempty"`
-	CIOC        string   `json:"cioc,omitempty"`
-	FIFA        string   `json:"fifa,omitempty"`
-	Independent bool     `json:"independent,omitempty"`
-	Status      string   `json:"status,omitempty"`
-	UNMember    bool     `json:"unMember,omitempty"`
-
-	Currencies Currencies `json:"currencies,omitempty"`
-
-	IDD struct {
-		Root     string   `json:"root,omitempty"`
-		Suffixes []string `json:"suffixes,omitempty"`
-	} `json:"idd,omitempty"`
-
-	Capital      []string  `json:"capital,omitempty"`
-	AltSpellings []string  `json:"altSpellings,omitempty"`
-	Latlng       []float64 `json:"latlng,omitempty"`
-	Landlocked   bool      `json:"landlocked,omitempty"`
-	Borders      []string  `json:"borders,omitempty"`
-	Area         float64   `json:"area,omitempty"`
-	Flag         string    `json:"flag,omitempty"`
-	Region       string    `json:"region,omitempty"`
-	Subregion    string    `json:"subregion,omitempty"`
-	Maps         struct {
-		GoogleMaps     string `json:"googleMaps,omitempty"`
-		OpenStreetMaps string `json:"openStreetMaps,omitempty"`
-	} `json:"maps,omitempty"`
-
-	Population int                `json:"population,omitempty"`
-	Gini       map[string]float64 `json:"gini,omitempty"`
-
-	Car struct {
-		Signs []string `json:"signs,omitempty"`
-		Side  string   `json:"side,omitempty"`
-	} `json:"car,omitempty"`
-
-	Timezones  []string `json:"timezones,omitempty"`
-	Continents []string `json:"continents,omitempty"`
-
-	Flags struct {
-		Svg string `json:"svg,omitempty"`
-		Png string `json:"png,omitempty"`
-		Alt string `json:"alt,omitempty"`
-	} `json:"flags,omitempty"`
-
-	CoatOfArms struct {
-		Svg string `json:"svg,omitempty"`
-		Png string `json:"png,omitempty"`
-	} `json:"coatOfArms,omitempty"`
-
-	StartOfWeek string `json:"startOfWeek,omitempty"`
-	CapitalInfo struct {
-		Latlng []float64 `json:"latlng,omitempty"`
-	} `json:"capitalInfo,omitempty"`
-	PostalCode struct {
-		Format string `json:"format,omitempty"`
-		Regex  string `json:"regex,omitempty"`
-	} `json:"postalCode,omitempty"`
-
-	Demonyms struct {
-		Eng struct {
-			F string `json:"f"`
-			M string `json:"m"`
-		} `json:"eng,omitempty"`
-		Fra struct {
-			F string `json:"f"`
-			M string `json:"m"`
-		} `json:"fra,omitempty"`
-	} `json:"demonyms,omitempty"`
-
-	Languages    map[string]string `json:"languages,omitempty"`
+	Languages    map[string]string `json:"languages,omitempty" example:"eng:English"`
 	Translations map[string]struct {
-		Official string `json:"official"`
-		Common   string `json:"common"`
+		Official string `json:"official" example:"Vereinigte Staaten von Amerika"`
+		Common   string `json:"common" example:"Vereinigte Staaten"`
 	} `json:"translations,omitempty"`
 }
 
-// countries holds the data once loaded.
-var countries []Country
+// ErrorResponse represents an error response.
+// @Description Error response model
+type ErrorResponse struct {
+	// The error message
+	// Required: true
+	Message string `json:"message" example:"Bad request"`
+}
 
-// LoadCountries reads local JSON data into the global countries variable.
-func LoadCountries(filename string) {
+// Countries holds the data once loaded.
+var Countries []Country
+
+// LoadCountriesSafe reads local JSON data into the global Countries variable.
+func LoadCountriesSafe(filename string) error {
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		panic(err) // Handle error appropriately in production environments.
+		return fmt.Errorf("failed to read countries file: %w", err)
 	}
-	err = json.Unmarshal(data, &countries)
-	if err != nil {
-		panic(err) // Handle error appropriately in production environments.
+
+	if err := json.Unmarshal(data, &Countries); err != nil {
+		return fmt.Errorf("failed to parse countries data: %w", err)
 	}
+
+	return nil
 }
 
 // filterCountries applies field-based filtering logic.
 func filterCountries(filters map[string]string) []Country {
 	filteredCountries := []Country{}
 
-	for _, country := range countries {
+	for _, country := range Countries {
 		match := true
 
 		for key, value := range filters {
@@ -203,8 +259,8 @@ func filterCountries(filters map[string]string) []Country {
 				d := country.Demonyms
 				if !strings.EqualFold(d.Eng.M, value) &&
 					!strings.EqualFold(d.Eng.F, value) &&
-					!strings.EqualFold(d.Fra.M, value) &&
-					!strings.EqualFold(d.Fra.F, value) {
+					d.Fra != nil && !strings.EqualFold(d.Fra.M, value) &&
+					d.Fra != nil && !strings.EqualFold(d.Fra.F, value) {
 					match = false
 				}
 
@@ -373,22 +429,23 @@ func validateBooleanQuery(paramValue string) (string, error) {
 // Below are your actual HTTP handlers with Swag doc comments, referencing Country.
 // --------------------------------------------------------------------------
 
-// getCountries godoc
+// GetCountries godoc
 // @Summary     Get all countries
-// @Description Get details of all countries, with optional filters
-// @ID          get-countries
+// @Description Get details of all countries, with optional filters.
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       independent query string false "Filter by independent status (true or false)"
 // @Param       fields      query string false "Comma-separated list of fields to include in the response"
-// @Success     200         {array}  Country
-// @Failure     400         {object} map[string]string "Bad request"
-// @Router      /v1/countries [get]
+// @Success     200 {array} Country
+// @Failure     400 {object} ErrorResponse "Bad request"
+// @Router      /countries [get]
 func GetCountries(c *gin.Context) {
 	filters := make(map[string]string)
 
 	indVal, err := validateBooleanQuery(c.Query("independent"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: err.Error()})
 		return
 	}
 	if indVal != "" {
@@ -411,21 +468,22 @@ func GetCountries(c *gin.Context) {
 	}
 }
 
-// getCountryByCode godoc
+// GetCountryByCode godoc
 // @Summary     Get country by code
-// @Description Get details of a specific country by its code (CCA2 or CCA3)
-// @ID          get-country-by-code
+// @Description Get details of a specific country by its code (CCA2 or CCA3).
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
-// @Param       code   path  string true  "Country Code (CCA2 or CCA3)"
+// @Param       code   path  string true  "Country code (CCA2 or CCA3)"
 // @Param       fields query string false "Comma-separated list of fields to include in the response"
-// @Success     200   {object} Country
-// @Failure     404   {object} map[string]string "Country not found"
-// @Router      /v1/countries/{code} [get]
+// @Success     200 {object} Country
+// @Failure     404 {object} ErrorResponse "Country not found"
+// @Router      /countries/{code} [get]
 func GetCountryByCode(c *gin.Context) {
 	code := c.Param("code")
 	fields := c.Query("fields")
 
-	for _, country := range countries {
+	for _, country := range Countries {
 		if strings.EqualFold(country.CCA2, code) || strings.EqualFold(country.CCA3, code) {
 			if fields != "" {
 				fieldList := strings.Split(fields, ",")
@@ -437,20 +495,21 @@ func GetCountryByCode(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"message": "Country not found"})
+	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Country not found"})
 }
 
-// getCountriesByName godoc
+// GetCountriesByName godoc
 // @Summary     Get countries by name
 // @Description Get countries matching a name query (common or official). Use fullText=true for exact name match.
-// @ID          get-countries-by-name
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       name     path string true  "Country name (common or official)"
 // @Param       fullText query string false "Exact match for full name (true/false)"
 // @Param       fields   query string false "Comma-separated list of fields to include in the response"
-// @Success     200     {array}  Country
-// @Failure     400     {object} map[string]string "Bad request"
-// @Router      /v1/name/{name} [get]
+// @Success     200 {array} Country
+// @Failure     400 {object} ErrorResponse "Bad request"
+// @Router      /name/{name} [get]
 func GetCountriesByName(c *gin.Context) {
 	name := c.Param("name")
 	fullTextParam := c.Query("fullText")
@@ -459,7 +518,7 @@ func GetCountriesByName(c *gin.Context) {
 	// Validate the fullTextParam
 	boolVal, err := validateBooleanQuery(fullTextParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: err.Error()})
 		return
 	}
 
@@ -486,28 +545,30 @@ func GetCountriesByName(c *gin.Context) {
 	}
 }
 
-// getCountriesByCodes godoc
+// GetCountriesByCodes godoc
 // @Summary     Get countries by codes
-// @Description Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC)
-// @ID          get-countries-by-codes
+// @Description Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC).
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       codes  query string true  "Comma-separated list of country codes (CCA2, CCN3, CCA3, CIOC)"
 // @Param       fields query string false "Comma-separated list of fields to include in the response"
-// @Success     200   {array}  Country
-// @Router      /v1/alpha [get]
+// @Success     200 {array} Country
+// @Failure     400 {object} ErrorResponse "Bad request"
+// @Router      /alpha [get]
 func GetCountriesByCodes(c *gin.Context) {
 	codes := c.Query("codes")
 	fields := c.Query("fields")
 
 	if codes == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter 'codes' is required"})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Query parameter 'codes' is required"})
 		return
 	}
 
 	codeList := strings.Split(codes, ",")
 
 	var filteredCountries []Country
-	for _, country := range countries {
+	for _, country := range Countries {
 		for _, code := range codeList {
 			if strings.EqualFold(country.CCA2, code) ||
 				strings.EqualFold(country.CCA3, code) ||
@@ -531,15 +592,17 @@ func GetCountriesByCodes(c *gin.Context) {
 	}
 }
 
-// getCountriesByCurrency godoc
+// GetCountriesByCurrency godoc
 // @Summary     Get countries by currency
-// @Description Get countries matching a currency code or name
-// @ID          get-countries-by-currency
+// @Description Get countries matching a currency code or name.
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       currency path string true  "Currency code or name"
 // @Param       fields   query string false "Comma-separated list of fields to include in the response"
-// @Success     200     {array}  Country
-// @Router      /v1/currency/{currency} [get]
+// @Success     200 {array} Country
+// @Failure     404 {object} ErrorResponse "Country not found"
+// @Router      /currency/{currency} [get]
 func GetCountriesByCurrency(c *gin.Context) {
 	currency := c.Param("currency")
 	fields := c.Query("fields")
@@ -559,15 +622,17 @@ func GetCountriesByCurrency(c *gin.Context) {
 	}
 }
 
-// getCountriesByDemonym godoc
+// GetCountriesByDemonym godoc
 // @Summary     Get countries by demonym
-// @Description Get countries matching a demonym
-// @ID          get-countries-by-demonym
+// @Description Get countries matching a demonym.
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       demonym path string true  "Demonym"
 // @Param       fields  query string false "Comma-separated list of fields to include in the response"
-// @Success     200    {array}  Country
-// @Router      /v1/demonym/{demonym} [get]
+// @Success     200 {array} Country
+// @Failure     404 {object} ErrorResponse "Country not found"
+// @Router      /demonym/{demonym} [get]
 func GetCountriesByDemonym(c *gin.Context) {
 	demonym := c.Param("demonym")
 	fields := c.Query("fields")
@@ -587,15 +652,17 @@ func GetCountriesByDemonym(c *gin.Context) {
 	}
 }
 
-// getCountriesByLanguage godoc
+// GetCountriesByLanguage godoc
 // @Summary     Get countries by language
-// @Description Get countries matching a language code or name
-// @ID          get-countries-by-language
+// @Description Get countries matching a language code or name.
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       language path string true  "Language code or name"
 // @Param       fields   query string false "Comma-separated list of fields to include in the response"
-// @Success     200     {array}  Country
-// @Router      /v1/lang/{language} [get]
+// @Success     200 {array} Country
+// @Failure     404 {object} ErrorResponse "Country not found"
+// @Router      /lang/{language} [get]
 func GetCountriesByLanguage(c *gin.Context) {
 	language := c.Param("language")
 	fields := c.Query("fields")
@@ -615,15 +682,17 @@ func GetCountriesByLanguage(c *gin.Context) {
 	}
 }
 
-// getCountriesByCapital godoc
+// GetCountriesByCapital godoc
 // @Summary     Get countries by capital
-// @Description Get countries matching a capital city name
-// @ID          get-countries-by-capital
+// @Description Get countries matching a capital city name.
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       capital path string true  "Capital city name"
 // @Param       fields  query string false "Comma-separated list of fields to include in the response"
-// @Success     200    {array}  Country
-// @Router      /v1/capital/{capital} [get]
+// @Success     200 {array} Country
+// @Failure     404 {object} ErrorResponse "Country not found"
+// @Router      /capital/{capital} [get]
 func GetCountriesByCapital(c *gin.Context) {
 	capital := c.Param("capital")
 	fields := c.Query("fields")
@@ -643,15 +712,17 @@ func GetCountriesByCapital(c *gin.Context) {
 	}
 }
 
-// getCountriesByRegion godoc
+// GetCountriesByRegion godoc
 // @Summary     Get countries by region
-// @Description Get countries matching a region
-// @ID          get-countries-by-region
+// @Description Get countries matching a region.
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       region path string true  "Region name"
 // @Param       fields query string false "Comma-separated list of fields to include in the response"
-// @Success     200   {array}  Country
-// @Router      /v1/region/{region} [get]
+// @Success     200 {array} Country
+// @Failure     404 {object} ErrorResponse "Country not found"
+// @Router      /region/{region} [get]
 func GetCountriesByRegion(c *gin.Context) {
 	region := c.Param("region")
 	fields := c.Query("fields")
@@ -671,15 +742,17 @@ func GetCountriesByRegion(c *gin.Context) {
 	}
 }
 
-// getCountriesBySubregion godoc
+// GetCountriesBySubregion godoc
 // @Summary     Get countries by subregion
-// @Description Get countries matching a subregion
-// @ID          get-countries-by-subregion
+// @Description Get countries matching a subregion.
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       subregion path string true  "Subregion name"
 // @Param       fields    query string false "Comma-separated list of fields to include in the response"
-// @Success     200      {array}  Country
-// @Router      /v1/subregion/{subregion} [get]
+// @Success     200 {array} Country
+// @Failure     404 {object} ErrorResponse "Country not found"
+// @Router      /subregion/{subregion} [get]
 func GetCountriesBySubregion(c *gin.Context) {
 	subregion := c.Param("subregion")
 	fields := c.Query("fields")
@@ -699,15 +772,17 @@ func GetCountriesBySubregion(c *gin.Context) {
 	}
 }
 
-// getCountriesByTranslation godoc
+// GetCountriesByTranslation godoc
 // @Summary     Get countries by translation
-// @Description Get countries matching a translation
-// @ID          get-countries-by-translation
+// @Description Get countries matching a translation.
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       translation path string true  "Translation"
 // @Param       fields      query string false "Comma-separated list of fields to include in the response"
-// @Success     200        {array}  Country
-// @Router      /v1/translation/{translation} [get]
+// @Success     200 {array} Country
+// @Failure     404 {object} ErrorResponse "Country not found"
+// @Router      /translation/{translation} [get]
 func GetCountriesByTranslation(c *gin.Context) {
 	translation := c.Param("translation")
 	fields := c.Query("fields")
@@ -727,16 +802,17 @@ func GetCountriesByTranslation(c *gin.Context) {
 	}
 }
 
-// getCountriesByIndependence godoc
+// GetCountriesByIndependence godoc
 // @Summary     Get countries by independence status
 // @Description Get countries filtered by independence. If not specified, defaults to status=true.
-// @ID          get-countries-by-independence
+// @Tags        Countries
+// @Accept      json
 // @Produce     json
 // @Param       status query string false "true or false. Defaults to 'true' if not specified"
 // @Param       fields query string false "Comma-separated list of fields to include in the response"
-// @Success     200   {array}  Country
-// @Failure     400   {object} map[string]string "Bad request"
-// @Router      /v1/independent [get]
+// @Success     200 {array} Country
+// @Failure     400 {object} ErrorResponse "Bad request"
+// @Router      /independent [get]
 func GetCountriesByIndependence(c *gin.Context) {
 	status := c.Query("status")
 
@@ -748,7 +824,7 @@ func GetCountriesByIndependence(c *gin.Context) {
 	// Validate
 	statusBool, err := validateBooleanQuery(status)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: err.Error()})
 		return
 	}
 
@@ -769,18 +845,4 @@ func GetCountriesByIndependence(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, filteredCountries)
 	}
-}
-
-// improve error handling during data loading
-func LoadCountriesSafe(filename string) error {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return fmt.Errorf("failed to read countries file: %w", err)
-	}
-
-	if err := json.Unmarshal(data, &countries); err != nil {
-		return fmt.Errorf("failed to parse countries data: %w", err)
-	}
-
-	return nil
 }

@@ -1,145 +1,165 @@
-basePath: /
+basePath: /v1
 definitions:
+  v1.CapitalInfo:
+    properties:
+      latlng:
+        description: Latitude and longitude of the capital
+        example:
+        - 38.8951
+        - 77.0364
+        items:
+          type: number
+        type: array
+    type: object
+  v1.Car:
+    properties:
+      side:
+        description: Side of the road cars drive on
+        example: right
+        type: string
+      signs:
+        description: Signs used on license plates
+        example:
+        - USA
+        items:
+          type: string
+        type: array
+    type: object
+  v1.CoatOfArms:
+    properties:
+      png:
+        description: PNG format URL of the coat of arms
+        example: https://mainfacts.com/media/images/coats_of_arms/us.png
+        type: string
+      svg:
+        description: SVG format URL of the coat of arms
+        example: https://mainfacts.com/media/images/coats_of_arms/us.svg
+        type: string
+    type: object
   v1.Country:
     properties:
       altSpellings:
+        example:
+        - US
+        - USA
+        - United States of America
         items:
           type: string
         type: array
       area:
+        example: 9372610
         type: number
       borders:
+        example:
+        - CAN
+        - MEX
         items:
           type: string
         type: array
       capital:
+        example:
+        - Washington
+        - ' D.C.'
         items:
           type: string
         type: array
       capitalInfo:
-        properties:
-          latlng:
-            items:
-              type: number
-            type: array
-        type: object
+        $ref: '#/definitions/v1.CapitalInfo'
       car:
-        properties:
-          side:
-            type: string
-          signs:
-            items:
-              type: string
-            type: array
-        type: object
+        $ref: '#/definitions/v1.Car'
       cca2:
+        example: US
         type: string
       cca3:
+        example: USA
         type: string
       ccn3:
+        example: "840"
         type: string
       cioc:
+        example: USA
         type: string
       coatOfArms:
-        properties:
-          png:
-            type: string
-          svg:
-            type: string
-        type: object
+        $ref: '#/definitions/v1.CoatOfArms'
       continents:
+        example:
+        - North America
         items:
           type: string
         type: array
       currencies:
         $ref: '#/definitions/v1.Currencies'
       demonyms:
-        properties:
-          eng:
-            properties:
-              f:
-                type: string
-              m:
-                type: string
-            type: object
-          fra:
-            properties:
-              f:
-                type: string
-              m:
-                type: string
-            type: object
-        type: object
+        $ref: '#/definitions/v1.Demonyms'
       fifa:
+        example: USA
         type: string
       flag:
+        example: "\U0001F1FA\U0001F1F8"
         type: string
       flags:
-        properties:
-          alt:
-            type: string
-          png:
-            type: string
-          svg:
-            type: string
-        type: object
+        $ref: '#/definitions/v1.Flags'
       gini:
         additionalProperties:
           type: number
+        example:
+          "2019": 39.7
         type: object
       idd:
-        properties:
-          root:
-            type: string
-          suffixes:
-            items:
-              type: string
-            type: array
-        type: object
+        $ref: '#/definitions/v1.IDD'
       independent:
+        example: true
         type: boolean
       landlocked:
+        example: false
         type: boolean
       languages:
         additionalProperties:
           type: string
+        example:
+          eng: English
         type: object
       latlng:
+        example:
+        - 38
+        - 97
         items:
           type: number
         type: array
       maps:
-        properties:
-          googleMaps:
-            type: string
-          openStreetMaps:
-            type: string
-        type: object
+        $ref: '#/definitions/v1.Maps'
       name:
-        properties:
-          common:
-            type: string
-          official:
-            type: string
-        type: object
+        $ref: '#/definitions/v1.Name'
       population:
+        example: 334805269
         type: integer
       postalCode:
-        properties:
-          format:
-            type: string
-          regex:
-            type: string
-        type: object
+        $ref: '#/definitions/v1.PostalCode'
       region:
+        example: Americas
         type: string
       startOfWeek:
+        example: sunday
         type: string
       status:
+        example: officially-assigned
         type: string
       subregion:
+        example: North America
         type: string
       timezones:
+        example:
+        - UTC-12:00
+        - UTC-11:00
+        - UTC-10:00
+        - UTC-09:00
+        - UTC-08:00
+        - UTC-07:00
+        - UTC-06:00
+        - UTC-05:00
+        - UTC-04:00
+        - UTC+10:00
+        - UTC+12:00
         items:
           type: string
         type: array
@@ -151,12 +171,15 @@ definitions:
         additionalProperties:
           properties:
             common:
+              example: Vereinigte Staaten
               type: string
             official:
+              example: Vereinigte Staaten von Amerika
               type: string
           type: object
         type: object
       unMember:
+        example: true
         type: boolean
     type: object
   v1.Currencies:
@@ -166,13 +189,113 @@ definitions:
   v1.CurrencyInfo:
     properties:
       name:
+        description: Name of the currency
+        example: US Dollar
         type: string
       symbol:
+        description: Symbol of the currency
+        example: $
+        type: string
+    type: object
+  v1.DemonymInfo:
+    properties:
+      f:
+        description: Feminine form of the demonym
+        example: American
+        type: string
+      m:
+        description: Masculine form of the demonym
+        example: American
+        type: string
+    type: object
+  v1.Demonyms:
+    properties:
+      eng:
+        allOf:
+        - $ref: '#/definitions/v1.DemonymInfo'
+        description: English demonyms
+      fra:
+        allOf:
+        - $ref: '#/definitions/v1.DemonymInfo'
+        description: French demonyms (if available)
+    type: object
+  v1.ErrorResponse:
+    description: Error response model
+    properties:
+      message:
+        description: |-
+          The error message
+          Required: true
+        example: Bad request
+        type: string
+    type: object
+  v1.Flags:
+    properties:
+      alt:
+        description: Alternative text description of the flag
+        example: The flag of the United States of America is a...
+        type: string
+      png:
+        description: PNG format URL of the flag
+        example: https://restcountries.eu/data/usa.png
+        type: string
+      svg:
+        description: SVG format URL of the flag
+        example: https://restcountries.eu/data/usa.svg
+        type: string
+    type: object
+  v1.IDD:
+    properties:
+      root:
+        description: Root for the international dialing code.
+        example: "+1"
+        type: string
+      suffixes:
+        description: Suffixes for the international dialing code.
+        example:
+        - "201"
+        - "202"
+        items:
+          type: string
+        type: array
+    type: object
+  v1.Maps:
+    properties:
+      googleMaps:
+        description: Google Maps URL
+        example: https://goo.gl/maps/...
+        type: string
+      openStreetMaps:
+        description: OpenStreetMaps URL
+        example: https://www.openstreetmap.org/...
+        type: string
+    type: object
+  v1.Name:
+    properties:
+      common:
+        description: Common name of the country
+        example: United States
+        type: string
+      official:
+        description: Official name of the country
+        example: United States of America
+        type: string
+    type: object
+  v1.PostalCode:
+    properties:
+      format:
+        description: Format of the postal code
+        example: '#####-####'
+        type: string
+      regex:
+        description: Regex pattern for validating the postal code
+        example: ^\d{5}(-\d{4})?$
         type: string
     type: object
 host: atlas.doroad.io
 info:
   contact:
+    email: support@doroad.ai
     name: Atlas API Support
     url: https://github.com/DoROAD-AI/atlas/issues
   description: A comprehensive REST API providing detailed country information worldwide.
@@ -181,13 +304,15 @@ info:
   license:
     name: MIT
     url: https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+  termsOfService: http://atlas.doroad.io/terms/
   title: Atlas - Geographic Data API by DoROAD
   version: "1.0"
 paths:
-  /v1/alpha:
+  /alpha:
     get:
-      description: Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC)
-      operationId: get-countries-by-codes
+      consumes:
+      - application/json
+      description: Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC).
       parameters:
       - description: Comma-separated list of country codes (CCA2, CCN3, CCA3, CIOC)
         in: query
@@ -207,11 +332,18 @@ paths:
             items:
               $ref: '#/definitions/v1.Country'
             type: array
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by codes
-  /v1/capital/{capital}:
+      tags:
+      - Countries
+  /capital/{capital}:
     get:
-      description: Get countries matching a capital city name
-      operationId: get-countries-by-capital
+      consumes:
+      - application/json
+      description: Get countries matching a capital city name.
       parameters:
       - description: Capital city name
         in: path
@@ -231,11 +363,18 @@ paths:
             items:
               $ref: '#/definitions/v1.Country'
             type: array
+        "404":
+          description: Country not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by capital
-  /v1/countries:
+      tags:
+      - Countries
+  /countries:
     get:
-      description: Get details of all countries, with optional filters
-      operationId: get-countries
+      consumes:
+      - application/json
+      description: Get details of all countries, with optional filters.
       parameters:
       - description: Filter by independent status (true or false)
         in: query
@@ -257,16 +396,17 @@ paths:
         "400":
           description: Bad request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get all countries
-  /v1/countries/{code}:
+      tags:
+      - Countries
+  /countries/{code}:
     get:
-      description: Get details of a specific country by its code (CCA2 or CCA3)
-      operationId: get-country-by-code
+      consumes:
+      - application/json
+      description: Get details of a specific country by its code (CCA2 or CCA3).
       parameters:
-      - description: Country Code (CCA2 or CCA3)
+      - description: Country code (CCA2 or CCA3)
         in: path
         name: code
         required: true
@@ -285,14 +425,15 @@ paths:
         "404":
           description: Country not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get country by code
-  /v1/currency/{currency}:
+      tags:
+      - Countries
+  /currency/{currency}:
     get:
-      description: Get countries matching a currency code or name
-      operationId: get-countries-by-currency
+      consumes:
+      - application/json
+      description: Get countries matching a currency code or name.
       parameters:
       - description: Currency code or name
         in: path
@@ -312,11 +453,18 @@ paths:
             items:
               $ref: '#/definitions/v1.Country'
             type: array
+        "404":
+          description: Country not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by currency
-  /v1/demonym/{demonym}:
+      tags:
+      - Countries
+  /demonym/{demonym}:
     get:
-      description: Get countries matching a demonym
-      operationId: get-countries-by-demonym
+      consumes:
+      - application/json
+      description: Get countries matching a demonym.
       parameters:
       - description: Demonym
         in: path
@@ -336,12 +484,19 @@ paths:
             items:
               $ref: '#/definitions/v1.Country'
             type: array
+        "404":
+          description: Country not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by demonym
-  /v1/independent:
+      tags:
+      - Countries
+  /independent:
     get:
+      consumes:
+      - application/json
       description: Get countries filtered by independence. If not specified, defaults
         to status=true.
-      operationId: get-countries-by-independence
       parameters:
       - description: true or false. Defaults to 'true' if not specified
         in: query
@@ -363,14 +518,15 @@ paths:
         "400":
           description: Bad request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by independence status
-  /v1/lang/{language}:
+      tags:
+      - Countries
+  /lang/{language}:
     get:
-      description: Get countries matching a language code or name
-      operationId: get-countries-by-language
+      consumes:
+      - application/json
+      description: Get countries matching a language code or name.
       parameters:
       - description: Language code or name
         in: path
@@ -390,12 +546,19 @@ paths:
             items:
               $ref: '#/definitions/v1.Country'
             type: array
+        "404":
+          description: Country not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by language
-  /v1/name/{name}:
+      tags:
+      - Countries
+  /name/{name}:
     get:
+      consumes:
+      - application/json
       description: Get countries matching a name query (common or official). Use fullText=true
         for exact name match.
-      operationId: get-countries-by-name
       parameters:
       - description: Country name (common or official)
         in: path
@@ -422,14 +585,15 @@ paths:
         "400":
           description: Bad request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by name
-  /v1/region/{region}:
+      tags:
+      - Countries
+  /region/{region}:
     get:
-      description: Get countries matching a region
-      operationId: get-countries-by-region
+      consumes:
+      - application/json
+      description: Get countries matching a region.
       parameters:
       - description: Region name
         in: path
@@ -449,11 +613,18 @@ paths:
             items:
               $ref: '#/definitions/v1.Country'
             type: array
+        "404":
+          description: Country not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by region
-  /v1/subregion/{subregion}:
+      tags:
+      - Countries
+  /subregion/{subregion}:
     get:
-      description: Get countries matching a subregion
-      operationId: get-countries-by-subregion
+      consumes:
+      - application/json
+      description: Get countries matching a subregion.
       parameters:
       - description: Subregion name
         in: path
@@ -473,11 +644,18 @@ paths:
             items:
               $ref: '#/definitions/v1.Country'
             type: array
+        "404":
+          description: Country not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by subregion
-  /v1/translation/{translation}:
+      tags:
+      - Countries
+  /translation/{translation}:
     get:
-      description: Get countries matching a translation
-      operationId: get-countries-by-translation
+      consumes:
+      - application/json
+      description: Get countries matching a translation.
       parameters:
       - description: Translation
         in: path
@@ -497,5 +675,13 @@ paths:
             items:
               $ref: '#/definitions/v1.Country'
             type: array
+        "404":
+          description: Country not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
       summary: Get countries by translation
+      tags:
+      - Countries
+schemes:
+- https
 swagger: "2.0"

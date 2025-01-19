@@ -12,16 +12,21 @@ import (
 	_ "github.com/DoROAD-AI/atlas/docs"
 )
 
-// @title Atlas - Geographic Data API by DoROAD
-// @version 1.0
+// @title       Atlas - Geographic Data API by DoROAD
+// @version     1.0
 // @description A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.
-// @host atlas.doroad.io
-// @BasePath /
-// @contact.name Atlas API Support
-// @contact.url https://github.com/DoROAD-AI/atlas/issues
-// @license.name MIT
-// @license.url https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+// @termsOfService http://atlas.doroad.io/terms/
 
+// @contact.name  Atlas API Support
+// @contact.url   https://github.com/DoROAD-AI/atlas/issues
+// @contact.email support@doroad.ai
+
+// @license.name MIT
+// @license.url  https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+
+// @host     atlas.doroad.io
+// @BasePath /v1
+// @schemes  https
 func getHost() string {
 	env := os.Getenv("ATLAS_ENV")
 	switch env {

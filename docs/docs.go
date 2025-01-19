@@ -9,9 +9,11 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
+        "termsOfService": "http://atlas.doroad.io/terms/",
         "contact": {
             "name": "Atlas API Support",
-            "url": "https://github.com/DoROAD-AI/atlas/issues"
+            "url": "https://github.com/DoROAD-AI/atlas/issues",
+            "email": "support@doroad.ai"
         },
         "license": {
             "name": "MIT",
@@ -22,14 +24,19 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/alpha": {
+        "/alpha": {
             "get": {
-                "description": "Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC)",
+                "description": "Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC).",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by codes",
-                "operationId": "get-countries-by-codes",
                 "parameters": [
                     {
                         "type": "string",
@@ -54,18 +61,29 @@ const docTemplate = `{
                                 "$ref": "#/definitions/v1.Country"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
                     }
                 }
             }
         },
-        "/v1/capital/{capital}": {
+        "/capital/{capital}": {
             "get": {
-                "description": "Get countries matching a capital city name",
+                "description": "Get countries matching a capital city name.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by capital",
-                "operationId": "get-countries-by-capital",
                 "parameters": [
                     {
                         "type": "string",
@@ -90,18 +108,29 @@ const docTemplate = `{
                                 "$ref": "#/definitions/v1.Country"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Country not found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
                     }
                 }
             }
         },
-        "/v1/countries": {
+        "/countries": {
             "get": {
-                "description": "Get details of all countries, with optional filters",
+                "description": "Get details of all countries, with optional filters.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get all countries",
-                "operationId": "get-countries",
                 "parameters": [
                     {
                         "type": "string",
@@ -129,27 +158,29 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/v1.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/v1/countries/{code}": {
+        "/countries/{code}": {
             "get": {
-                "description": "Get details of a specific country by its code (CCA2 or CCA3)",
+                "description": "Get details of a specific country by its code (CCA2 or CCA3).",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get country by code",
-                "operationId": "get-country-by-code",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Country Code (CCA2 or CCA3)",
+                        "description": "Country code (CCA2 or CCA3)",
                         "name": "code",
                         "in": "path",
                         "required": true
@@ -171,23 +202,25 @@ const docTemplate = `{
                     "404": {
                         "description": "Country not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/v1.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/v1/currency/{currency}": {
+        "/currency/{currency}": {
             "get": {
-                "description": "Get countries matching a currency code or name",
+                "description": "Get countries matching a currency code or name.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by currency",
-                "operationId": "get-countries-by-currency",
                 "parameters": [
                     {
                         "type": "string",
@@ -212,18 +245,29 @@ const docTemplate = `{
                                 "$ref": "#/definitions/v1.Country"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Country not found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
                     }
                 }
             }
         },
-        "/v1/demonym/{demonym}": {
+        "/demonym/{demonym}": {
             "get": {
-                "description": "Get countries matching a demonym",
+                "description": "Get countries matching a demonym.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by demonym",
-                "operationId": "get-countries-by-demonym",
                 "parameters": [
                     {
                         "type": "string",
@@ -248,18 +292,29 @@ const docTemplate = `{
                                 "$ref": "#/definitions/v1.Country"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Country not found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
                     }
                 }
             }
         },
-        "/v1/independent": {
+        "/independent": {
             "get": {
                 "description": "Get countries filtered by independence. If not specified, defaults to status=true.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by independence status",
-                "operationId": "get-countries-by-independence",
                 "parameters": [
                     {
                         "type": "string",
@@ -287,23 +342,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/v1.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/v1/lang/{language}": {
+        "/lang/{language}": {
             "get": {
-                "description": "Get countries matching a language code or name",
+                "description": "Get countries matching a language code or name.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by language",
-                "operationId": "get-countries-by-language",
                 "parameters": [
                     {
                         "type": "string",
@@ -328,18 +385,29 @@ const docTemplate = `{
                                 "$ref": "#/definitions/v1.Country"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Country not found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
                     }
                 }
             }
         },
-        "/v1/name/{name}": {
+        "/name/{name}": {
             "get": {
                 "description": "Get countries matching a name query (common or official). Use fullText=true for exact name match.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by name",
-                "operationId": "get-countries-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -374,23 +442,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/v1.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/v1/region/{region}": {
+        "/region/{region}": {
             "get": {
-                "description": "Get countries matching a region",
+                "description": "Get countries matching a region.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by region",
-                "operationId": "get-countries-by-region",
                 "parameters": [
                     {
                         "type": "string",
@@ -415,18 +485,29 @@ const docTemplate = `{
                                 "$ref": "#/definitions/v1.Country"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Country not found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
                     }
                 }
             }
         },
-        "/v1/subregion/{subregion}": {
+        "/subregion/{subregion}": {
             "get": {
-                "description": "Get countries matching a subregion",
+                "description": "Get countries matching a subregion.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by subregion",
-                "operationId": "get-countries-by-subregion",
                 "parameters": [
                     {
                         "type": "string",
@@ -451,18 +532,29 @@ const docTemplate = `{
                                 "$ref": "#/definitions/v1.Country"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Country not found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
                     }
                 }
             }
         },
-        "/v1/translation/{translation}": {
+        "/translation/{translation}": {
             "get": {
-                "description": "Get countries matching a translation",
+                "description": "Get countries matching a translation.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Countries"
+                ],
                 "summary": "Get countries by translation",
-                "operationId": "get-countries-by-translation",
                 "parameters": [
                     {
                         "type": "string",
@@ -487,12 +579,69 @@ const docTemplate = `{
                                 "$ref": "#/definitions/v1.Country"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Country not found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "v1.CapitalInfo": {
+            "type": "object",
+            "properties": {
+                "latlng": {
+                    "description": "Latitude and longitude of the capital",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "example": [
+                        38.8951,
+                        77.0364
+                    ]
+                }
+            }
+        },
+        "v1.Car": {
+            "type": "object",
+            "properties": {
+                "side": {
+                    "description": "Side of the road cars drive on",
+                    "type": "string",
+                    "example": "right"
+                },
+                "signs": {
+                    "description": "Signs used on license plates",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "USA"
+                    ]
+                }
+            }
+        },
+        "v1.CoatOfArms": {
+            "type": "object",
+            "properties": {
+                "png": {
+                    "description": "PNG format URL of the coat of arms",
+                    "type": "string",
+                    "example": "https://mainfacts.com/media/images/coats_of_arms/us.png"
+                },
+                "svg": {
+                    "description": "SVG format URL of the coat of arms",
+                    "type": "string",
+                    "example": "https://mainfacts.com/media/images/coats_of_arms/us.svg"
+                }
+            }
+        },
         "v1.Country": {
             "type": "object",
             "properties": {
@@ -500,218 +649,174 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "US",
+                        "USA",
+                        "United States of America"
+                    ]
                 },
                 "area": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 9372610
                 },
                 "borders": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "CAN",
+                        "MEX"
+                    ]
                 },
                 "capital": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "Washington",
+                        " D.C."
+                    ]
                 },
                 "capitalInfo": {
-                    "type": "object",
-                    "properties": {
-                        "latlng": {
-                            "type": "array",
-                            "items": {
-                                "type": "number"
-                            }
-                        }
-                    }
+                    "$ref": "#/definitions/v1.CapitalInfo"
                 },
                 "car": {
-                    "type": "object",
-                    "properties": {
-                        "side": {
-                            "type": "string"
-                        },
-                        "signs": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
+                    "$ref": "#/definitions/v1.Car"
                 },
                 "cca2": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "US"
                 },
                 "cca3": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "USA"
                 },
                 "ccn3": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "840"
                 },
                 "cioc": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "USA"
                 },
                 "coatOfArms": {
-                    "type": "object",
-                    "properties": {
-                        "png": {
-                            "type": "string"
-                        },
-                        "svg": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/v1.CoatOfArms"
                 },
                 "continents": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "North America"
+                    ]
                 },
                 "currencies": {
                     "$ref": "#/definitions/v1.Currencies"
                 },
                 "demonyms": {
-                    "type": "object",
-                    "properties": {
-                        "eng": {
-                            "type": "object",
-                            "properties": {
-                                "f": {
-                                    "type": "string"
-                                },
-                                "m": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "fra": {
-                            "type": "object",
-                            "properties": {
-                                "f": {
-                                    "type": "string"
-                                },
-                                "m": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "$ref": "#/definitions/v1.Demonyms"
                 },
                 "fifa": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "USA"
                 },
                 "flag": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "🇺🇸"
                 },
                 "flags": {
-                    "type": "object",
-                    "properties": {
-                        "alt": {
-                            "type": "string"
-                        },
-                        "png": {
-                            "type": "string"
-                        },
-                        "svg": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/v1.Flags"
                 },
                 "gini": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "number"
+                    },
+                    "example": {
+                        "2019": 39.7
                     }
                 },
                 "idd": {
-                    "type": "object",
-                    "properties": {
-                        "root": {
-                            "type": "string"
-                        },
-                        "suffixes": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
+                    "$ref": "#/definitions/v1.IDD"
                 },
                 "independent": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "landlocked": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": false
                 },
                 "languages": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    },
+                    "example": {
+                        "eng": "English"
                     }
                 },
                 "latlng": {
                     "type": "array",
                     "items": {
                         "type": "number"
-                    }
+                    },
+                    "example": [
+                        38,
+                        97
+                    ]
                 },
                 "maps": {
-                    "type": "object",
-                    "properties": {
-                        "googleMaps": {
-                            "type": "string"
-                        },
-                        "openStreetMaps": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/v1.Maps"
                 },
                 "name": {
-                    "type": "object",
-                    "properties": {
-                        "common": {
-                            "type": "string"
-                        },
-                        "official": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/v1.Name"
                 },
                 "population": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 334805269
                 },
                 "postalCode": {
-                    "type": "object",
-                    "properties": {
-                        "format": {
-                            "type": "string"
-                        },
-                        "regex": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/v1.PostalCode"
                 },
                 "region": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Americas"
                 },
                 "startOfWeek": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "sunday"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "officially-assigned"
                 },
                 "subregion": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "North America"
                 },
                 "timezones": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "UTC-12:00",
+                        "UTC-11:00",
+                        "UTC-10:00",
+                        "UTC-09:00",
+                        "UTC-08:00",
+                        "UTC-07:00",
+                        "UTC-06:00",
+                        "UTC-05:00",
+                        "UTC-04:00",
+                        "UTC+10:00",
+                        "UTC+12:00"
+                    ]
                 },
                 "tld": {
                     "type": "array",
@@ -725,16 +830,19 @@ const docTemplate = `{
                         "type": "object",
                         "properties": {
                             "common": {
-                                "type": "string"
+                                "type": "string",
+                                "example": "Vereinigte Staaten"
                             },
                             "official": {
-                                "type": "string"
+                                "type": "string",
+                                "example": "Vereinigte Staaten von Amerika"
                             }
                         }
                     }
                 },
                 "unMember": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -748,10 +856,147 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "type": "string"
+                    "description": "Name of the currency",
+                    "type": "string",
+                    "example": "US Dollar"
                 },
                 "symbol": {
-                    "type": "string"
+                    "description": "Symbol of the currency",
+                    "type": "string",
+                    "example": "$"
+                }
+            }
+        },
+        "v1.DemonymInfo": {
+            "type": "object",
+            "properties": {
+                "f": {
+                    "description": "Feminine form of the demonym",
+                    "type": "string",
+                    "example": "American"
+                },
+                "m": {
+                    "description": "Masculine form of the demonym",
+                    "type": "string",
+                    "example": "American"
+                }
+            }
+        },
+        "v1.Demonyms": {
+            "type": "object",
+            "properties": {
+                "eng": {
+                    "description": "English demonyms",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.DemonymInfo"
+                        }
+                    ]
+                },
+                "fra": {
+                    "description": "French demonyms (if available)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.DemonymInfo"
+                        }
+                    ]
+                }
+            }
+        },
+        "v1.ErrorResponse": {
+            "description": "Error response model",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "The error message\nRequired: true",
+                    "type": "string",
+                    "example": "Bad request"
+                }
+            }
+        },
+        "v1.Flags": {
+            "type": "object",
+            "properties": {
+                "alt": {
+                    "description": "Alternative text description of the flag",
+                    "type": "string",
+                    "example": "The flag of the United States of America is a..."
+                },
+                "png": {
+                    "description": "PNG format URL of the flag",
+                    "type": "string",
+                    "example": "https://restcountries.eu/data/usa.png"
+                },
+                "svg": {
+                    "description": "SVG format URL of the flag",
+                    "type": "string",
+                    "example": "https://restcountries.eu/data/usa.svg"
+                }
+            }
+        },
+        "v1.IDD": {
+            "type": "object",
+            "properties": {
+                "root": {
+                    "description": "Root for the international dialing code.",
+                    "type": "string",
+                    "example": "+1"
+                },
+                "suffixes": {
+                    "description": "Suffixes for the international dialing code.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "201",
+                        "202"
+                    ]
+                }
+            }
+        },
+        "v1.Maps": {
+            "type": "object",
+            "properties": {
+                "googleMaps": {
+                    "description": "Google Maps URL",
+                    "type": "string",
+                    "example": "https://goo.gl/maps/..."
+                },
+                "openStreetMaps": {
+                    "description": "OpenStreetMaps URL",
+                    "type": "string",
+                    "example": "https://www.openstreetmap.org/..."
+                }
+            }
+        },
+        "v1.Name": {
+            "type": "object",
+            "properties": {
+                "common": {
+                    "description": "Common name of the country",
+                    "type": "string",
+                    "example": "United States"
+                },
+                "official": {
+                    "description": "Official name of the country",
+                    "type": "string",
+                    "example": "United States of America"
+                }
+            }
+        },
+        "v1.PostalCode": {
+            "type": "object",
+            "properties": {
+                "format": {
+                    "description": "Format of the postal code",
+                    "type": "string",
+                    "example": "#####-####"
+                },
+                "regex": {
+                    "description": "Regex pattern for validating the postal code",
+                    "type": "string",
+                    "example": "^\\d{5}(-\\d{4})?$"
                 }
             }
         }
@@ -762,8 +1007,8 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "atlas.doroad.io",
-	BasePath:         "/",
-	Schemes:          []string{},
+	BasePath:         "/v1",
+	Schemes:          []string{"https"},
 	Title:            "Atlas - Geographic Data API by DoROAD",
 	Description:      "A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.",
 	InfoInstanceName: "swagger",
