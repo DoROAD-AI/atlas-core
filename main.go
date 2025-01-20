@@ -33,7 +33,7 @@ func getHost() string {
 	case "test":
 		return "atlas.doroad.dev"
 	case "dev":
-		return "localhost:3101"
+		return "atlas-guauaxfgd2enghft.francecentral-01.azurewebsites.net"
 	default:
 		return "localhost:3101"
 	}
