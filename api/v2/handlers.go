@@ -1288,16 +1288,19 @@ func GetAirportsByKeyword(c *gin.Context) {
 func SuperTypeQuery(c *gin.Context) {
 	// Get the 'type' query parameter
 	dataType := c.Query("type")
-	// Remove 'type' from parameters
+
+	// Copy all query parameters
 	queryParams := c.Request.URL.Query()
+
 	// Remove 'type' from queryParams
 	delete(queryParams, "type")
+
 	// If queryParams is empty, return error
 	if len(queryParams) == 0 {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "At least one query parameter is required"})
 		return
 	}
-	// Depending on dataType, search appropriate data
+
 	switch strings.ToLower(dataType) {
 	case "country":
 		results := searchCountries(queryParams)
@@ -1306,6 +1309,7 @@ func SuperTypeQuery(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusOK, results)
+
 	case "airport":
 		results := searchAirports(queryParams)
 		if len(results) == 0 {
@@ -1313,146 +1317,182 @@ func SuperTypeQuery(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusOK, results)
+
 	case "", "all":
-		// Search countries and airports
+		// Search both
 		var combinedResults struct {
 			Countries []v1.Country `json:"countries"`
 			Airports  []Airport    `json:"airports"`
 		}
+
 		countries := searchCountries(queryParams)
 		airports := searchAirports(queryParams)
 		combinedResults.Countries = countries
 		combinedResults.Airports = airports
+
 		if len(countries) == 0 && len(airports) == 0 {
 			c.JSON(http.StatusNotFound, ErrorResponse{Message: "No results found matching the criteria"})
 			return
 		}
+
 		c.JSON(http.StatusOK, combinedResults)
+
 	default:
 		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid type parameter. Allowed values are 'country', 'airport', or 'all'"})
 		return
 	}
 }
 
-// searchCountries searches countries based on query parameters
+// searchCountries searches countries based on query parameters (partial match, case-insensitive, OR match for multi-values).
 func searchCountries(queryParams url.Values) []v1.Country {
 	var results []v1.Country
+
+OuterLoop:
 	for _, country := range v1.Countries {
-		match := true
+		// For each country, check all query parameters
 		for key, values := range queryParams {
-			value := values[0]
-			switch strings.ToLower(key) {
-			case "name":
-				if !strings.Contains(strings.ToLower(country.Name.Common), strings.ToLower(value)) &&
-					!strings.Contains(strings.ToLower(country.Name.Official), strings.ToLower(value)) {
-					match = false
-					break
-				}
-			case "region":
-				if !strings.EqualFold(country.Region, value) {
-					match = false
-					break
-				}
-			case "subregion":
-				if !strings.EqualFold(country.Subregion, value) {
-					match = false
-					break
-				}
-			case "cca2":
-				if !strings.EqualFold(country.CCA2, value) {
-					match = false
-					break
-				}
-			case "cca3":
-				if !strings.EqualFold(country.CCA3, value) {
-					match = false
-					break
-				}
-			case "ccn3":
-				if !strings.EqualFold(country.CCN3, value) {
-					match = false
-					break
-				}
-			case "capital":
-				found := false
-				for _, cap := range country.Capital {
-					if strings.EqualFold(cap, value) {
-						found = true
+			// If multiple values for the same key: treat them as OR
+			// If at least one value matches, the parameter is satisfied
+			matchedParam := false
+
+			for _, val := range values {
+				val = strings.TrimSpace(strings.ToLower(val))
+
+				switch strings.ToLower(key) {
+				case "name":
+					// Check partial in Common or Official
+					if strings.Contains(strings.ToLower(country.Name.Common), val) ||
+						strings.Contains(strings.ToLower(country.Name.Official), val) {
+						matchedParam = true
 						break
 					}
+
+				case "region":
+					if strings.Contains(strings.ToLower(country.Region), val) {
+						matchedParam = true
+						break
+					}
+
+				case "subregion":
+					if strings.Contains(strings.ToLower(country.Subregion), val) {
+						matchedParam = true
+						break
+					}
+
+				case "cca2":
+					if strings.Contains(strings.ToLower(country.CCA2), val) {
+						matchedParam = true
+						break
+					}
+
+				case "cca3":
+					if strings.Contains(strings.ToLower(country.CCA3), val) {
+						matchedParam = true
+						break
+					}
+
+				case "ccn3":
+					if strings.Contains(strings.ToLower(country.CCN3), val) {
+						matchedParam = true
+						break
+					}
+
+				case "capital":
+					// country.Capital is a slice, so check partial match in any capital city
+					for _, cap := range country.Capital {
+						if strings.Contains(strings.ToLower(cap), val) {
+							matchedParam = true
+							break
+						}
+					}
+
+				default:
+					// Skip unrecognized keys instead of forcing a mismatch
+					// matchedParam remains false for this query key
+					// This means we IGNORE unrecognized keys, so the user can pass them
+					// and they simply won't filter anything.
+					continue
 				}
-				if !found {
-					match = false
-					break
-				}
-			// Add other fields as needed...
-			default:
-				// Skip unrecognized fields
-				match = false
-				break
+			}
+
+			// If we never found a match for this parameter, the country does not match
+			if !matchedParam {
+				continue OuterLoop
 			}
 		}
-		if match {
-			results = append(results, country)
-		}
+
+		// If all query parameters matched (some with OR logic among multi-values),
+		// then this country is a result
+		results = append(results, country)
 	}
 	return results
 }
 
-// searchAirports searches airports based on query parameters
+// searchAirports searches airports based on query parameters (partial match, case-insensitive, OR match for multi-values).
 func searchAirports(queryParams url.Values) []Airport {
 	var results []Airport
+
 	for _, countryAirports := range AirportData {
+	AirportLoop:
 		for _, airport := range countryAirports.Airports {
-			match := true
+			// For each airport, check all query parameters
 			for key, values := range queryParams {
-				value := values[0]
-				switch strings.ToLower(key) {
-				case "name":
-					if !strings.Contains(strings.ToLower(airport.Name), strings.ToLower(value)) {
-						match = false
-						break
+				matchedParam := false
+
+				for _, val := range values {
+					val = strings.TrimSpace(strings.ToLower(val))
+
+					switch strings.ToLower(key) {
+					case "name":
+						if strings.Contains(strings.ToLower(airport.Name), val) {
+							matchedParam = true
+							break
+						}
+					case "municipality":
+						if strings.Contains(strings.ToLower(airport.Municipality), val) {
+							matchedParam = true
+							break
+						}
+					case "ident":
+						if strings.Contains(strings.ToLower(airport.Ident), val) {
+							matchedParam = true
+							break
+						}
+					case "iata_code":
+						if strings.Contains(strings.ToLower(airport.IATACode), val) {
+							matchedParam = true
+							break
+						}
+					case "iso_country":
+						if strings.Contains(strings.ToLower(airport.ISOCountry), val) {
+							matchedParam = true
+							break
+						}
+					case "iso_region":
+						if strings.Contains(strings.ToLower(airport.ISORegion), val) {
+							matchedParam = true
+							break
+						}
+					case "airport_type":
+						if strings.Contains(strings.ToLower(airport.Type), val) {
+							matchedParam = true
+							break
+						}
+					default:
+						// Skip unrecognized keys
+						continue
 					}
-				case "municipality":
-					if !strings.Contains(strings.ToLower(airport.Municipality), strings.ToLower(value)) {
-						match = false
-						break
-					}
-				case "ident":
-					if !strings.EqualFold(airport.Ident, value) {
-						match = false
-						break
-					}
-				case "iata_code":
-					if !strings.EqualFold(airport.IATACode, value) {
-						match = false
-						break
-					}
-				case "iso_country":
-					if !strings.EqualFold(airport.ISOCountry, value) {
-						match = false
-						break
-					}
-				case "iso_region":
-					if !strings.EqualFold(airport.ISORegion, value) {
-						match = false
-						break
-					}
-				case "airport_type":
-					if !strings.EqualFold(airport.Type, value) {
-						match = false
-						break
-					}
-				// Add other fields as needed...
-				default:
-					// Skip unrecognized fields
-					match = false
-					break
+				}
+
+				// If this particular query parameter never matched, skip this airport
+				if !matchedParam {
+					continue AirportLoop
 				}
 			}
-			if match {
-				results = append(results, airport)
-			}
+
+			// If we satisfied all query parameters (some with OR logic),
+			// add this airport to the results
+			results = append(results, airport)
 		}
 	}
 	return results
