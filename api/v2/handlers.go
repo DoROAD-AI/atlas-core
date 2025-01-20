@@ -22,6 +22,10 @@ var Passports PassportData
 // codeToCCA3 maps various country codes to their CCA3 code
 var codeToCCA3 map[string]string
 
+// AirportData holds the airport data keyed by alpha-2 country code
+// (e.g., "VC" -> { ... }).
+var AirportData map[string]CountryAirports
+
 // VisaRequirement represents the visa requirement between two countries.
 // @Description VisaRequirement represents the visa requirement between two countries.
 type VisaRequirement struct {
@@ -110,12 +114,16 @@ type CountryAirports struct {
 	Airports      []Airport `json:"airports"`
 }
 
-// AirportData holds the airport data
-var AirportData map[string]CountryAirports
+// PassportResponse represents the passport data response.
+// @Description PassportResponse represents the passport data response.
+type PassportResponse struct {
+	Passport string            `json:"passport" example:"USA"`
+	Visas    map[string]string `json:"visas"`
+}
 
-// Initialize code mapping after loading passports data
+// init initializes the global codeToCCA3 map (used for passports and for
+// mapping any recognized country code to its CCA3 form).
 func init() {
-	// Ensure that codeToCCA3 is initialized
 	codeToCCA3 = make(map[string]string)
 }
 
@@ -133,8 +141,8 @@ func LoadPassportData(filename string) error {
 	return nil
 }
 
-// LoadAirportData loads airport data from a JSON file.
-func LoadAirportData(filename string) error {
+// LoadAirportsData loads airport data from a JSON file into AirportData.
+func LoadAirportsData(filename string) error {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("failed to read airports file: %w", err)
@@ -146,6 +154,8 @@ func LoadAirportData(filename string) error {
 }
 
 // initCodeMapping builds a mapping from various country codes to CCA3 codes.
+// This mapping is used both for passport data and to route "country codes"
+// to a single standard (CCA3).
 func initCodeMapping() {
 	for _, country := range v1.Countries {
 		cca3 := country.CCA3
@@ -168,13 +178,34 @@ func initCodeMapping() {
 	}
 }
 
+// toAlpha2 attempts to convert an arbitrary country code (CCA2, CCA3, CCN3, etc.)
+// to its ISO alpha-2 equivalent. It returns the alpha-2 code if found.
+func toAlpha2(code string) (string, bool) {
+	upper := strings.ToUpper(code)
+	cca3, ok := codeToCCA3[upper]
+	if !ok {
+		return "", false
+	}
+	// Find the country in the v1.Countries slice by matching alpha-3
+	for _, c := range v1.Countries {
+		if c.CCA3 == cca3 {
+			return c.CCA2, true
+		}
+	}
+	return "", false
+}
+
+// ----------------------------------------------------------------------------
+// Passport Handlers
+// ----------------------------------------------------------------------------
+
 // GetPassportData handles GET /passports/:passportCode
 // @Summary     Get passport data
 // @Description Get visa requirement data for a specific passport.
 // @Tags        Passports
 // @Accept      json
 // @Produce     json
-// @Param       passportCode path string true "Passport code (e.g., USA)"
+// @Param       passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
 // @Success     200 {object} PassportResponse
 // @Failure     404 {object} ErrorResponse
 // @Router      /passports/{passportCode} [get]
@@ -203,7 +234,7 @@ func GetPassportData(c *gin.Context) {
 // @Tags        Passports
 // @Accept      json
 // @Produce     json
-// @Param       passportCode path string true "Passport code (e.g., USA)"
+// @Param       passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
 // @Success     200 {object} PassportResponse
 // @Failure     404 {object} ErrorResponse
 // @Router      /passports/{passportCode}/visas [get]
@@ -232,8 +263,8 @@ func GetVisaRequirementsForPassport(c *gin.Context) {
 // @Tags        Passports
 // @Accept      json
 // @Produce     json
-// @Param       fromCountry query string true "Origin country code (e.g., USA)"
-// @Param       toCountry   query string true "Destination country code (e.g., DEU)"
+// @Param       fromCountry query string true "Origin country code (e.g., USA, US, 840, etc.)"
+// @Param       toCountry   query string true "Destination country code (e.g., DEU, DE, 276, etc.)"
 // @Success     200 {object} VisaRequirement
 // @Failure     400 {object} ErrorResponse
 // @Failure     404 {object} ErrorResponse
@@ -275,67 +306,88 @@ func GetVisaRequirements(c *gin.Context) {
 	})
 }
 
-// PassportResponse represents the passport data response.
-// @Description PassportResponse represents the passport data response.
-type PassportResponse struct {
-	Passport string            `json:"passport" example:"USA"`
-	Visas    map[string]string `json:"visas"`
-}
+// ----------------------------------------------------------------------------
+// Airports Handlers
+// ----------------------------------------------------------------------------
 
-// GetAirports handles GET /airports
+// GetAllAirports handles GET /airports
 // @Summary     Get all airports
-// @Description Retrieves a list of all airports.
+// @Description Retrieves a list of all airports for all countries (keyed by each country's alpha-2 code).
 // @Tags        Airports
 // @Accept      json
 // @Produce     json
-// @Success     200 {array} CountryAirports
+// @Success     200 {object} map[string]CountryAirports
 // @Failure     500 {object} ErrorResponse
 // @Router      /airports [get]
-func GetAirports(c *gin.Context) {
+func GetAllAirports(c *gin.Context) {
 	c.JSON(http.StatusOK, AirportData)
 }
 
-// GetAirportByCode handles GET /airports/:code
-// @Summary     Get airport by code
-// @Description Retrieves an airport by its IATA or ICAO code.
+// GetAirportsByCountry handles GET /airports/:countryCode
+// @Summary     Get airports by country
+// @Description Retrieves all airports in a specific country. The country code can be in any recognized format (CCA2, CCA3, CCN3, CIOC, FIFA, or alt spelling).
 // @Tags        Airports
 // @Accept      json
 // @Produce     json
-// @Param       code path string true "Airport code (IATA or ICAO)"
+// @Param       countryCode path string true "Country code (e.g., VC, VCT, 670, etc.)"
+// @Success     200 {object} CountryAirports
+// @Failure     404 {object} ErrorResponse
+// @Router      /airports/{countryCode} [get]
+func GetAirportsByCountry(c *gin.Context) {
+	countryParam := c.Param("countryCode")
+
+	// Convert any recognized code to alpha-2
+	alpha2, ok := toAlpha2(countryParam)
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid or unrecognized country code"})
+		return
+	}
+
+	// Retrieve airport data by alpha-2 code
+	countryAirports, found := AirportData[strings.ToUpper(alpha2)]
+	if !found {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airport data found for this country"})
+		return
+	}
+
+	c.JSON(http.StatusOK, countryAirports)
+}
+
+// GetAirportByIdent handles GET /airports/:countryCode/:airportIdent
+// @Summary     Get a single airport by identifier
+// @Description Retrieves a specific airport within a country by matching the airport's ICAO or IATA code. The country code can be in any recognized format (CCA2, CCA3, CCN3, CIOC, etc.).
+// @Tags        Airports
+// @Accept      json
+// @Produce     json
+// @Param       countryCode   path string true "Country code (e.g., VC, VCT, 670, etc.)"
+// @Param       airportIdent  path string true "Airport Ident (ICAO) or IATA code"
 // @Success     200 {object} Airport
 // @Failure     404 {object} ErrorResponse
-// @Router      /airports/{code} [get]
-func GetAirportByCode(c *gin.Context) {
-	code := strings.ToUpper(c.Param("code"))
+// @Router      /airports/{countryCode}/{airportIdent} [get]
+func GetAirportByIdent(c *gin.Context) {
+	countryParam := c.Param("countryCode")
+	airportIdent := strings.ToUpper(c.Param("airportIdent"))
 
-	for _, countryAirports := range AirportData {
-		for _, airport := range countryAirports.Airports {
-			if airport.IATACode == code || airport.Ident == code {
-				c.JSON(http.StatusOK, airport)
-				return
-			}
+	// Convert any recognized code to alpha-2
+	alpha2, ok := toAlpha2(countryParam)
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid or unrecognized country code"})
+		return
+	}
+
+	countryAirports, found := AirportData[strings.ToUpper(alpha2)]
+	if !found {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airport data found for this country"})
+		return
+	}
+
+	// Search airports array by matching ident or IATA code
+	for _, airport := range countryAirports.Airports {
+		if strings.EqualFold(airport.Ident, airportIdent) || strings.EqualFold(airport.IATACode, airportIdent) {
+			c.JSON(http.StatusOK, airport)
+			return
 		}
 	}
 
-	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found"})
-}
-
-// GetAirportsByCountry handles GET /airports/country/:countryCode
-// @Summary     Get airports by country
-// @Description Retrieves all airports in a specific country.
-// @Tags        Airports
-// @Accept      json
-// @Produce     json
-// @Param       countryCode path string true "Country code (e.g., VC)"
-// @Success     200 {object} CountryAirports
-// @Failure     404 {object} ErrorResponse
-// @Router      /airports/country/{countryCode} [get]
-func GetAirportsByCountry(c *gin.Context) {
-	countryCode := strings.ToUpper(c.Param("countryCode"))
-
-	if countryAirports, ok := AirportData[countryCode]; ok {
-		c.JSON(http.StatusOK, countryAirports)
-	} else {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Country not found or no airports available"})
-	}
+	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found in this country"})
 }

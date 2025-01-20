@@ -454,31 +454,32 @@ info:
     email: support@doroad.ai
     name: Atlas API Support
     url: https://github.com/DoROAD-AI/atlas/issues
-  description: A comprehensive REST API providing detailed country information and
-    passport visa requirements worldwide. This modern, high-performance service offers
-    extensive data about countries, including demographics, geography, international
-    codes, and visa regulations for various passports.
+  description: A comprehensive REST API providing detailed country information, airport
+    data, and passport visa requirements worldwide. This service offers extensive
+    data about countries (demographics, geography, international codes, etc.), airports,
+    and visa regulations for various passports.
   license:
     name: MIT
     url: https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
   termsOfService: http://atlas.doroad.io/terms/
-  title: Atlas - Geographic and Passport Data API by DoROAD
+  title: Atlas - Geographic, Airport, and Passport Data API by DoROAD
   version: "2.0"
 paths:
   /airports:
     get:
       consumes:
       - application/json
-      description: Retrieves a list of all airports.
+      description: Retrieves a list of all airports for all countries (keyed by each
+        country's alpha-2 code).
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
+            additionalProperties:
               $ref: '#/definitions/v2.CountryAirports'
-            type: array
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -486,38 +487,14 @@ paths:
       summary: Get all airports
       tags:
       - Airports
-  /airports/{code}:
+  /airports/{countryCode}:
     get:
       consumes:
       - application/json
-      description: Retrieves an airport by its IATA or ICAO code.
+      description: Retrieves all airports in a specific country. The country code
+        can be in any recognized format (CCA2, CCA3, CCN3, CIOC, FIFA, or alt spelling).
       parameters:
-      - description: Airport code (IATA or ICAO)
-        in: path
-        name: code
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v2.Airport'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get airport by code
-      tags:
-      - Airports
-  /airports/country/{countryCode}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves all airports in a specific country.
-      parameters:
-      - description: Country code (e.g., VC)
+      - description: Country code (e.g., VC, VCT, 670, etc.)
         in: path
         name: countryCode
         required: true
@@ -534,6 +511,38 @@ paths:
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airports by country
+      tags:
+      - Airports
+  /airports/{countryCode}/{airportIdent}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific airport within a country by matching the airport's
+        ICAO or IATA code. The country code can be in any recognized format (CCA2,
+        CCA3, CCN3, CIOC, etc.).
+      parameters:
+      - description: Country code (e.g., VC, VCT, 670, etc.)
+        in: path
+        name: countryCode
+        required: true
+        type: string
+      - description: Airport Ident (ICAO) or IATA code
+        in: path
+        name: airportIdent
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.Airport'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get a single airport by identifier
       tags:
       - Airports
   /alpha:
@@ -852,7 +861,7 @@ paths:
       - application/json
       description: Get visa requirement data for a specific passport.
       parameters:
-      - description: Passport code (e.g., USA)
+      - description: Passport code (e.g., USA, US, 840, etc.)
         in: path
         name: passportCode
         required: true
@@ -877,7 +886,7 @@ paths:
       - application/json
       description: Get visa requirements for all destinations for a specific passport.
       parameters:
-      - description: Passport code (e.g., USA)
+      - description: Passport code (e.g., USA, US, 840, etc.)
         in: path
         name: passportCode
         required: true
@@ -903,12 +912,12 @@ paths:
       description: Get visa requirements for a passport holder from one country traveling
         to another.
       parameters:
-      - description: Origin country code (e.g., USA)
+      - description: Origin country code (e.g., USA, US, 840, etc.)
         in: query
         name: fromCountry
         required: true
         type: string
-      - description: Destination country code (e.g., DEU)
+      - description: Destination country code (e.g., DEU, DE, 276, etc.)
         in: query
         name: toCountry
         required: true

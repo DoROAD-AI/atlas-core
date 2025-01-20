@@ -16,9 +16,9 @@ import (
 	"github.com/gin-contrib/cors"
 )
 
-// @title       Atlas - Geographic and Passport Data API by DoROAD
+// @title       Atlas - Geographic, Airport, and Passport Data API by DoROAD
 // @version     2.0
-// @description A comprehensive REST API providing detailed country information and passport visa requirements worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, international codes, and visa regulations for various passports.
+// @description A comprehensive REST API providing detailed country information, airport data, and passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.
 // @termsOfService http://atlas.doroad.io/terms/
 
 // @contact.name  Atlas API Support
@@ -54,7 +54,7 @@ func main() {
 
 	// Load country data from JSON
 	if err := v1.LoadCountriesSafe("countries.json"); err != nil {
-		log.Fatalf("Failed to initialize API: %v", err)
+		log.Fatalf("Failed to initialize country data: %v", err)
 	}
 
 	// Load passport data from JSON
@@ -63,7 +63,7 @@ func main() {
 	}
 
 	// Load airport data from JSON
-	if err := v2.LoadAirportData("airports.json"); err != nil {
+	if err := v2.LoadAirportsData("airports.json"); err != nil {
 		log.Fatalf("Failed to initialize airport data: %v", err)
 	}
 
@@ -76,7 +76,9 @@ func main() {
 	// Dynamically set Swagger host
 	docs.SwaggerInfo.Host = getHost()
 
+	//------------------------------------------------
 	// v1 routes
+	//------------------------------------------------
 	v1Group := router.Group("/v1")
 	{
 		// restcountries.com v3.1 compatible routes
@@ -98,7 +100,9 @@ func main() {
 		v1Group.GET("/callingcode/:callingcode", v1.GetCountriesByCallingCode)
 	}
 
+	//------------------------------------------------
 	// v2 routes
+	//------------------------------------------------
 	v2Group := router.Group("/v2")
 	{
 		// Replicate all v1 routes under v2
@@ -118,14 +122,16 @@ func main() {
 		v2Group.GET("/alpha/:code", v1.GetCountryByAlphaCode)
 		v2Group.GET("/ccn3/:code", v1.GetCountryByCCN3)
 		v2Group.GET("/callingcode/:callingcode", v1.GetCountriesByCallingCode)
-		// New v2 passport routes
+
+		// v2 passport routes
 		v2Group.GET("/passports/:passportCode", v2.GetPassportData)
 		v2Group.GET("/passports/:passportCode/visas", v2.GetVisaRequirementsForPassport)
 		v2Group.GET("/passports/visa", v2.GetVisaRequirements)
-		// New v2 airport routes
-		v2Group.GET("/airports", v2.GetAirports)
-		v2Group.GET("/airports/:code", v2.GetAirportByCode)
-		v2Group.GET("/airports/country/:countryCode", v2.GetAirportsByCountry)
+
+		// v2 airport routes
+		v2Group.GET("/airports", v2.GetAllAirports)
+		v2Group.GET("/airports/:countryCode", v2.GetAirportsByCountry)
+		v2Group.GET("/airports/:countryCode/:airportIdent", v2.GetAirportByIdent)
 	}
 
 	// Swagger documentation endpoint

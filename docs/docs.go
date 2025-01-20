@@ -26,7 +26,7 @@ const docTemplate = `{
     "paths": {
         "/airports": {
             "get": {
-                "description": "Retrieves a list of all airports.",
+                "description": "Retrieves a list of all airports for all countries (keyed by each country's alpha-2 code).",
                 "consumes": [
                     "application/json"
                 ],
@@ -41,8 +41,8 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
+                            "type": "object",
+                            "additionalProperties": {
                                 "$ref": "#/definitions/v2.CountryAirports"
                             }
                         }
@@ -56,9 +56,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/airports/country/{countryCode}": {
+        "/airports/{countryCode}": {
             "get": {
-                "description": "Retrieves all airports in a specific country.",
+                "description": "Retrieves all airports in a specific country. The country code can be in any recognized format (CCA2, CCA3, CCN3, CIOC, FIFA, or alt spelling).",
                 "consumes": [
                     "application/json"
                 ],
@@ -72,7 +72,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Country code (e.g., VC)",
+                        "description": "Country code (e.g., VC, VCT, 670, etc.)",
                         "name": "countryCode",
                         "in": "path",
                         "required": true
@@ -94,9 +94,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/airports/{code}": {
+        "/airports/{countryCode}/{airportIdent}": {
             "get": {
-                "description": "Retrieves an airport by its IATA or ICAO code.",
+                "description": "Retrieves a specific airport within a country by matching the airport's ICAO or IATA code. The country code can be in any recognized format (CCA2, CCA3, CCN3, CIOC, etc.).",
                 "consumes": [
                     "application/json"
                 ],
@@ -106,12 +106,19 @@ const docTemplate = `{
                 "tags": [
                     "Airports"
                 ],
-                "summary": "Get airport by code",
+                "summary": "Get a single airport by identifier",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Airport code (IATA or ICAO)",
-                        "name": "code",
+                        "description": "Country code (e.g., VC, VCT, 670, etc.)",
+                        "name": "countryCode",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Airport Ident (ICAO) or IATA code",
+                        "name": "airportIdent",
                         "in": "path",
                         "required": true
                     }
@@ -616,14 +623,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Origin country code (e.g., USA)",
+                        "description": "Origin country code (e.g., USA, US, 840, etc.)",
                         "name": "fromCountry",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Destination country code (e.g., DEU)",
+                        "description": "Destination country code (e.g., DEU, DE, 276, etc.)",
                         "name": "toCountry",
                         "in": "query",
                         "required": true
@@ -667,7 +674,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Passport code (e.g., USA)",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
                         "name": "passportCode",
                         "in": "path",
                         "required": true
@@ -705,7 +712,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Passport code (e.g., USA)",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
                         "name": "passportCode",
                         "in": "path",
                         "required": true
@@ -1514,8 +1521,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/v2",
 	Schemes:          []string{"https", "http"},
-	Title:            "Atlas - Geographic and Passport Data API by DoROAD",
-	Description:      "A comprehensive REST API providing detailed country information and passport visa requirements worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, international codes, and visa regulations for various passports.",
+	Title:            "Atlas - Geographic, Airport, and Passport Data API by DoROAD",
+	Description:      "A comprehensive REST API providing detailed country information, airport data, and passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
