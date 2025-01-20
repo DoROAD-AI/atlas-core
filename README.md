@@ -1,186 +1,286 @@
-# Atlas 🌍
+# Atlas API - v2.0 🌍
 
-Atlas is a powerful, Go-based geographic information API that provides detailed country data and geographic insights. Built with modern Go practices and inspired by the REST Countries API, Atlas delivers comprehensive geographic data through a clean, RESTful interface.
+**Atlas** is DoROAD's flagship Global Travel and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport data, and up-to-date passport visa requirements.
 
-## Using Atlas
+**Atlas v2.0 is a proprietary product designed for enterprise use.** It offers advanced features, enhanced data coverage, and the reliability required for mission-critical applications in the travel, aviation, and logistics industries.
 
-### Via DoROAD's Hosted Service
+## Key Features of Atlas v2.0
 
-The fastest way to get started with Atlas is through our hosted API service:
+Atlas v2.0 builds upon the foundation of v1, adding powerful new capabilities and expanding existing ones:
 
-**Production Environment**
+### 1. Enhanced Country Data (v1 Features)
 
-- Base URL: `https://atlas.doroad.io`
-- Swagger Documentation: `https://atlas.doroad.io/swagger/index.html`
+*   **Comprehensive Data:** In-depth information on all countries, including demographics, geography, economy, international codes, and more.
+*   **Flexible Querying:** Search by:
+    *   Name (full or partial matching)
+    *   Country codes (CCA2, CCN3, CCA3, CIOC, FIFA)
+    *   Currency
+    *   Language
+    *   Capital city
+    *   Region and subregion
+    *   Translations
+    *   Demonyms
+    *   Independence status
+    *   Calling code
+*   **Field Filtering:** Control the size of responses by selecting specific fields.
+*   **Case-Insensitive Search:** User-friendly searching.
+*   **Input Validation:** Robust error handling for invalid parameters.
 
-**Test/Staging Environment**
+### 2. Advanced Airport Data & Intelligence
 
-- Base URL: `https://atlas.doroad.dev`
-- Swagger Documentation: `https://atlas.doroad.dev/swagger/index.html`
+*   **Global Airport Coverage:** A comprehensive database of airports worldwide, including major hubs and smaller airfields.
+*   **Detailed Airport Information:**
+    *   ICAO and IATA codes
+    *   Airport type (e.g., medium\_airport, large\_airport, heliport, closed)
+    *   Name, latitude, longitude, elevation
+    *   Continent, ISO country code, ISO region code
+    *   Municipality
+    *   Scheduled service status (yes/no)
+    *   Links to home page and Wikipedia
+    *   Keywords
+*   **Runway Data:**
+    *   Runway length and width
+    *   Surface type
+    *   Lighting status
+    *   Closed status
+    *   Runway identifiers (e.g., 04/22)
+    *   Latitude, longitude, elevation, and heading for both ends
+    *   Displaced threshold information
+*   **Communication Frequencies:**
+    *   Frequency type (e.g., APP, ATIS, GND, TWR)
+    *   Description
+    *   Frequency in MHz
+*   **Advanced Airport Queries:**
+    *   **By Code:** Retrieve an airport directly by its ICAO or IATA code.
+    *   **By Region:** Find all airports within a given ISO region.
+    *   **By Municipality:** Get airports in a specific city or town.
+    *   **By Type:** Filter airports based on their type.
+    *   **By Scheduled Service:** Identify airports with scheduled commercial flights.
+    *   **By Keyword:** Search for airports using relevant keywords.
+*   **Geospatial Queries:**
+    *   **Within Radius:** Find all airports within a specified radius of a given latitude/longitude.
+*   **Distance Calculation:** Calculate the distance between two airports using their ICAO or IATA codes.
+*   **Flexible Search:** Search across multiple fields (name, city, codes) for quick airport lookups.
 
-### Quick Examples
+### 3. Comprehensive Passport and Visa Data
 
-```bash
-# Get all countries
-curl https://atlas.doroad.io/v1/countries
+*   **Passport Data:** Access visa requirements for all passport/destination country combinations.
+*   **Visa Requirement Details:**
+    *   Visa-free status
+    *   Visa on arrival
+    *   E-visa
+    *   Visa required
+    *   Duration of stay (if applicable)
+*   **Advanced Visa Queries:**
+    *   **Visa-Free Destinations:** Get a list of countries where a given passport holder can travel visa-free.
+    *   **Visa-on-Arrival Destinations:** List countries offering visa on arrival for a specific passport.
+    *   **E-Visa Destinations:** Find countries where a passport holder can apply for an e-visa.
+    *   **Visa-Required Destinations:** Identify countries requiring a pre-arranged visa for a given passport.
+    *   **Visa Requirement Details:** Get specific visa details (duration, type) for a passport and destination.
+    *   **Reciprocal Visa Agreements:** Check visa requirements both ways between two countries.
+    *   **Visa Requirement Comparison:** Compare visa requirements for multiple passports to a single destination.
+    *   **Passport Ranking:** Get a ranked list of passports based on the number of visa-free destinations.
+    *   **Common Visa-Free Destinations:** Find shared visa-free destinations for a group of passports.
 
-# Search by country name
-curl https://atlas.doroad.io/v1/name/united
+### 4. Enterprise-Grade Features
 
-# Get specific fields for a country
-curl https://atlas.doroad.io/v1/countries?fields=name,capital,currencies
-```
+*   **High Performance:** Optimized for speed and efficiency to handle large volumes of requests.
+*   **Scalability:** Designed to scale horizontally to meet growing demands.
+*   **Reliability:** Built with robust error handling and redundancy for maximum uptime.
+*   **Security:** Secure API endpoints (HTTPS) and data protection measures.
+*   **API Documentation:** Comprehensive documentation using Swagger (OpenAPI) for easy integration.
+*   **Proprietary Data and Algorithms:** Atlas v2.0 incorporates proprietary data and algorithms for enhanced accuracy and insights.
 
-## Features
+## API Endpoints (v2.0)
 
-### Current Features
+**Base URL:** `https://atlas.doroad.io/v2` (Production)
 
-- **Complete Country Information**: Comprehensive country data worldwide
-- **Flexible Querying**: Multiple search criteria including:
-  - Name (full/partial matching)
-  - Country codes (CCA2, CCN3, CCA3, CIOC)
-  - Currency
-  - Language
-  - Capital city
-  - Region and subregion
-  - Translations
-  - Demonyms
-  - Independence status
-  - Calling code
-- **Field Filtering**: Optimize response payload size
-- **Modern API Design**: RESTful architecture with JSON responses
-- **Interactive Documentation**: Swagger UI for easy exploration
-- **Case-Insensitive Search**: Flexible searching
-- **Input Validation**: Built-in parameter validation
+**Note:**  Access to v2.0 endpoints requires a commercial license.
 
-### Planned Features
+### Country Endpoints
 
-- Airport information
-- Geographic coordinate calculations
-- City data
-- Time zone utilities
-- Geographic service integrations
-- Advanced caching
-- Rate limiting
-- Response compression
-- Usage metrics
+*   **`GET /v2/all`:** Get all countries (with optional field filtering).
+*   **`GET /v2/countries`:** Same as `/v2/all`.
+*   **`GET /v2/countries/{code}`:** Get a country by its CCA2, CCA3, CCN3, CIOC, or FIFA code.
+*   **`GET /v2/name/{name}`:** Search for countries by name (partial or full).
+*   **`GET /v2/alpha`:** Get countries by a list of CCA2 codes.
+*   **`GET /v2/currency/{currency}`:** Search for countries by currency code.
+*   **`GET /v2/demonym/{demonym}`:** Search for countries by demonym.
+*   **`GET /v2/lang/{language}`:** Search for countries by language code.
+*   **`GET /v2/capital/{capital}`:** Search for countries by capital city.
+*   **`GET /v2/region/{region}`:** Search for countries by region.
+*   **`GET /v2/subregion/{subregion}`:** Search for countries by subregion.
+*   **`GET /v2/translation/{translation}`:** Search for countries by translated name.
+*   **`GET /v2/independent`:** Get independent or non-independent countries.
+*   **`GET /v2/alpha/{code}`:** Get a country by its CCA2 code.
+*   **`GET /v2/ccn3/{code}`:** Get a country by its CCN3 code.
+*   **`GET /v2/callingcode/{callingcode}`:** Get countries by calling code.
 
-## Self-Hosting Atlas
+### Airport Endpoints
+
+*   **`GET /v2/airports`:** Get all airports (grouped by country).
+*   **`GET /v2/airports/{countryCode}`:** Get airports in a specific country.
+*   **`GET /v2/airports/{countryCode}/{airportIdent}`:** Get an airport by ICAO or IATA code within a country.
+*   **`GET /v2/airports/by-code/{airportCode}`:** Get an airport by ICAO or IATA code (globally).
+*   **`GET /v2/airports/region/{isoRegion}`:** Get airports in an ISO region.
+*   **`GET /v2/airports/municipality/{municipalityName}`:** Get airports in a municipality.
+*   **`GET /v2/airports/type/{airportType}`:** Get airports of a specific type.
+*   **`GET /v2/airports/scheduled`:** Get airports with scheduled service.
+*   **`GET /v2/airports/{countryCode}/{airportIdent}/runways`:** Get runway information for an airport.
+*   **`GET /v2/airports/{countryCode}/{airportIdent}/frequencies`:** Get communication frequencies for an airport.
+*   **`GET /v2/airports/search?query={searchString}`:** Search for airports by name, city, or code.
+*   **`GET /v2/airports/radius?latitude={latitude}&longitude={longitude}&radius={radiusInKm}`:** Get airports within a radius.
+*   **`GET /v2/airports/distance?airport1={airportCode1}&airport2={airportCode2}`:** Calculate the distance between two airports.
+*   **`GET /v2/airports/keyword/{keyword}`:** Get airports by keyword.
+
+### Passport and Visa Endpoints
+
+*   **`GET /v2/passports/{passportCode}`:** Get visa requirements for a passport.
+*   **`GET /v2/passports/{passportCode}/visas`:** Same as `/v2/passports/{passportCode}`.
+*   **`GET /v2/passports/visa?fromCountry={fromCountry}&toCountry={toCountry}`:** Get visa requirements between two countries.
+*   **`GET /v2/passports/{passportCode}/visa-free`:** Get visa-free destinations for a passport.
+*   **`GET /v2/passports/{passportCode}/visa-on-arrival`:** Get visa-on-arrival destinations for a passport.
+*   **`GET /v2/passports/{passportCode}/e-visa`:** Get e-visa destinations for a passport.
+*   **`GET /v2/passports/{passportCode}/visa-required`:** Get visa-required destinations for a passport.
+*   **`GET /v2/passports/{passportCode}/visa-details/{destinationCode}`:** Get detailed visa requirements for a passport and destination.
+*   **`GET /v2/passports/reciprocal/{countryCode1}/{countryCode2}`:** Get reciprocal visa requirements between two countries.
+*   **`GET /v2/passports/compare?passports={passportCode1},{passportCode2},...&destination={destinationCode}`:** Compare visa requirements for multiple passports to a destination.
+*   **`GET /v2/passports/ranking`:** Get a ranked list of passports based on visa-free access.
+*   **`GET /v2/passports/common-visa-free?passports={passportCode1},{passportCode2},...`:** Find common visa-free destinations for multiple passports.
+
+## Building and Running Atlas v2.0 (Internal Instructions)
+
+These instructions are for internal DoROAD teams building and running Atlas v2.0 from source.
 
 ### Prerequisites
 
-- Go 1.20 or higher
-- Git
-- Docker (optional)
+*   **Go:** Version 1.20 or higher.
+*   **Git:** For version control.
+*   **Docker (Optional):** For containerized deployment.
+*   **Commercial License:** A valid commercial license for Atlas v2.0 is required.
 
-### Local Development Setup
+### Setting Up the Development Environment
 
-1. **Clone and set up the project:**
+1. **Clone the Repository:**
 
-   ```bash
-   # Clone the repository
-   git clone https://github.com/DoROAD-AI/atlas.git
-   cd atlas
+    ```bash
+    git clone https://github.com/DoROAD-AI/atlas.git
+    cd atlas
+    ```
 
-   # Initialize the module
-   go mod init github.com/DoROAD-AI/atlas
-   go mod tidy
+2. **Initialize Go Modules:**
 
-   # Install Swagger tools
-   go install github.com/swaggo/swag/cmd/swag@latest
+    ```bash
+    go mod init github.com/DoROAD-AI/atlas
+    go mod tidy
+    ```
 
-   # Generate Swagger documentation
-   swag init
-   ```
+3. **Install Swagger Tools (for documentation):**
 
-2. **Configure the environment:**
+    ```bash
+    go install github.com/swaggo/swag/cmd/swag@latest
+    ```
 
-   ```bash
-   # Development (localhost:3101)
-   export ATLAS_ENV=development
+### Configuring the Environment
 
-   # Test environment (atlas.doroad.dev)
-   export ATLAS_ENV=test
+Atlas uses environment variables for configuration.
 
-   # Production environment (atlas.doroad.io)
-   export ATLAS_ENV=production
-   ```
+1. **`ATLAS_ENV`:** Sets the environment:
+    *   `development`: For local development (default).
+    *   `test`: For the test/staging environment.
+    *   `production`: For the production environment.
 
-3. **Run the server:**
+2. **`PORT` (Optional):** Sets the port the API will listen on (default: `3101`).
 
-   ```bash
-   go run main.go
-   ```
+**Example:**
 
-   or
+```bash
+# For development on localhost:3101
+export ATLAS_ENV=development
 
-   ```bash
+# For production, served on port 80
+export ATLAS_ENV=production
+export PORT=80
+```
+
+### Building and Running the API
+
+**1. Building:**
+
+```bash
+go build -o atlas .
+```
+
+**2. Running:**
+
+```bash
+./atlas
+```
+Or use `go run` for development
+```bash
+go run main.go
+```
+
+best is to use this version `go run` for rapid development and testing
+ ```bash
    go clean
    go build
    go run main.go
    ```
 
-### Docker Deployment
-
-Create a `Dockerfile`:
-
-```dockerfile
-FROM golang:1.20-alpine
-WORKDIR /app
-COPY . .
-RUN go mod download
-RUN go build -o atlas
-EXPOSE 3101
-CMD ["./atlas"]
-```
-
-Build and run the Docker image:
+**Generating Swagger Documentation:**
 
 ```bash
-docker build -t atlas .
-docker run -p 3101:3101 -e ATLAS_ENV=production atlas
+swag init
 ```
 
-## API Documentation
+This will generate the `docs` folder with the Swagger (OpenAPI) documentation. You can access the interactive documentation at `http://localhost:3101/swagger/index.html` (replace `3101` with your configured port if necessary).
 
-Complete API documentation is available through our Swagger UI:
+### Docker Deployment (Optional)
 
-- **Production**: https://atlas.doroad.io/swagger/index.html
-- **Test**: https://atlas.doroad.dev/swagger/index.html
-- **Local**: http://localhost:3101/swagger/index.html
+1. **Create a `Dockerfile`:**
 
-## Contributing
+    ```dockerfile
+    FROM golang:1.20-alpine
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+    WORKDIR /app
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+    COPY . .
+
+    RUN go mod download
+
+    RUN go build -o atlas .
+
+    EXPOSE 3101
+
+    CMD ["./atlas"]
+    ```
+
+2. **Build the Docker Image:**
+
+    ```bash
+    docker build -t atlas-v2 .
+    ```
+
+3. **Run the Docker Container:**
+
+    ```bash
+    docker run -p 3101:3101 -e ATLAS_ENV=production atlas-v2
+    ```
+
+    *   `-p 3101:3101` maps port 3101 on your host to port 3101 inside the container.
+    *   `-e ATLAS_ENV=production` sets the environment variable within the container.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Atlas v1** is licensed under the **MIT License**.
 
-## Acknowledgments
+**Atlas v2 and later** are **proprietary** and require a **commercial license** from DoROAD. Please contact `support@doroad.ai` for information on obtaining a commercial license.
 
-- Inspired by [REST Countries API](https://restcountries.com/)
-- Built with [Gin Web Framework](https://gin-gonic.com/)
-- Documentation powered by [Swag](https://github.com/swaggo/swag)
+## Support
 
-## Support and Contact
-
-- GitHub Issues: [https://github.com/DoROAD-AI/atlas/issues](https://github.com/DoROAD-AI/atlas/issues)
-- GitHub Discussions: [https://github.com/DoROAD-AI/atlas/discussions](https://github.com/DoROAD-AI/atlas/discussions)
-
-## About DoROAD AI
-
-DoROAD (DoRoad B.V.) is a pioneering travel technology company headquartered in The Netherlands. DoROAD is revolutionizing the travel technology market through advanced technology and unwavering security and privacy protection.
-
-Today, DoROAD stands at the forefront of travel technology innovation, combining advanced artificial intelligence with an unwavering commitment to privacy. Our platform serves both individual travelers and businesses, offering personalized experiences while maintaining the highest standards of data protection.
-
-Looking ahead, we're not just adapting to the future of travel—we're creating it. Our vision extends beyond traditional travel technology, aiming to establish new standards for personalization, security, and efficiency in global travel management.
+*   **Internal Support:** Contact the DoROAD Roadman Team for assistance.
+*   **Commercial License Support:**  `support@doroad.ai`
 
 ---
 
