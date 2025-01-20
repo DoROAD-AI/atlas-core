@@ -235,12 +235,25 @@ definitions:
         type: string
     type: object
   v2.ErrorResponse:
+    description: ErrorResponse represents an error response.
     properties:
       message:
         example: Bad request
         type: string
     type: object
+  v2.PassportResponse:
+    description: PassportResponse represents the passport data response.
+    properties:
+      passport:
+        example: USA
+        type: string
+      visas:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
   v2.VisaRequirement:
+    description: VisaRequirement represents the visa requirement between two countries.
     properties:
       from:
         example: USA
@@ -595,8 +608,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/v2.PassportResponse'
         "404":
           description: Not Found
           schema:
@@ -621,8 +633,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/v2.PassportResponse'
         "404":
           description: Not Found
           schema:

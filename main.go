@@ -113,11 +113,10 @@ func main() {
 		v2Group.GET("/alpha/:code", v1.GetCountryByAlphaCode)
 		v2Group.GET("/ccn3/:code", v1.GetCountryByCCN3)
 		v2Group.GET("/callingcode/:callingcode", v1.GetCountriesByCallingCode)
-
 		// New v2 passport routes
 		v2Group.GET("/passports/:passportCode", v2.GetPassportData)
 		v2Group.GET("/passports/:passportCode/visas", v2.GetVisaRequirementsForPassport)
-		v2Group.GET("/passports/visa", v2.GetVisaRequirements) // Updated route using query parameters
+		v2Group.GET("/passports/visa", v2.GetVisaRequirements)
 	}
 
 	// Swagger documentation endpoint

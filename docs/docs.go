@@ -569,8 +569,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/v2.PassportResponse"
                         }
                     },
                     "404": {
@@ -608,8 +607,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/v2.PassportResponse"
                         }
                     },
                     "404": {
@@ -1105,6 +1103,7 @@ const docTemplate = `{
             }
         },
         "v2.ErrorResponse": {
+            "description": "ErrorResponse represents an error response.",
             "type": "object",
             "properties": {
                 "message": {
@@ -1113,7 +1112,24 @@ const docTemplate = `{
                 }
             }
         },
+        "v2.PassportResponse": {
+            "description": "PassportResponse represents the passport data response.",
+            "type": "object",
+            "properties": {
+                "passport": {
+                    "type": "string",
+                    "example": "USA"
+                },
+                "visas": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "v2.VisaRequirement": {
+            "description": "VisaRequirement represents the visa requirement between two countries.",
             "type": "object",
             "properties": {
                 "from": {
