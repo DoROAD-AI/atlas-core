@@ -1,4 +1,4 @@
-basePath: /v1
+basePath: /v2
 definitions:
   v1.CapitalInfo:
     properties:
@@ -234,20 +234,39 @@ definitions:
         example: ^\d{5}(-\d{4})?$
         type: string
     type: object
+  v2.ErrorResponse:
+    properties:
+      message:
+        example: Bad request
+        type: string
+    type: object
+  v2.VisaRequirement:
+    properties:
+      from:
+        example: USA
+        type: string
+      requirement:
+        example: "90"
+        type: string
+      to:
+        example: DEU
+        type: string
+    type: object
 info:
   contact:
     email: support@doroad.ai
     name: Atlas API Support
     url: https://github.com/DoROAD-AI/atlas/issues
-  description: A comprehensive REST API providing detailed country information worldwide.
-    This modern, high-performance service offers extensive data about countries, including
-    demographics, geography, and international codes.
+  description: A comprehensive REST API providing detailed country information and
+    passport visa requirements worldwide. This modern, high-performance service offers
+    extensive data about countries, including demographics, geography, international
+    codes, and visa regulations for various passports.
   license:
     name: MIT
     url: https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
   termsOfService: http://atlas.doroad.io/terms/
-  title: Atlas - Geographic Data API by DoROAD
-  version: "1.0"
+  title: Atlas - Geographic and Passport Data API by DoROAD
+  version: "2.0"
 paths:
   /alpha:
     get:
@@ -559,6 +578,93 @@ paths:
       summary: Get countries by name
       tags:
       - Countries
+  /passports/{passportCode}:
+    get:
+      consumes:
+      - application/json
+      description: Get visa requirement data for a specific passport.
+      parameters:
+      - description: Passport code (e.g., USA)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get passport data
+      tags:
+      - Passports
+  /passports/{passportCode}/visas:
+    get:
+      consumes:
+      - application/json
+      description: Get visa requirements for all destinations for a specific passport.
+      parameters:
+      - description: Passport code (e.g., USA)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get visa requirements for a passport
+      tags:
+      - Passports
+  /passports/visa:
+    get:
+      consumes:
+      - application/json
+      description: Get visa requirements for a passport holder from one country traveling
+        to another.
+      parameters:
+      - description: Origin country code (e.g., USA)
+        in: query
+        name: fromCountry
+        required: true
+        type: string
+      - description: Destination country code (e.g., DEU)
+        in: query
+        name: toCountry
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.VisaRequirement'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get visa requirements between two countries
+      tags:
+      - Passports
   /region/{region}:
     get:
       consumes:

@@ -6,24 +6,29 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
+	swaggerFiles "github.com/swaggo/files" // Swagger files
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	v1 "github.com/DoROAD-AI/atlas/api/v1"
-	"github.com/DoROAD-AI/atlas/docs"
+	v2 "github.com/DoROAD-AI/atlas/api/v2"
+
+	"github.com/DoROAD-AI/atlas/docs" // Swagger docs
 	"github.com/gin-contrib/cors"
 )
 
-// @title       Atlas - Geographic Data API by DoROAD
-// @version     1.0
-// @description A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.
+// @title       Atlas - Geographic and Passport Data API by DoROAD
+// @version     2.0
+// @description A comprehensive REST API providing detailed country information and passport visa requirements worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, international codes, and visa regulations for various passports.
 // @termsOfService http://atlas.doroad.io/terms/
+
 // @contact.name  Atlas API Support
 // @contact.url   https://github.com/DoROAD-AI/atlas/issues
 // @contact.email support@doroad.ai
+
 // @license.name  MIT
 // @license.url   https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
-// @BasePath      /v1
+
+// @BasePath      /v2
 // @schemes       https http
 
 func getHost() string {
@@ -50,6 +55,11 @@ func main() {
 	// Load country data from JSON
 	if err := v1.LoadCountriesSafe("countries.json"); err != nil {
 		log.Fatalf("Failed to initialize API: %v", err)
+	}
+
+	// Load passport data from JSON
+	if err := v2.LoadPassportData("passports.json"); err != nil {
+		log.Fatalf("Failed to initialize passport data: %v", err)
 	}
 
 	// Create Gin router with default middleware
@@ -80,8 +90,34 @@ func main() {
 		v1Group.GET("/independent", v1.GetCountriesByIndependence)
 		v1Group.GET("/alpha/:code", v1.GetCountryByAlphaCode)
 		v1Group.GET("/ccn3/:code", v1.GetCountryByCCN3)
-		// New route for calling code
 		v1Group.GET("/callingcode/:callingcode", v1.GetCountriesByCallingCode)
+	}
+
+	// v2 routes
+	v2Group := router.Group("/v2")
+	{
+		// Replicate all v1 routes under v2
+		v2Group.GET("/all", v1.GetCountries)
+		v2Group.GET("/countries", v1.GetCountries)
+		v2Group.GET("/countries/:code", v1.GetCountryByCode)
+		v2Group.GET("/name/:name", v1.GetCountriesByName)
+		v2Group.GET("/alpha", v1.GetCountriesByCodes)
+		v2Group.GET("/currency/:currency", v1.GetCountriesByCurrency)
+		v2Group.GET("/demonym/:demonym", v1.GetCountriesByDemonym)
+		v2Group.GET("/lang/:language", v1.GetCountriesByLanguage)
+		v2Group.GET("/capital/:capital", v1.GetCountriesByCapital)
+		v2Group.GET("/region/:region", v1.GetCountriesByRegion)
+		v2Group.GET("/subregion/:subregion", v1.GetCountriesBySubregion)
+		v2Group.GET("/translation/:translation", v1.GetCountriesByTranslation)
+		v2Group.GET("/independent", v1.GetCountriesByIndependence)
+		v2Group.GET("/alpha/:code", v1.GetCountryByAlphaCode)
+		v2Group.GET("/ccn3/:code", v1.GetCountryByCCN3)
+		v2Group.GET("/callingcode/:callingcode", v1.GetCountriesByCallingCode)
+
+		// New v2 passport routes
+		v2Group.GET("/passports/:passportCode", v2.GetPassportData)
+		v2Group.GET("/passports/:passportCode/visas", v2.GetVisaRequirementsForPassport)
+		v2Group.GET("/passports/visa", v2.GetVisaRequirements) // Updated route using query parameters
 	}
 
 	// Swagger documentation endpoint

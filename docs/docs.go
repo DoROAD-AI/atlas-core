@@ -492,6 +492,135 @@ const docTemplate = `{
                 }
             }
         },
+        "/passports/visa": {
+            "get": {
+                "description": "Get visa requirements for a passport holder from one country traveling to another.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get visa requirements between two countries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Origin country code (e.g., USA)",
+                        "name": "fromCountry",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination country code (e.g., DEU)",
+                        "name": "toCountry",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.VisaRequirement"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/{passportCode}": {
+            "get": {
+                "description": "Get visa requirement data for a specific passport.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get passport data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/{passportCode}/visas": {
+            "get": {
+                "description": "Get visa requirements for all destinations for a specific passport.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get visa requirements for a passport",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/region/{region}": {
             "get": {
                 "description": "Get countries matching a region.",
@@ -974,18 +1103,44 @@ const docTemplate = `{
                     "example": "^\\d{5}(-\\d{4})?$"
                 }
             }
+        },
+        "v2.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Bad request"
+                }
+            }
+        },
+        "v2.VisaRequirement": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "example": "USA"
+                },
+                "requirement": {
+                    "type": "string",
+                    "example": "90"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "DEU"
+                }
+            }
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "2.0",
 	Host:             "",
-	BasePath:         "/v1",
+	BasePath:         "/v2",
 	Schemes:          []string{"https", "http"},
-	Title:            "Atlas - Geographic Data API by DoROAD",
-	Description:      "A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.",
+	Title:            "Atlas - Geographic and Passport Data API by DoROAD",
+	Description:      "A comprehensive REST API providing detailed country information and passport visa requirements worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, international codes, and visa regulations for various passports.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
