@@ -63,7 +63,8 @@ func main() {
 	// v1 routes
 	v1Group := router.Group("/v1")
 	{
-		// Existing routes
+		// restcountries.com v3.1 compatible routes
+		v1Group.GET("/all", v1.GetCountries)
 		v1Group.GET("/countries", v1.GetCountries)
 		v1Group.GET("/countries/:code", v1.GetCountryByCode)
 		v1Group.GET("/name/:name", v1.GetCountriesByName)
@@ -77,10 +78,7 @@ func main() {
 		v1Group.GET("/translation/:translation", v1.GetCountriesByTranslation)
 		v1Group.GET("/independent", v1.GetCountriesByIndependence)
 		v1Group.GET("/alpha/:code", v1.GetCountryByAlphaCode)
-		// New route for numeric ISO code
 		v1Group.GET("/ccn3/:code", v1.GetCountryByCCN3)
-		// Alias for "/v1/all" -> same as "/v1/countries"
-		v1Group.GET("/all", v1.GetCountries)
 		// New route for calling code
 		v1Group.GET("/callingcode/:callingcode", v1.GetCountriesByCallingCode)
 	}
