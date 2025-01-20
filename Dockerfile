@@ -30,6 +30,7 @@ COPY --from=builder /app/atlas /
 
 # If your application requires any data files at runtime, copy them as well
 COPY --from=builder /app/countries.json /
+COPY --from=builder /app/passports.json /
 
 # Command to run the application
 ENTRYPOINT ["/atlas"]
