@@ -36,6 +36,83 @@ type ErrorResponse struct {
 	Message string `json:"message" example:"Bad request"`
 }
 
+// AirportFrequency represents the frequency data for an airport.
+// @Description AirportFrequency represents the frequency data for an airport.
+type AirportFrequency struct {
+	ID           string `json:"id" example:"322388"`
+	AirportRef   string `json:"airport_ref" example:"322383"`
+	AirportIdent string `json:"airport_ident" example:"TVSA"`
+	Type         string `json:"type" example:"APP"`
+	Description  string `json:"description" example:"Argyle Approach"`
+	FrequencyMHz string `json:"frequency_mhz" example:"120.8"`
+}
+
+// AirportRunway represents the runway data for an airport.
+// @Description AirportRunway represents the runway data for an airport.
+type AirportRunway struct {
+	ID                     string `json:"id" example:"322384"`
+	AirportRef             string `json:"airport_ref" example:"322383"`
+	AirportIdent           string `json:"airport_ident" example:"TVSA"`
+	LengthFt               string `json:"length_ft" example:"9000"`
+	WidthFt                string `json:"width_ft" example:"148"`
+	Surface                string `json:"surface" example:"ASP"`
+	Lighted                string `json:"lighted" example:"1"`
+	Closed                 string `json:"closed" example:"0"`
+	LEIdent                string `json:"le_ident" example:"04"`
+	LELatitudeDeg          string `json:"le_latitude_deg" example:""`
+	LELongitudeDeg         string `json:"le_longitude_deg" example:""`
+	LEElevationFt          string `json:"le_elevation_ft" example:"136"`
+	LEHeadingDegT          string `json:"le_heading_degT" example:""`
+	LEDisplacedThresholdFt string `json:"le_displaced_threshold_ft" example:""`
+	HEIdent                string `json:"he_ident" example:"22"`
+	HELatitudeDeg          string `json:"he_latitude_deg" example:""`
+	HELongitudeDeg         string `json:"he_longitude_deg" example:""`
+	HEElevationFt          string `json:"he_elevation_ft" example:"52"`
+	HEHeadingDegT          string `json:"he_heading_degT" example:""`
+	HEDisplacedThresholdFt string `json:"he_displaced_threshold_ft" example:"985"`
+}
+
+// Airport represents the airport data.
+// @Description Airport represents the airport data.
+type Airport struct {
+	ID               string             `json:"id" example:"322383"`
+	Ident            string             `json:"ident" example:"TVSA"`
+	Type             string             `json:"type" example:"medium_airport"`
+	Name             string             `json:"name" example:"Argyle International Airport"`
+	LatitudeDeg      string             `json:"latitude_deg" example:"13.156695"`
+	LongitudeDeg     string             `json:"longitude_deg" example:"-61.149945"`
+	ElevationFt      string             `json:"elevation_ft" example:"136"`
+	Continent        string             `json:"continent" example:"NA"`
+	ISOCountry       string             `json:"iso_country" example:"VC"`
+	ISORegion        string             `json:"iso_region" example:"VC-04"`
+	Municipality     string             `json:"municipality" example:"Kingstown"`
+	ScheduledService string             `json:"scheduled_service" example:"yes"`
+	GPSCode          string             `json:"gps_code" example:"TVSA"`
+	IATACode         string             `json:"iata_code" example:"SVD"`
+	LocalCode        string             `json:"local_code" example:""`
+	HomeLink         string             `json:"home_link" example:"http://www.svgiadc.com"`
+	WikipediaLink    string             `json:"wikipedia_link" example:"https://en.m.wikipedia.org/wiki/Argyle_International_Airport"`
+	Keywords         string             `json:"keywords" example:""`
+	Comments         []string           `json:"comments" example:""`
+	Frequencies      []AirportFrequency `json:"frequencies"`
+	Runways          []AirportRunway    `json:"runways"`
+}
+
+// CountryAirports represents the airport data for a country.
+// @Description CountryAirports represents the airport data for a country.
+type CountryAirports struct {
+	ID            string    `json:"id" example:"302756"`
+	Code          string    `json:"code" example:"VC"`
+	Name          string    `json:"name" example:"Saint Vincent and the Grenadines"`
+	Continent     string    `json:"continent" example:"NA"`
+	WikipediaLink string    `json:"wikipedia_link" example:"https://en.wikipedia.org/wiki/Saint_Vincent_and_the_Grenadines"`
+	Keywords      string    `json:"keywords" example:"Airports in Saint Vincent and the Grenadines"`
+	Airports      []Airport `json:"airports"`
+}
+
+// AirportData holds the airport data
+var AirportData map[string]CountryAirports
+
 // Initialize code mapping after loading passports data
 func init() {
 	// Ensure that codeToCCA3 is initialized
@@ -53,6 +130,18 @@ func LoadPassportData(filename string) error {
 	}
 	// Initialize code mapping after loading passports
 	initCodeMapping()
+	return nil
+}
+
+// LoadAirportData loads airport data from a JSON file.
+func LoadAirportData(filename string) error {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("failed to read airports file: %w", err)
+	}
+	if err := json.Unmarshal(data, &AirportData); err != nil {
+		return fmt.Errorf("failed to parse airports data: %w", err)
+	}
 	return nil
 }
 
@@ -191,4 +280,62 @@ func GetVisaRequirements(c *gin.Context) {
 type PassportResponse struct {
 	Passport string            `json:"passport" example:"USA"`
 	Visas    map[string]string `json:"visas"`
+}
+
+// GetAirports handles GET /airports
+// @Summary     Get all airports
+// @Description Retrieves a list of all airports.
+// @Tags        Airports
+// @Accept      json
+// @Produce     json
+// @Success     200 {array} CountryAirports
+// @Failure     500 {object} ErrorResponse
+// @Router      /airports [get]
+func GetAirports(c *gin.Context) {
+	c.JSON(http.StatusOK, AirportData)
+}
+
+// GetAirportByCode handles GET /airports/:code
+// @Summary     Get airport by code
+// @Description Retrieves an airport by its IATA or ICAO code.
+// @Tags        Airports
+// @Accept      json
+// @Produce     json
+// @Param       code path string true "Airport code (IATA or ICAO)"
+// @Success     200 {object} Airport
+// @Failure     404 {object} ErrorResponse
+// @Router      /airports/{code} [get]
+func GetAirportByCode(c *gin.Context) {
+	code := strings.ToUpper(c.Param("code"))
+
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if airport.IATACode == code || airport.Ident == code {
+				c.JSON(http.StatusOK, airport)
+				return
+			}
+		}
+	}
+
+	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found"})
+}
+
+// GetAirportsByCountry handles GET /airports/country/:countryCode
+// @Summary     Get airports by country
+// @Description Retrieves all airports in a specific country.
+// @Tags        Airports
+// @Accept      json
+// @Produce     json
+// @Param       countryCode path string true "Country code (e.g., VC)"
+// @Success     200 {object} CountryAirports
+// @Failure     404 {object} ErrorResponse
+// @Router      /airports/country/{countryCode} [get]
+func GetAirportsByCountry(c *gin.Context) {
+	countryCode := strings.ToUpper(c.Param("countryCode"))
+
+	if countryAirports, ok := AirportData[countryCode]; ok {
+		c.JSON(http.StatusOK, countryAirports)
+	} else {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Country not found or no airports available"})
+	}
 }

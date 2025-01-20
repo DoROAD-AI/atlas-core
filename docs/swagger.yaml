@@ -234,6 +234,190 @@ definitions:
         example: ^\d{5}(-\d{4})?$
         type: string
     type: object
+  v2.Airport:
+    description: Airport represents the airport data.
+    properties:
+      comments:
+        example:
+        - ""
+        items:
+          type: string
+        type: array
+      continent:
+        example: NA
+        type: string
+      elevation_ft:
+        example: "136"
+        type: string
+      frequencies:
+        items:
+          $ref: '#/definitions/v2.AirportFrequency'
+        type: array
+      gps_code:
+        example: TVSA
+        type: string
+      home_link:
+        example: http://www.svgiadc.com
+        type: string
+      iata_code:
+        example: SVD
+        type: string
+      id:
+        example: "322383"
+        type: string
+      ident:
+        example: TVSA
+        type: string
+      iso_country:
+        example: VC
+        type: string
+      iso_region:
+        example: VC-04
+        type: string
+      keywords:
+        example: ""
+        type: string
+      latitude_deg:
+        example: "13.156695"
+        type: string
+      local_code:
+        example: ""
+        type: string
+      longitude_deg:
+        example: "-61.149945"
+        type: string
+      municipality:
+        example: Kingstown
+        type: string
+      name:
+        example: Argyle International Airport
+        type: string
+      runways:
+        items:
+          $ref: '#/definitions/v2.AirportRunway'
+        type: array
+      scheduled_service:
+        example: "yes"
+        type: string
+      type:
+        example: medium_airport
+        type: string
+      wikipedia_link:
+        example: https://en.m.wikipedia.org/wiki/Argyle_International_Airport
+        type: string
+    type: object
+  v2.AirportFrequency:
+    description: AirportFrequency represents the frequency data for an airport.
+    properties:
+      airport_ident:
+        example: TVSA
+        type: string
+      airport_ref:
+        example: "322383"
+        type: string
+      description:
+        example: Argyle Approach
+        type: string
+      frequency_mhz:
+        example: "120.8"
+        type: string
+      id:
+        example: "322388"
+        type: string
+      type:
+        example: APP
+        type: string
+    type: object
+  v2.AirportRunway:
+    description: AirportRunway represents the runway data for an airport.
+    properties:
+      airport_ident:
+        example: TVSA
+        type: string
+      airport_ref:
+        example: "322383"
+        type: string
+      closed:
+        example: "0"
+        type: string
+      he_displaced_threshold_ft:
+        example: "985"
+        type: string
+      he_elevation_ft:
+        example: "52"
+        type: string
+      he_heading_degT:
+        example: ""
+        type: string
+      he_ident:
+        example: "22"
+        type: string
+      he_latitude_deg:
+        example: ""
+        type: string
+      he_longitude_deg:
+        example: ""
+        type: string
+      id:
+        example: "322384"
+        type: string
+      le_displaced_threshold_ft:
+        example: ""
+        type: string
+      le_elevation_ft:
+        example: "136"
+        type: string
+      le_heading_degT:
+        example: ""
+        type: string
+      le_ident:
+        example: "04"
+        type: string
+      le_latitude_deg:
+        example: ""
+        type: string
+      le_longitude_deg:
+        example: ""
+        type: string
+      length_ft:
+        example: "9000"
+        type: string
+      lighted:
+        example: "1"
+        type: string
+      surface:
+        example: ASP
+        type: string
+      width_ft:
+        example: "148"
+        type: string
+    type: object
+  v2.CountryAirports:
+    description: CountryAirports represents the airport data for a country.
+    properties:
+      airports:
+        items:
+          $ref: '#/definitions/v2.Airport'
+        type: array
+      code:
+        example: VC
+        type: string
+      continent:
+        example: NA
+        type: string
+      id:
+        example: "302756"
+        type: string
+      keywords:
+        example: Airports in Saint Vincent and the Grenadines
+        type: string
+      name:
+        example: Saint Vincent and the Grenadines
+        type: string
+      wikipedia_link:
+        example: https://en.wikipedia.org/wiki/Saint_Vincent_and_the_Grenadines
+        type: string
+    type: object
   v2.ErrorResponse:
     description: ErrorResponse represents an error response.
     properties:
@@ -281,6 +465,77 @@ info:
   title: Atlas - Geographic and Passport Data API by DoROAD
   version: "2.0"
 paths:
+  /airports:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all airports.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.CountryAirports'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get all airports
+      tags:
+      - Airports
+  /airports/{code}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an airport by its IATA or ICAO code.
+      parameters:
+      - description: Airport code (IATA or ICAO)
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.Airport'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airport by code
+      tags:
+      - Airports
+  /airports/country/{countryCode}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all airports in a specific country.
+      parameters:
+      - description: Country code (e.g., VC)
+        in: path
+        name: countryCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.CountryAirports'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airports by country
+      tags:
+      - Airports
   /alpha:
     get:
       consumes:

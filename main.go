@@ -62,6 +62,11 @@ func main() {
 		log.Fatalf("Failed to initialize passport data: %v", err)
 	}
 
+	// Load airport data from JSON
+	if err := v2.LoadAirportData("airports.json"); err != nil {
+		log.Fatalf("Failed to initialize airport data: %v", err)
+	}
+
 	// Create Gin router with default middleware
 	router := gin.Default()
 
@@ -117,6 +122,10 @@ func main() {
 		v2Group.GET("/passports/:passportCode", v2.GetPassportData)
 		v2Group.GET("/passports/:passportCode/visas", v2.GetVisaRequirementsForPassport)
 		v2Group.GET("/passports/visa", v2.GetVisaRequirements)
+		// New v2 airport routes
+		v2Group.GET("/airports", v2.GetAirports)
+		v2Group.GET("/airports/:code", v2.GetAirportByCode)
+		v2Group.GET("/airports/country/:countryCode", v2.GetAirportsByCountry)
 	}
 
 	// Swagger documentation endpoint

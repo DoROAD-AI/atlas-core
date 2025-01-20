@@ -21,6 +21,114 @@
     },
     "basePath": "/v2",
     "paths": {
+        "/airports": {
+            "get": {
+                "description": "Retrieves a list of all airports.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get all airports",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.CountryAirports"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/country/{countryCode}": {
+            "get": {
+                "description": "Retrieves all airports in a specific country.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airports by country",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country code (e.g., VC)",
+                        "name": "countryCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.CountryAirports"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/{code}": {
+            "get": {
+                "description": "Retrieves an airport by its IATA or ICAO code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airport by code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Airport code (IATA or ICAO)",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.Airport"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/alpha": {
             "get": {
                 "description": "Get countries matching a list of codes (CCA2, CCN3, CCA3, or CIOC).",
@@ -1096,6 +1204,257 @@
                 "regex": {
                     "type": "string",
                     "example": "^\\d{5}(-\\d{4})?$"
+                }
+            }
+        },
+        "v2.Airport": {
+            "description": "Airport represents the airport data.",
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        ""
+                    ]
+                },
+                "continent": {
+                    "type": "string",
+                    "example": "NA"
+                },
+                "elevation_ft": {
+                    "type": "string",
+                    "example": "136"
+                },
+                "frequencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.AirportFrequency"
+                    }
+                },
+                "gps_code": {
+                    "type": "string",
+                    "example": "TVSA"
+                },
+                "home_link": {
+                    "type": "string",
+                    "example": "http://www.svgiadc.com"
+                },
+                "iata_code": {
+                    "type": "string",
+                    "example": "SVD"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "322383"
+                },
+                "ident": {
+                    "type": "string",
+                    "example": "TVSA"
+                },
+                "iso_country": {
+                    "type": "string",
+                    "example": "VC"
+                },
+                "iso_region": {
+                    "type": "string",
+                    "example": "VC-04"
+                },
+                "keywords": {
+                    "type": "string",
+                    "example": ""
+                },
+                "latitude_deg": {
+                    "type": "string",
+                    "example": "13.156695"
+                },
+                "local_code": {
+                    "type": "string",
+                    "example": ""
+                },
+                "longitude_deg": {
+                    "type": "string",
+                    "example": "-61.149945"
+                },
+                "municipality": {
+                    "type": "string",
+                    "example": "Kingstown"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Argyle International Airport"
+                },
+                "runways": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.AirportRunway"
+                    }
+                },
+                "scheduled_service": {
+                    "type": "string",
+                    "example": "yes"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "medium_airport"
+                },
+                "wikipedia_link": {
+                    "type": "string",
+                    "example": "https://en.m.wikipedia.org/wiki/Argyle_International_Airport"
+                }
+            }
+        },
+        "v2.AirportFrequency": {
+            "description": "AirportFrequency represents the frequency data for an airport.",
+            "type": "object",
+            "properties": {
+                "airport_ident": {
+                    "type": "string",
+                    "example": "TVSA"
+                },
+                "airport_ref": {
+                    "type": "string",
+                    "example": "322383"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Argyle Approach"
+                },
+                "frequency_mhz": {
+                    "type": "string",
+                    "example": "120.8"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "322388"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "APP"
+                }
+            }
+        },
+        "v2.AirportRunway": {
+            "description": "AirportRunway represents the runway data for an airport.",
+            "type": "object",
+            "properties": {
+                "airport_ident": {
+                    "type": "string",
+                    "example": "TVSA"
+                },
+                "airport_ref": {
+                    "type": "string",
+                    "example": "322383"
+                },
+                "closed": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "he_displaced_threshold_ft": {
+                    "type": "string",
+                    "example": "985"
+                },
+                "he_elevation_ft": {
+                    "type": "string",
+                    "example": "52"
+                },
+                "he_heading_degT": {
+                    "type": "string",
+                    "example": ""
+                },
+                "he_ident": {
+                    "type": "string",
+                    "example": "22"
+                },
+                "he_latitude_deg": {
+                    "type": "string",
+                    "example": ""
+                },
+                "he_longitude_deg": {
+                    "type": "string",
+                    "example": ""
+                },
+                "id": {
+                    "type": "string",
+                    "example": "322384"
+                },
+                "le_displaced_threshold_ft": {
+                    "type": "string",
+                    "example": ""
+                },
+                "le_elevation_ft": {
+                    "type": "string",
+                    "example": "136"
+                },
+                "le_heading_degT": {
+                    "type": "string",
+                    "example": ""
+                },
+                "le_ident": {
+                    "type": "string",
+                    "example": "04"
+                },
+                "le_latitude_deg": {
+                    "type": "string",
+                    "example": ""
+                },
+                "le_longitude_deg": {
+                    "type": "string",
+                    "example": ""
+                },
+                "length_ft": {
+                    "type": "string",
+                    "example": "9000"
+                },
+                "lighted": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "surface": {
+                    "type": "string",
+                    "example": "ASP"
+                },
+                "width_ft": {
+                    "type": "string",
+                    "example": "148"
+                }
+            }
+        },
+        "v2.CountryAirports": {
+            "description": "CountryAirports represents the airport data for a country.",
+            "type": "object",
+            "properties": {
+                "airports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.Airport"
+                    }
+                },
+                "code": {
+                    "type": "string",
+                    "example": "VC"
+                },
+                "continent": {
+                    "type": "string",
+                    "example": "NA"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "302756"
+                },
+                "keywords": {
+                    "type": "string",
+                    "example": "Airports in Saint Vincent and the Grenadines"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Saint Vincent and the Grenadines"
+                },
+                "wikipedia_link": {
+                    "type": "string",
+                    "example": "https://en.wikipedia.org/wiki/Saint_Vincent_and_the_Grenadines"
                 }
             }
         },
