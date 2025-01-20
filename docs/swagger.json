@@ -1642,6 +1642,125 @@
                 }
             }
         },
+        "/search": {
+            "get": {
+                "description": "Performs a comprehensive search across all data types (countries, airports) based on query parameters.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Search"
+                ],
+                "summary": "Super Type Query",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Type of data to search for (country, airport). If omitted or set to 'all', searches across all data types.",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the country or airport",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Region of the country",
+                        "name": "region",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Subregion of the country",
+                        "name": "subregion",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Country code Alpha-2",
+                        "name": "cca2",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Country code Alpha-3",
+                        "name": "cca3",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Country code Numeric",
+                        "name": "ccn3",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Capital city of the country",
+                        "name": "capital",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Airport Ident code (e.g., ICAO code)",
+                        "name": "ident",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Airport IATA code",
+                        "name": "iata_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ISO country code for airports",
+                        "name": "iso_country",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ISO region code for airports",
+                        "name": "iso_region",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Municipality of the airport",
+                        "name": "municipality",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Type of the airport",
+                        "name": "airport_type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/subregion/{subregion}": {
             "get": {
                 "description": "Get countries matching a subregion.",

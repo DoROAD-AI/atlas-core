@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -1258,4 +1259,201 @@ func GetAirportsByKeyword(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, matchingAirports)
+}
+
+// SuperTypeQuery handles GET /v2/search
+// @Summary Super Type Query
+// @Description Performs a comprehensive search across all data types (countries, airports) based on query parameters.
+// @Tags Search
+// @Accept json
+// @Produce json
+// @Param type query string false "Type of data to search for (country, airport). If omitted or set to 'all', searches across all data types."
+// @Param name query string false "Name of the country or airport"
+// @Param region query string false "Region of the country"
+// @Param subregion query string false "Subregion of the country"
+// @Param cca2 query string false "Country code Alpha-2"
+// @Param cca3 query string false "Country code Alpha-3"
+// @Param ccn3 query string false "Country code Numeric"
+// @Param capital query string false "Capital city of the country"
+// @Param ident query string false "Airport Ident code (e.g., ICAO code)"
+// @Param iata_code query string false "Airport IATA code"
+// @Param iso_country query string false "ISO country code for airports"
+// @Param iso_region query string false "ISO region code for airports"
+// @Param municipality query string false "Municipality of the airport"
+// @Param airport_type query string false "Type of the airport"
+// @Success 200 {object} interface{}
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Router /search [get]
+func SuperTypeQuery(c *gin.Context) {
+	// Get the 'type' query parameter
+	dataType := c.Query("type")
+	// Remove 'type' from parameters
+	queryParams := c.Request.URL.Query()
+	// Remove 'type' from queryParams
+	delete(queryParams, "type")
+	// If queryParams is empty, return error
+	if len(queryParams) == 0 {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "At least one query parameter is required"})
+		return
+	}
+	// Depending on dataType, search appropriate data
+	switch strings.ToLower(dataType) {
+	case "country":
+		results := searchCountries(queryParams)
+		if len(results) == 0 {
+			c.JSON(http.StatusNotFound, ErrorResponse{Message: "No countries found matching the criteria"})
+			return
+		}
+		c.JSON(http.StatusOK, results)
+	case "airport":
+		results := searchAirports(queryParams)
+		if len(results) == 0 {
+			c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found matching the criteria"})
+			return
+		}
+		c.JSON(http.StatusOK, results)
+	case "", "all":
+		// Search countries and airports
+		var combinedResults struct {
+			Countries []v1.Country `json:"countries"`
+			Airports  []Airport    `json:"airports"`
+		}
+		countries := searchCountries(queryParams)
+		airports := searchAirports(queryParams)
+		combinedResults.Countries = countries
+		combinedResults.Airports = airports
+		if len(countries) == 0 && len(airports) == 0 {
+			c.JSON(http.StatusNotFound, ErrorResponse{Message: "No results found matching the criteria"})
+			return
+		}
+		c.JSON(http.StatusOK, combinedResults)
+	default:
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid type parameter. Allowed values are 'country', 'airport', or 'all'"})
+		return
+	}
+}
+
+// searchCountries searches countries based on query parameters
+func searchCountries(queryParams url.Values) []v1.Country {
+	var results []v1.Country
+	for _, country := range v1.Countries {
+		match := true
+		for key, values := range queryParams {
+			value := values[0]
+			switch strings.ToLower(key) {
+			case "name":
+				if !strings.Contains(strings.ToLower(country.Name.Common), strings.ToLower(value)) &&
+					!strings.Contains(strings.ToLower(country.Name.Official), strings.ToLower(value)) {
+					match = false
+					break
+				}
+			case "region":
+				if !strings.EqualFold(country.Region, value) {
+					match = false
+					break
+				}
+			case "subregion":
+				if !strings.EqualFold(country.Subregion, value) {
+					match = false
+					break
+				}
+			case "cca2":
+				if !strings.EqualFold(country.CCA2, value) {
+					match = false
+					break
+				}
+			case "cca3":
+				if !strings.EqualFold(country.CCA3, value) {
+					match = false
+					break
+				}
+			case "ccn3":
+				if !strings.EqualFold(country.CCN3, value) {
+					match = false
+					break
+				}
+			case "capital":
+				found := false
+				for _, cap := range country.Capital {
+					if strings.EqualFold(cap, value) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					match = false
+					break
+				}
+			// Add other fields as needed...
+			default:
+				// Skip unrecognized fields
+				match = false
+				break
+			}
+		}
+		if match {
+			results = append(results, country)
+		}
+	}
+	return results
+}
+
+// searchAirports searches airports based on query parameters
+func searchAirports(queryParams url.Values) []Airport {
+	var results []Airport
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			match := true
+			for key, values := range queryParams {
+				value := values[0]
+				switch strings.ToLower(key) {
+				case "name":
+					if !strings.Contains(strings.ToLower(airport.Name), strings.ToLower(value)) {
+						match = false
+						break
+					}
+				case "municipality":
+					if !strings.Contains(strings.ToLower(airport.Municipality), strings.ToLower(value)) {
+						match = false
+						break
+					}
+				case "ident":
+					if !strings.EqualFold(airport.Ident, value) {
+						match = false
+						break
+					}
+				case "iata_code":
+					if !strings.EqualFold(airport.IATACode, value) {
+						match = false
+						break
+					}
+				case "iso_country":
+					if !strings.EqualFold(airport.ISOCountry, value) {
+						match = false
+						break
+					}
+				case "iso_region":
+					if !strings.EqualFold(airport.ISORegion, value) {
+						match = false
+						break
+					}
+				case "airport_type":
+					if !strings.EqualFold(airport.Type, value) {
+						match = false
+						break
+					}
+				// Add other fields as needed...
+				default:
+					// Skip unrecognized fields
+					match = false
+					break
+				}
+			}
+			if match {
+				results = append(results, airport)
+			}
+		}
+	}
+	return results
 }

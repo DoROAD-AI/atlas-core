@@ -1569,6 +1569,87 @@ paths:
       summary: Get countries by region
       tags:
       - Countries
+  /search:
+    get:
+      consumes:
+      - application/json
+      description: Performs a comprehensive search across all data types (countries,
+        airports) based on query parameters.
+      parameters:
+      - description: Type of data to search for (country, airport). If omitted or
+          set to 'all', searches across all data types.
+        in: query
+        name: type
+        type: string
+      - description: Name of the country or airport
+        in: query
+        name: name
+        type: string
+      - description: Region of the country
+        in: query
+        name: region
+        type: string
+      - description: Subregion of the country
+        in: query
+        name: subregion
+        type: string
+      - description: Country code Alpha-2
+        in: query
+        name: cca2
+        type: string
+      - description: Country code Alpha-3
+        in: query
+        name: cca3
+        type: string
+      - description: Country code Numeric
+        in: query
+        name: ccn3
+        type: string
+      - description: Capital city of the country
+        in: query
+        name: capital
+        type: string
+      - description: Airport Ident code (e.g., ICAO code)
+        in: query
+        name: ident
+        type: string
+      - description: Airport IATA code
+        in: query
+        name: iata_code
+        type: string
+      - description: ISO country code for airports
+        in: query
+        name: iso_country
+        type: string
+      - description: ISO region code for airports
+        in: query
+        name: iso_region
+        type: string
+      - description: Municipality of the airport
+        in: query
+        name: municipality
+        type: string
+      - description: Type of the airport
+        in: query
+        name: airport_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Super Type Query
+      tags:
+      - Search
   /subregion/{subregion}:
     get:
       consumes:

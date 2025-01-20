@@ -139,6 +139,7 @@ func main() {
 		v2Group.GET("/passports/common-visa-free", v2.GetCommonVisaFreeDestinations)
 
 		// v2 airport routes
+		v2Group.GET("/search", v2.SuperTypeQuery)
 		v2Group.GET("/airports", v2.GetAllAirports)
 		v2Group.GET("/airports/:countryCode", v2.GetAirportsByCountry)
 		v2Group.GET("/airports/:countryCode/:airportIdent", v2.GetAirportByIdent)
