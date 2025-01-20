@@ -1,3 +1,4 @@
+// main.go - Atlas API entry point
 package main
 
 import (

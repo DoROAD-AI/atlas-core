@@ -1,3 +1,4 @@
+// handles.go contains the HTTP handlers for the API endpoints. The handlers are implemented using the Gin framework, which provides a high-performance HTTP router and middleware framework for Go.
 package v1
 
 import (
