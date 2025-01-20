@@ -16,7 +16,7 @@ import (
 	"github.com/gin-contrib/cors"
 )
 
-// @title       Atlas - Geographic, Airport, and Passport Data API by DoROAD
+// @title       Atlas - Global Travel and Aviation Intelligence Data API by DoROAD
 // @version     2.0
 // @description A comprehensive REST API providing detailed country information, airport data, and passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.
 // @termsOfService http://atlas.doroad.io/terms/
@@ -25,8 +25,9 @@ import (
 // @contact.url   https://github.com/DoROAD-AI/atlas/issues
 // @contact.email support@doroad.ai
 
-// @license.name  MIT
+// @license.name  MIT / Proprietary
 // @license.url   https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+// @description   Version 1 of the Atlas API is licensed under the MIT License. Version 2 and later are proprietary and require a commercial license. Please contact Atlas API Support for details on obtaining a commercial license for v2+.
 
 // @BasePath      /v2
 // @schemes       https http
@@ -127,11 +128,32 @@ func main() {
 		v2Group.GET("/passports/:passportCode", v2.GetPassportData)
 		v2Group.GET("/passports/:passportCode/visas", v2.GetVisaRequirementsForPassport)
 		v2Group.GET("/passports/visa", v2.GetVisaRequirements)
+		v2Group.GET("/passports/:passportCode/visa-free", v2.GetVisaFreeCountries)
+		v2Group.GET("/passports/:passportCode/visa-on-arrival", v2.GetVisaOnArrivalCountries)
+		v2Group.GET("/passports/:passportCode/e-visa", v2.GetEVisaCountries)
+		v2Group.GET("/passports/:passportCode/visa-required", v2.GetVisaRequiredCountries)
+		v2Group.GET("/passports/:passportCode/visa-details/:destinationCode", v2.GetVisaDetails)
+		v2Group.GET("/passports/reciprocal/:countryCode1/:countryCode2", v2.GetReciprocalVisaRequirements)
+		v2Group.GET("/passports/compare", v2.CompareVisaRequirements)
+		v2Group.GET("/passports/ranking", v2.GetPassportRanking)
+		v2Group.GET("/passports/common-visa-free", v2.GetCommonVisaFreeDestinations)
 
 		// v2 airport routes
 		v2Group.GET("/airports", v2.GetAllAirports)
 		v2Group.GET("/airports/:countryCode", v2.GetAirportsByCountry)
 		v2Group.GET("/airports/:countryCode/:airportIdent", v2.GetAirportByIdent)
+		v2Group.GET("/airports/by-code/:airportCode", v2.GetAirportByCode)
+		v2Group.GET("/airports/region/:isoRegion", v2.GetAirportsByRegion)
+		v2Group.GET("/airports/municipality/:municipalityName", v2.GetAirportsByMunicipality)
+		v2Group.GET("/airports/type/:airportType", v2.GetAirportsByType)
+		v2Group.GET("/airports/scheduled", v2.GetAirportsWithScheduledService)
+		v2Group.GET("/airports/:countryCode/:airportIdent/runways", v2.GetAirportRunways)
+		v2Group.GET("/airports/:countryCode/:airportIdent/frequencies", v2.GetAirportFrequencies)
+		v2Group.GET("/airports/search", v2.SearchAirports)
+		v2Group.GET("/airports/radius", v2.GetAirportsWithinRadius)
+		v2Group.GET("/airports/distance", v2.CalculateDistanceBetweenAirports)
+		v2Group.GET("/airports/keyword/:keyword", v2.GetAirportsByKeyword)
+
 	}
 
 	// Swagger documentation endpoint

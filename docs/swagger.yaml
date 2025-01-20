@@ -306,6 +306,22 @@ definitions:
         example: https://en.m.wikipedia.org/wiki/Argyle_International_Airport
         type: string
     type: object
+  v2.AirportDistance:
+    description: AirportDistance represents the distance between two airports.
+    properties:
+      airport1:
+        example: TVSA
+        type: string
+      airport2:
+        example: TVSB
+        type: string
+      distance_km:
+        example: 1234.5
+        type: number
+      distance_miles:
+        example: 767.1
+        type: number
+    type: object
   v2.AirportFrequency:
     description: AirportFrequency represents the frequency data for an airport.
     properties:
@@ -454,15 +470,14 @@ info:
     email: support@doroad.ai
     name: Atlas API Support
     url: https://github.com/DoROAD-AI/atlas/issues
-  description: A comprehensive REST API providing detailed country information, airport
-    data, and passport visa requirements worldwide. This service offers extensive
-    data about countries (demographics, geography, international codes, etc.), airports,
-    and visa regulations for various passports.
+  description: Version 1 of the Atlas API is licensed under the MIT License. Version
+    2 and later are proprietary and require a commercial license. Please contact Atlas
+    API Support for details on obtaining a commercial license for v2+.
   license:
-    name: MIT
+    name: MIT / Proprietary
     url: https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
   termsOfService: http://atlas.doroad.io/terms/
-  title: Atlas - Geographic, Airport, and Passport Data API by DoROAD
+  title: Atlas - Global Travel and Aviation Intelligence Data API by DoROAD
   version: "2.0"
 paths:
   /airports:
@@ -543,6 +558,324 @@ paths:
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
       summary: Get a single airport by identifier
+      tags:
+      - Airports
+  /airports/{countryCode}/{airportIdent}/frequencies:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves communication frequencies used at a specific airport.
+      parameters:
+      - description: Country code (e.g., VC, VCT, 670, etc.)
+        in: path
+        name: countryCode
+        required: true
+        type: string
+      - description: Airport Ident (ICAO) or IATA code
+        in: path
+        name: airportIdent
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.AirportFrequency'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airport frequencies
+      tags:
+      - Airports
+  /airports/{countryCode}/{airportIdent}/runways:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves detailed runway information for a specific airport.
+      parameters:
+      - description: Country code (e.g., VC, VCT, 670, etc.)
+        in: path
+        name: countryCode
+        required: true
+        type: string
+      - description: Airport Ident (ICAO) or IATA code
+        in: path
+        name: airportIdent
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.AirportRunway'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airport runways
+      tags:
+      - Airports
+  /airports/by-code/{airportCode}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific airport by its ICAO or IATA code.
+      parameters:
+      - description: Airport ICAO or IATA code
+        in: path
+        name: airportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.Airport'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airport by ICAO or IATA code
+      tags:
+      - Airports
+  /airports/distance:
+    get:
+      consumes:
+      - application/json
+      description: Calculates the distance (in kilometers and miles) between two airports.
+      parameters:
+      - description: ICAO or IATA code of the first airport
+        in: query
+        name: airport1
+        required: true
+        type: string
+      - description: ICAO or IATA code of the second airport
+        in: query
+        name: airport2
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.AirportDistance'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Calculate distance between two airports
+      tags:
+      - Airports
+  /airports/keyword/{keyword}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all airports associated with a specific keyword.
+      parameters:
+      - description: Keyword to search for
+        in: path
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Airport'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airports by keyword
+      tags:
+      - Airports
+  /airports/municipality/{municipalityName}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all airports within a specific municipality.
+      parameters:
+      - description: Municipality name
+        in: path
+        name: municipalityName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Airport'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airports by municipality
+      tags:
+      - Airports
+  /airports/radius:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all airports within a specified radius of a given latitude/longitude
+        coordinate.
+      parameters:
+      - description: Latitude of the center point
+        in: query
+        name: latitude
+        required: true
+        type: number
+      - description: Longitude of the center point
+        in: query
+        name: longitude
+        required: true
+        type: number
+      - description: Radius in kilometers
+        in: query
+        name: radius
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Airport'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airports within a radius
+      tags:
+      - Airports
+  /airports/region/{isoRegion}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all airports within a specific ISO region.
+      parameters:
+      - description: ISO region code (e.g., VC-04)
+        in: path
+        name: isoRegion
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Airport'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airports by ISO region
+      tags:
+      - Airports
+  /airports/scheduled:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all airports that have scheduled airline service.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Airport'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airports with scheduled service
+      tags:
+      - Airports
+  /airports/search:
+    get:
+      consumes:
+      - application/json
+      description: Performs a flexible search for airports based on a query string.
+      parameters:
+      - description: Search string (can match airport name, city, ICAO/IATA code,
+          etc.)
+        in: query
+        name: query
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Airport'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Search airports
+      tags:
+      - Airports
+  /airports/type/{airportType}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all airports of a specific type.
+      parameters:
+      - description: Airport type (e.g., medium_airport, closed)
+        in: path
+        name: airportType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Airport'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airports by type
       tags:
       - Airports
   /alpha:
@@ -880,6 +1213,149 @@ paths:
       summary: Get passport data
       tags:
       - Passports
+  /passports/{passportCode}/e-visa:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of countries where the given passport holder can
+        apply for an e-visa.
+      parameters:
+      - description: Passport code (e.g., USA, US, 840, etc.)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get e-visa destinations for a passport
+      tags:
+      - Passports
+  /passports/{passportCode}/visa-details/{destinationCode}:
+    get:
+      consumes:
+      - application/json
+      description: Provides specific visa requirement details (duration, type, etc.)
+        for a given passport and destination.
+      parameters:
+      - description: Passport code (e.g., USA, US, 840, etc.)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      - description: Destination country code (e.g., DEU, DE, 276, etc.)
+        in: path
+        name: destinationCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.VisaRequirement'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get detailed visa requirements for a passport and destination
+      tags:
+      - Passports
+  /passports/{passportCode}/visa-free:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of countries where the given passport holder can
+        travel visa-free.
+      parameters:
+      - description: Passport code (e.g., USA, US, 840, etc.)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get visa-free destinations for a passport
+      tags:
+      - Passports
+  /passports/{passportCode}/visa-on-arrival:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of countries where the given passport holder can
+        obtain a visa on arrival.
+      parameters:
+      - description: Passport code (e.g., USA, US, 840, etc.)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get visa-on-arrival destinations for a passport
+      tags:
+      - Passports
+  /passports/{passportCode}/visa-required:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of countries where the given passport holder requires
+        a visa before arrival.
+      parameters:
+      - description: Passport code (e.g., USA, US, 840, etc.)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get visa-required destinations for a passport
+      tags:
+      - Passports
   /passports/{passportCode}/visas:
     get:
       consumes:
@@ -903,6 +1379,128 @@ paths:
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
       summary: Get visa requirements for a passport
+      tags:
+      - Passports
+  /passports/common-visa-free:
+    get:
+      consumes:
+      - application/json
+      description: Determines the common countries that a set of passports can access
+        visa-free.
+      parameters:
+      - collectionFormat: csv
+        description: Comma-separated list of passport codes (e.g., USA,DEU,JPN)
+        in: query
+        items:
+          type: string
+        name: passports
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Find common visa-free destinations for multiple passports
+      tags:
+      - Passports
+  /passports/compare:
+    get:
+      consumes:
+      - application/json
+      description: Compares visa requirements for a list of passports to a single
+        destination.
+      parameters:
+      - collectionFormat: csv
+        description: Comma-separated list of passport codes (e.g., USA,DEU,JPN)
+        in: query
+        items:
+          type: string
+        name: passports
+        required: true
+        type: array
+      - description: Destination country code (e.g., FRA)
+        in: query
+        name: destination
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/v2.VisaRequirement'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Compare visa requirements for multiple passports to a single destination
+      tags:
+      - Passports
+  /passports/ranking:
+    get:
+      consumes:
+      - application/json
+      description: Returns a ranked list of passports based on the number of countries
+        they can access visa-free or with visa-on-arrival.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: Get a ranked list of passports based on visa-free access
+      tags:
+      - Passports
+  /passports/reciprocal/{countryCode1}/{countryCode2}:
+    get:
+      consumes:
+      - application/json
+      description: Checks the visa requirements both ways between two countries.
+      parameters:
+      - description: First country code (e.g., USA, US, 840, etc.)
+        in: path
+        name: countryCode1
+        required: true
+        type: string
+      - description: Second country code (e.g., DEU, DE, 276, etc.)
+        in: path
+        name: countryCode2
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/v2.VisaRequirement'
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get reciprocal visa requirements between two countries
       tags:
       - Passports
   /passports/visa:

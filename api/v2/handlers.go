@@ -4,8 +4,11 @@ package v2
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"os"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -306,6 +309,433 @@ func GetVisaRequirements(c *gin.Context) {
 	})
 }
 
+// GetVisaFreeCountries handles GET /v2/passports/{passportCode}/visa-free
+// @Summary Get visa-free destinations for a passport
+// @Description Retrieves a list of countries where the given passport holder can travel visa-free.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
+// @Success 200 {array} string
+// @Failure 404 {object} ErrorResponse
+// @Router /passports/{passportCode}/visa-free [get]
+func GetVisaFreeCountries(c *gin.Context) {
+	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
+	passportCCA3, ok := codeToCCA3[passportCodeInput]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		return
+	}
+
+	visaRules, ok := Passports[passportCCA3]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		return
+	}
+
+	visaFreeCountries := []string{}
+	for countryCode, requirement := range visaRules {
+		// Visa-free is typically indicated by "90", "visa free", "visa on arrival", etc.
+		// You might need to adjust the conditions based on your data.
+		if requirement == "visa free" || strings.Contains(requirement, "90") || requirement == "visa on arrival" || requirement == "eta" {
+			visaFreeCountries = append(visaFreeCountries, countryCode)
+		}
+	}
+
+	c.JSON(http.StatusOK, visaFreeCountries)
+}
+
+// GetVisaOnArrivalCountries handles GET /v2/passports/{passportCode}/visa-on-arrival
+// @Summary Get visa-on-arrival destinations for a passport
+// @Description Retrieves a list of countries where the given passport holder can obtain a visa on arrival.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
+// @Success 200 {array} string
+// @Failure 404 {object} ErrorResponse
+// @Router /passports/{passportCode}/visa-on-arrival [get]
+func GetVisaOnArrivalCountries(c *gin.Context) {
+	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
+	passportCCA3, ok := codeToCCA3[passportCodeInput]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		return
+	}
+
+	visaRules, ok := Passports[passportCCA3]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		return
+	}
+
+	visaOnArrivalCountries := []string{}
+	for countryCode, requirement := range visaRules {
+		// Adjust the condition based on how "visa on arrival" is represented in your data.
+		if requirement == "visa on arrival" {
+			visaOnArrivalCountries = append(visaOnArrivalCountries, countryCode)
+		}
+	}
+
+	c.JSON(http.StatusOK, visaOnArrivalCountries)
+}
+
+// GetEVisaCountries handles GET /v2/passports/{passportCode}/e-visa
+// @Summary Get e-visa destinations for a passport
+// @Description Retrieves a list of countries where the given passport holder can apply for an e-visa.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
+// @Success 200 {array} string
+// @Failure 404 {object} ErrorResponse
+// @Router /passports/{passportCode}/e-visa [get]
+func GetEVisaCountries(c *gin.Context) {
+	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
+	passportCCA3, ok := codeToCCA3[passportCodeInput]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		return
+	}
+
+	visaRules, ok := Passports[passportCCA3]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		return
+	}
+
+	eVisaCountries := []string{}
+	for countryCode, requirement := range visaRules {
+		// Adjust the condition based on how "e-visa" is represented in your data.
+		if requirement == "e-visa" || requirement == "eta" {
+			eVisaCountries = append(eVisaCountries, countryCode)
+		}
+	}
+
+	c.JSON(http.StatusOK, eVisaCountries)
+}
+
+// GetVisaRequiredCountries handles GET /v2/passports/{passportCode}/visa-required
+// @Summary Get visa-required destinations for a passport
+// @Description Retrieves a list of countries where the given passport holder requires a visa before arrival.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
+// @Success 200 {array} string
+// @Failure 404 {object} ErrorResponse
+// @Router /passports/{passportCode}/visa-required [get]
+func GetVisaRequiredCountries(c *gin.Context) {
+	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
+	passportCCA3, ok := codeToCCA3[passportCodeInput]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		return
+	}
+
+	visaRules, ok := Passports[passportCCA3]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		return
+	}
+
+	visaRequiredCountries := []string{}
+	for countryCode, requirement := range visaRules {
+		// Adjust the condition based on how "visa required" is represented in your data.
+		if requirement == "visa required" {
+			visaRequiredCountries = append(visaRequiredCountries, countryCode)
+		}
+	}
+
+	c.JSON(http.StatusOK, visaRequiredCountries)
+}
+
+// GetVisaDetails handles GET /v2/passports/{passportCode}/visa-details/{destinationCode}
+// @Summary Get detailed visa requirements for a passport and destination
+// @Description Provides specific visa requirement details (duration, type, etc.) for a given passport and destination.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
+// @Param destinationCode path string true "Destination country code (e.g., DEU, DE, 276, etc.)"
+// @Success 200 {object} VisaRequirement
+// @Failure 404 {object} ErrorResponse
+// @Router /passports/{passportCode}/visa-details/{destinationCode} [get]
+func GetVisaDetails(c *gin.Context) {
+	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
+	destinationCodeInput := strings.ToUpper(c.Param("destinationCode"))
+
+	passportCCA3, ok := codeToCCA3[passportCodeInput]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		return
+	}
+
+	destinationCCA3, ok := codeToCCA3[destinationCodeInput]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid destination country code"})
+		return
+	}
+
+	visaRules, ok := Passports[passportCCA3]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		return
+	}
+
+	requirement, ok := visaRules[destinationCCA3]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Visa requirement data not found for this destination"})
+		return
+	}
+
+	visaDetails := VisaRequirement{
+		From:        passportCCA3,
+		To:          destinationCCA3,
+		Requirement: requirement,
+	}
+
+	c.JSON(http.StatusOK, visaDetails)
+}
+
+// GetReciprocalVisaRequirements handles GET /v2/passports/reciprocal/{countryCode1}/{countryCode2}
+// @Summary Get reciprocal visa requirements between two countries
+// @Description Checks the visa requirements both ways between two countries.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Param countryCode1 path string true "First country code (e.g., USA, US, 840, etc.)"
+// @Param countryCode2 path string true "Second country code (e.g., DEU, DE, 276, etc.)"
+// @Success 200 {object} map[string]VisaRequirement
+// @Failure 404 {object} ErrorResponse
+// @Router /passports/reciprocal/{countryCode1}/{countryCode2} [get]
+func GetReciprocalVisaRequirements(c *gin.Context) {
+	countryCode1Input := strings.ToUpper(c.Param("countryCode1"))
+	countryCode2Input := strings.ToUpper(c.Param("countryCode2"))
+
+	countryCCA3_1, ok := codeToCCA3[countryCode1Input]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid country code for countryCode1"})
+		return
+	}
+
+	countryCCA3_2, ok := codeToCCA3[countryCode2Input]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid country code for countryCode2"})
+		return
+	}
+
+	visaRules1, ok := Passports[countryCCA3_1]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found for the first country"})
+		return
+	}
+
+	visaRules2, ok := Passports[countryCCA3_2]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found for the second country"})
+		return
+	}
+
+	requirement1to2, ok1 := visaRules1[countryCCA3_2]
+	if !ok1 {
+		requirement1to2 = "Data not available" // Or handle it as appropriate
+	}
+
+	requirement2to1, ok2 := visaRules2[countryCCA3_1]
+	if !ok2 {
+		requirement2to1 = "Data not available" // Or handle it as appropriate
+	}
+
+	reciprocalRequirements := map[string]VisaRequirement{
+		fmt.Sprintf("%s_to_%s", countryCCA3_1, countryCCA3_2): {
+			From:        countryCCA3_1,
+			To:          countryCCA3_2,
+			Requirement: requirement1to2,
+		},
+		fmt.Sprintf("%s_to_%s", countryCCA3_2, countryCCA3_1): {
+			From:        countryCCA3_2,
+			To:          countryCCA3_1,
+			Requirement: requirement2to1,
+		},
+	}
+
+	c.JSON(http.StatusOK, reciprocalRequirements)
+}
+
+// CompareVisaRequirements handles GET /v2/passports/compare
+// @Summary Compare visa requirements for multiple passports to a single destination
+// @Description Compares visa requirements for a list of passports to a single destination.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Param passports query []string true "Comma-separated list of passport codes (e.g., USA,DEU,JPN)"
+// @Param destination query string true "Destination country code (e.g., FRA)"
+// @Success 200 {object} map[string]VisaRequirement
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Router /passports/compare [get]
+func CompareVisaRequirements(c *gin.Context) {
+	passportCodesInput := c.Query("passports")
+	destinationCodeInput := strings.ToUpper(c.Query("destination"))
+
+	if passportCodesInput == "" || destinationCodeInput == "" {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "passports and destination query parameters are required"})
+		return
+	}
+
+	passportCodes := strings.Split(passportCodesInput, ",")
+	destinationCCA3, ok := codeToCCA3[destinationCodeInput]
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid destination country code"})
+		return
+	}
+
+	comparisonResults := make(map[string]VisaRequirement)
+	for _, passportCodeInput := range passportCodes {
+		passportCodeInput = strings.ToUpper(strings.TrimSpace(passportCodeInput))
+		passportCCA3, ok := codeToCCA3[passportCodeInput]
+		if !ok {
+			comparisonResults[passportCodeInput] = VisaRequirement{
+				From:        passportCodeInput,
+				To:          destinationCodeInput,
+				Requirement: "Invalid passport code",
+			}
+			continue
+		}
+
+		visaRules, ok := Passports[passportCCA3]
+		if !ok {
+			comparisonResults[passportCodeInput] = VisaRequirement{
+				From:        passportCCA3,
+				To:          destinationCodeInput,
+				Requirement: "Passport data not found",
+			}
+			continue
+		}
+
+		requirement, ok := visaRules[destinationCCA3]
+		if !ok {
+			comparisonResults[passportCodeInput] = VisaRequirement{
+				From:        passportCCA3,
+				To:          destinationCodeInput,
+				Requirement: "Data not available",
+			}
+		} else {
+			comparisonResults[passportCodeInput] = VisaRequirement{
+				From:        passportCCA3,
+				To:          destinationCodeInput,
+				Requirement: requirement,
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, comparisonResults)
+}
+
+// GetPassportRanking handles GET /v2/passports/ranking
+// @Summary Get a ranked list of passports based on visa-free access
+// @Description Returns a ranked list of passports based on the number of countries they can access visa-free or with visa-on-arrival.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Success 200 {array} map[string]interface{}
+// @Router /passports/ranking [get]
+func GetPassportRanking(c *gin.Context) {
+	type PassportRank struct {
+		PassportCode  string `json:"passportCode"`
+		Rank          int    `json:"rank"`
+		VisaFreeCount int    `json:"visaFreeCount"`
+	}
+
+	passportRanks := make(map[string]int)
+
+	for passportCode, visaRules := range Passports {
+		visaFreeCount := 0
+		for _, requirement := range visaRules {
+			if requirement == "visa free" || strings.Contains(requirement, "90") || requirement == "visa on arrival" || requirement == "eta" {
+				visaFreeCount++
+			}
+		}
+		passportRanks[passportCode] = visaFreeCount
+	}
+
+	// Convert map to slice for sorting
+	var ranks []PassportRank
+	for code, count := range passportRanks {
+		ranks = append(ranks, PassportRank{PassportCode: code, VisaFreeCount: count})
+	}
+
+	// Sort by visa-free count in descending order
+	sort.Slice(ranks, func(i, j int) bool {
+		return ranks[i].VisaFreeCount > ranks[j].VisaFreeCount
+	})
+
+	// Assign ranks
+	for i := 0; i < len(ranks); i++ {
+		if i > 0 && ranks[i].VisaFreeCount != ranks[i-1].VisaFreeCount {
+			ranks[i].Rank = i + 1
+		} else if i == 0 {
+			ranks[i].Rank = 1
+		} else {
+			ranks[i].Rank = ranks[i-1].Rank
+		}
+	}
+
+	c.JSON(http.StatusOK, ranks)
+}
+
+// GetCommonVisaFreeDestinations handles GET /v2/passports/common-visa-free
+// @Summary Find common visa-free destinations for multiple passports
+// @Description Determines the common countries that a set of passports can access visa-free.
+// @Tags Passports
+// @Accept json
+// @Produce json
+// @Param passports query []string true "Comma-separated list of passport codes (e.g., USA,DEU,JPN)"
+// @Success 200 {array} string
+// @Failure 400 {object} ErrorResponse
+// @Router /passports/common-visa-free [get]
+func GetCommonVisaFreeDestinations(c *gin.Context) {
+	passportCodesInput := c.Query("passports")
+	if passportCodesInput == "" {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "passports query parameter is required"})
+		return
+	}
+
+	passportCodes := strings.Split(passportCodesInput, ",")
+	commonVisaFree := make(map[string]int)
+	passportCount := len(passportCodes)
+
+	for _, passportCodeInput := range passportCodes {
+		passportCodeInput = strings.ToUpper(strings.TrimSpace(passportCodeInput))
+		passportCCA3, ok := codeToCCA3[passportCodeInput]
+		if !ok {
+			continue // Skip invalid passport codes
+		}
+
+		visaRules, ok := Passports[passportCCA3]
+		if !ok {
+			continue // Skip if passport data is not found
+		}
+
+		for countryCode, requirement := range visaRules {
+			if requirement == "visa free" || strings.Contains(requirement, "90") || requirement == "visa on arrival" || requirement == "eta" {
+				commonVisaFree[countryCode]++
+			}
+		}
+	}
+
+	// Filter out countries that are not common to all passports
+	var result []string
+	for countryCode, count := range commonVisaFree {
+		if count == passportCount {
+			result = append(result, countryCode)
+		}
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 // ----------------------------------------------------------------------------
 // Airports Handlers
 // ----------------------------------------------------------------------------
@@ -390,4 +820,442 @@ func GetAirportByIdent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found in this country"})
+}
+
+// ----------------------------------------------------------------------------
+// New Airport Handlers (Enhanced and Enterprise)
+// ----------------------------------------------------------------------------
+
+// AirportDistance represents the distance between two airports.
+// @Description AirportDistance represents the distance between two airports.
+type AirportDistance struct {
+	Airport1      string  `json:"airport1" example:"TVSA"`
+	Airport2      string  `json:"airport2" example:"TVSB"`
+	DistanceKM    float64 `json:"distance_km" example:"1234.5"`
+	DistanceMiles float64 `json:"distance_miles" example:"767.1"`
+}
+
+// GetAirportByCode handles GET /v2/airports/by-code/{airportCode}
+// @Summary Get airport by ICAO or IATA code
+// @Description Retrieves a specific airport by its ICAO or IATA code.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param airportCode path string true "Airport ICAO or IATA code"
+// @Success 200 {object} Airport
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/by-code/{airportCode} [get]
+func GetAirportByCode(c *gin.Context) {
+	airportCode := strings.ToUpper(c.Param("airportCode"))
+
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if airport.Ident == airportCode || airport.IATACode == airportCode {
+				c.JSON(http.StatusOK, airport)
+				return
+			}
+		}
+	}
+
+	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found"})
+}
+
+// GetAirportsByRegion handles GET /v2/airports/region/{isoRegion}
+// @Summary Get airports by ISO region
+// @Description Retrieves all airports within a specific ISO region.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param isoRegion path string true "ISO region code (e.g., VC-04)"
+// @Success 200 {array} Airport
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/region/{isoRegion} [get]
+func GetAirportsByRegion(c *gin.Context) {
+	isoRegion := strings.ToUpper(c.Param("isoRegion"))
+	var airportsInRegion []Airport
+
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if airport.ISORegion == isoRegion {
+				airportsInRegion = append(airportsInRegion, airport)
+			}
+		}
+	}
+
+	if len(airportsInRegion) == 0 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found for this ISO region"})
+		return
+	}
+
+	c.JSON(http.StatusOK, airportsInRegion)
+}
+
+// GetAirportsByMunicipality handles GET /v2/airports/municipality/{municipalityName}
+// @Summary Get airports by municipality
+// @Description Retrieves all airports within a specific municipality.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param municipalityName path string true "Municipality name"
+// @Success 200 {array} Airport
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/municipality/{municipalityName} [get]
+func GetAirportsByMunicipality(c *gin.Context) {
+	municipalityName := strings.ToUpper(c.Param("municipalityName"))
+	var airportsInMunicipality []Airport
+
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if strings.EqualFold(airport.Municipality, municipalityName) {
+				airportsInMunicipality = append(airportsInMunicipality, airport)
+			}
+		}
+	}
+
+	if len(airportsInMunicipality) == 0 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found in this municipality"})
+		return
+	}
+
+	c.JSON(http.StatusOK, airportsInMunicipality)
+}
+
+// GetAirportsByType handles GET /v2/airports/type/{airportType}
+// @Summary Get airports by type
+// @Description Retrieves all airports of a specific type.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param airportType path string true "Airport type (e.g., medium_airport, closed)"
+// @Success 200 {array} Airport
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/type/{airportType} [get]
+func GetAirportsByType(c *gin.Context) {
+	airportType := strings.ToLower(c.Param("airportType"))
+	var matchingAirports []Airport
+
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if airport.Type == airportType {
+				matchingAirports = append(matchingAirports, airport)
+			}
+		}
+	}
+
+	if len(matchingAirports) == 0 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found for this type"})
+		return
+	}
+
+	c.JSON(http.StatusOK, matchingAirports)
+}
+
+// GetAirportsWithScheduledService handles GET /v2/airports/scheduled
+// @Summary Get airports with scheduled service
+// @Description Retrieves all airports that have scheduled airline service.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Success 200 {array} Airport
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/scheduled [get]
+func GetAirportsWithScheduledService(c *gin.Context) {
+	var scheduledAirports []Airport
+
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if airport.ScheduledService == "yes" {
+				scheduledAirports = append(scheduledAirports, airport)
+			}
+		}
+	}
+
+	if len(scheduledAirports) == 0 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports with scheduled service found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, scheduledAirports)
+}
+
+// GetAirportRunways handles GET /v2/airports/{countryCode}/{airportIdent}/runways
+// @Summary Get airport runways
+// @Description Retrieves detailed runway information for a specific airport.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param countryCode path string true "Country code (e.g., VC, VCT, 670, etc.)"
+// @Param airportIdent path string true "Airport Ident (ICAO) or IATA code"
+// @Success 200 {array} AirportRunway
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/{countryCode}/{airportIdent}/runways [get]
+func GetAirportRunways(c *gin.Context) {
+	countryParam := c.Param("countryCode")
+	airportIdent := strings.ToUpper(c.Param("airportIdent"))
+
+	alpha2, ok := toAlpha2(countryParam)
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid or unrecognized country code"})
+		return
+	}
+
+	countryAirports, found := AirportData[strings.ToUpper(alpha2)]
+	if !found {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airport data found for this country"})
+		return
+	}
+
+	for _, airport := range countryAirports.Airports {
+		if airport.Ident == airportIdent || airport.IATACode == airportIdent {
+			c.JSON(http.StatusOK, airport.Runways)
+			return
+		}
+	}
+
+	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found in this country"})
+}
+
+// GetAirportFrequencies handles GET /v2/airports/{countryCode}/{airportIdent}/frequencies
+// @Summary Get airport frequencies
+// @Description Retrieves communication frequencies used at a specific airport.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param countryCode path string true "Country code (e.g., VC, VCT, 670, etc.)"
+// @Param airportIdent path string true "Airport Ident (ICAO) or IATA code"
+// @Success 200 {array} AirportFrequency
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/{countryCode}/{airportIdent}/frequencies [get]
+func GetAirportFrequencies(c *gin.Context) {
+	countryParam := c.Param("countryCode")
+	airportIdent := strings.ToUpper(c.Param("airportIdent"))
+
+	alpha2, ok := toAlpha2(countryParam)
+	if !ok {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid or unrecognized country code"})
+		return
+	}
+
+	countryAirports, found := AirportData[strings.ToUpper(alpha2)]
+	if !found {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airport data found for this country"})
+		return
+	}
+
+	for _, airport := range countryAirports.Airports {
+		if airport.Ident == airportIdent || airport.IATACode == airportIdent {
+			c.JSON(http.StatusOK, airport.Frequencies)
+			return
+		}
+	}
+
+	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found in this country"})
+}
+
+// SearchAirports handles GET /v2/airports/search?query={searchString}
+// @Summary Search airports
+// @Description Performs a flexible search for airports based on a query string.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param query query string true "Search string (can match airport name, city, ICAO/IATA code, etc.)"
+// @Success 200 {array} Airport
+// @Failure 400 {object} ErrorResponse
+// @Router /airports/search [get]
+func SearchAirports(c *gin.Context) {
+	searchString := strings.ToUpper(c.Query("query"))
+	if searchString == "" {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Query parameter 'query' is required"})
+		return
+	}
+
+	var matchingAirports []Airport
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if strings.Contains(strings.ToUpper(airport.Name), searchString) ||
+				strings.Contains(strings.ToUpper(airport.Municipality), searchString) ||
+				strings.Contains(strings.ToUpper(airport.Ident), searchString) ||
+				strings.Contains(strings.ToUpper(airport.IATACode), searchString) ||
+				strings.Contains(strings.ToUpper(airport.GPSCode), searchString) {
+				matchingAirports = append(matchingAirports, airport)
+			}
+		}
+	}
+
+	if len(matchingAirports) == 0 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found matching the search criteria"})
+		return
+	}
+
+	c.JSON(http.StatusOK, matchingAirports)
+}
+
+// GetAirportsWithinRadius handles GET /v2/airports/radius?latitude={latitude}&longitude={longitude}&radius={radiusInKm}
+// @Summary Get airports within a radius
+// @Description Retrieves all airports within a specified radius of a given latitude/longitude coordinate.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param latitude query number true "Latitude of the center point"
+// @Param longitude query number true "Longitude of the center point"
+// @Param radius query number true "Radius in kilometers"
+// @Success 200 {array} Airport
+// @Failure 400 {object} ErrorResponse
+// @Router /airports/radius [get]
+func GetAirportsWithinRadius(c *gin.Context) {
+	latitude, err := parseFloatQueryParam(c, "latitude")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid latitude"})
+		return
+	}
+	longitude, err := parseFloatQueryParam(c, "longitude")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid longitude"})
+		return
+	}
+	radius, err := parseFloatQueryParam(c, "radius")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid radius"})
+		return
+	}
+
+	var airportsWithinRadius []Airport
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			airportLat, _ := parseFloat(airport.LatitudeDeg)
+			airportLon, _ := parseFloat(airport.LongitudeDeg)
+			distance := calculateHaversineDistance(latitude, longitude, airportLat, airportLon)
+			if distance <= radius {
+				airportsWithinRadius = append(airportsWithinRadius, airport)
+			}
+		}
+	}
+
+	if len(airportsWithinRadius) == 0 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found within the specified radius"})
+		return
+	}
+
+	c.JSON(http.StatusOK, airportsWithinRadius)
+}
+
+// parseFloatQueryParam is a helper function to parse a float64 query parameter.
+func parseFloatQueryParam(c *gin.Context, paramName string) (float64, error) {
+	valueStr := c.Query(paramName)
+	if valueStr == "" {
+		return 0, fmt.Errorf("parameter %s is required", paramName)
+	}
+	return parseFloat(valueStr)
+}
+
+// parseFloat is a helper function to parse a float64 string.
+func parseFloat(valueStr string) (float64, error) {
+	return strconv.ParseFloat(valueStr, 64)
+}
+
+// calculateHaversineDistance calculates the distance between two points on the Earth.
+func calculateHaversineDistance(lat1, lon1, lat2, lon2 float64) float64 {
+	const earthRadiusKm = 6371.0
+
+	// Convert latitude and longitude from degrees to radians
+	lat1Rad := lat1 * math.Pi / 180
+	lon1Rad := lon1 * math.Pi / 180
+	lat2Rad := lat2 * math.Pi / 180
+	lon2Rad := lon2 * math.Pi / 180
+
+	// Haversine formula
+	dLat := lat2Rad - lat1Rad
+	dLon := lon2Rad - lon1Rad
+	a := math.Pow(math.Sin(dLat/2), 2) + math.Cos(lat1Rad)*math.Cos(lat2Rad)*math.Pow(math.Sin(dLon/2), 2)
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+	distance := earthRadiusKm * c
+
+	return distance
+}
+
+// CalculateDistanceBetweenAirports handles GET /v2/airports/distance?airport1={airportCode1}&airport2={airportCode2}
+// @Summary Calculate distance between two airports
+// @Description Calculates the distance (in kilometers and miles) between two airports.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param airport1 query string true "ICAO or IATA code of the first airport"
+// @Param airport2 query string true "ICAO or IATA code of the second airport"
+// @Success 200 {object} AirportDistance
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/distance [get]
+func CalculateDistanceBetweenAirports(c *gin.Context) {
+	airportCode1 := strings.ToUpper(c.Query("airport1"))
+	airportCode2 := strings.ToUpper(c.Query("airport2"))
+
+	if airportCode1 == "" || airportCode2 == "" {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Both airport1 and airport2 query parameters are required"})
+		return
+	}
+
+	airport1, found1 := findAirportByCode(airportCode1)
+	airport2, found2 := findAirportByCode(airportCode2)
+
+	if !found1 || !found2 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "One or both airports not found"})
+		return
+	}
+
+	lat1, _ := strconv.ParseFloat(airport1.LatitudeDeg, 64)
+	lon1, _ := strconv.ParseFloat(airport1.LongitudeDeg, 64)
+	lat2, _ := strconv.ParseFloat(airport2.LatitudeDeg, 64)
+	lon2, _ := strconv.ParseFloat(airport2.LongitudeDeg, 64)
+
+	distanceKm := calculateHaversineDistance(lat1, lon1, lat2, lon2)
+	distanceMiles := distanceKm * 0.621371 // Convert kilometers to miles
+
+	c.JSON(http.StatusOK, AirportDistance{
+		Airport1:      airportCode1,
+		Airport2:      airportCode2,
+		DistanceKM:    distanceKm,
+		DistanceMiles: distanceMiles,
+	})
+}
+
+// findAirportByCode is a helper function to find an airport by its ICAO or IATA code.
+func findAirportByCode(airportCode string) (*Airport, bool) {
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if airport.Ident == airportCode || airport.IATACode == airportCode {
+				return &airport, true
+			}
+		}
+	}
+	return nil, false
+}
+
+// GetAirportsByKeyword handles GET /v2/airports/keyword/{keyword}
+// @Summary Get airports by keyword
+// @Description Retrieves all airports associated with a specific keyword.
+// @Tags Airports
+// @Accept json
+// @Produce json
+// @Param keyword path string true "Keyword to search for"
+// @Success 200 {array} Airport
+// @Failure 404 {object} ErrorResponse
+// @Router /airports/keyword/{keyword} [get]
+func GetAirportsByKeyword(c *gin.Context) {
+	keyword := strings.ToLower(c.Param("keyword"))
+	var matchingAirports []Airport
+
+	for _, countryAirports := range AirportData {
+		for _, airport := range countryAirports.Airports {
+			if strings.Contains(strings.ToLower(airport.Keywords), keyword) {
+				matchingAirports = append(matchingAirports, airport)
+			}
+		}
+	}
+
+	if len(matchingAirports) == 0 {
+		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found matching the keyword"})
+		return
+	}
+
+	c.JSON(http.StatusOK, matchingAirports)
 }

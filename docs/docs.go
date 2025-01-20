@@ -16,7 +16,7 @@ const docTemplate = `{
             "email": "support@doroad.ai"
         },
         "license": {
-            "name": "MIT",
+            "name": "MIT / Proprietary",
             "url": "https://github.com/DoROAD-AI/atlas/blob/main/LICENSE"
         },
         "version": "{{.Version}}"
@@ -49,6 +49,387 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/by-code/{airportCode}": {
+            "get": {
+                "description": "Retrieves a specific airport by its ICAO or IATA code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airport by ICAO or IATA code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Airport ICAO or IATA code",
+                        "name": "airportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.Airport"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/distance": {
+            "get": {
+                "description": "Calculates the distance (in kilometers and miles) between two airports.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Calculate distance between two airports",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ICAO or IATA code of the first airport",
+                        "name": "airport1",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ICAO or IATA code of the second airport",
+                        "name": "airport2",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.AirportDistance"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/keyword/{keyword}": {
+            "get": {
+                "description": "Retrieves all airports associated with a specific keyword.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airports by keyword",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Keyword to search for",
+                        "name": "keyword",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airport"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/municipality/{municipalityName}": {
+            "get": {
+                "description": "Retrieves all airports within a specific municipality.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airports by municipality",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Municipality name",
+                        "name": "municipalityName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airport"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/radius": {
+            "get": {
+                "description": "Retrieves all airports within a specified radius of a given latitude/longitude coordinate.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airports within a radius",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "Latitude of the center point",
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Longitude of the center point",
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Radius in kilometers",
+                        "name": "radius",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airport"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/region/{isoRegion}": {
+            "get": {
+                "description": "Retrieves all airports within a specific ISO region.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airports by ISO region",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ISO region code (e.g., VC-04)",
+                        "name": "isoRegion",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airport"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/scheduled": {
+            "get": {
+                "description": "Retrieves all airports that have scheduled airline service.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airports with scheduled service",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airport"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/search": {
+            "get": {
+                "description": "Performs a flexible search for airports based on a query string.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Search airports",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search string (can match airport name, city, ICAO/IATA code, etc.)",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airport"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/type/{airportType}": {
+            "get": {
+                "description": "Retrieves all airports of a specific type.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airports by type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Airport type (e.g., medium_airport, closed)",
+                        "name": "airportType",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airport"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v2.ErrorResponse"
                         }
@@ -128,6 +509,102 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v2.Airport"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/{countryCode}/{airportIdent}/frequencies": {
+            "get": {
+                "description": "Retrieves communication frequencies used at a specific airport.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airport frequencies",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country code (e.g., VC, VCT, 670, etc.)",
+                        "name": "countryCode",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Airport Ident (ICAO) or IATA code",
+                        "name": "airportIdent",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.AirportFrequency"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/{countryCode}/{airportIdent}/runways": {
+            "get": {
+                "description": "Retrieves detailed runway information for a specific airport.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airport runways",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country code (e.g., VC, VCT, 670, etc.)",
+                        "name": "countryCode",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Airport Ident (ICAO) or IATA code",
+                        "name": "airportIdent",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.AirportRunway"
+                            }
                         }
                     },
                     "404": {
@@ -607,6 +1084,184 @@ const docTemplate = `{
                 }
             }
         },
+        "/passports/common-visa-free": {
+            "get": {
+                "description": "Determines the common countries that a set of passports can access visa-free.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Find common visa-free destinations for multiple passports",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Comma-separated list of passport codes (e.g., USA,DEU,JPN)",
+                        "name": "passports",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/compare": {
+            "get": {
+                "description": "Compares visa requirements for a list of passports to a single destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Compare visa requirements for multiple passports to a single destination",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Comma-separated list of passport codes (e.g., USA,DEU,JPN)",
+                        "name": "passports",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination country code (e.g., FRA)",
+                        "name": "destination",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/v2.VisaRequirement"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/ranking": {
+            "get": {
+                "description": "Returns a ranked list of passports based on the number of countries they can access visa-free or with visa-on-arrival.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get a ranked list of passports based on visa-free access",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/reciprocal/{countryCode1}/{countryCode2}": {
+            "get": {
+                "description": "Checks the visa requirements both ways between two countries.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get reciprocal visa requirements between two countries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "First country code (e.g., USA, US, 840, etc.)",
+                        "name": "countryCode1",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Second country code (e.g., DEU, DE, 276, etc.)",
+                        "name": "countryCode2",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/v2.VisaRequirement"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/passports/visa": {
             "get": {
                 "description": "Get visa requirements for a passport holder from one country traveling to another.",
@@ -685,6 +1340,215 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v2.PassportResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/{passportCode}/e-visa": {
+            "get": {
+                "description": "Retrieves a list of countries where the given passport holder can apply for an e-visa.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get e-visa destinations for a passport",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/{passportCode}/visa-details/{destinationCode}": {
+            "get": {
+                "description": "Provides specific visa requirement details (duration, type, etc.) for a given passport and destination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get detailed visa requirements for a passport and destination",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination country code (e.g., DEU, DE, 276, etc.)",
+                        "name": "destinationCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.VisaRequirement"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/{passportCode}/visa-free": {
+            "get": {
+                "description": "Retrieves a list of countries where the given passport holder can travel visa-free.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get visa-free destinations for a passport",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/{passportCode}/visa-on-arrival": {
+            "get": {
+                "description": "Retrieves a list of countries where the given passport holder can obtain a visa on arrival.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get visa-on-arrival destinations for a passport",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/passports/{passportCode}/visa-required": {
+            "get": {
+                "description": "Retrieves a list of countries where the given passport holder requires a visa before arrival.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Passports"
+                ],
+                "summary": "Get visa-required destinations for a passport",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
@@ -1316,6 +2180,28 @@ const docTemplate = `{
                 }
             }
         },
+        "v2.AirportDistance": {
+            "description": "AirportDistance represents the distance between two airports.",
+            "type": "object",
+            "properties": {
+                "airport1": {
+                    "type": "string",
+                    "example": "TVSA"
+                },
+                "airport2": {
+                    "type": "string",
+                    "example": "TVSB"
+                },
+                "distance_km": {
+                    "type": "number",
+                    "example": 1234.5
+                },
+                "distance_miles": {
+                    "type": "number",
+                    "example": 767.1
+                }
+            }
+        },
         "v2.AirportFrequency": {
             "description": "AirportFrequency represents the frequency data for an airport.",
             "type": "object",
@@ -1521,8 +2407,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/v2",
 	Schemes:          []string{"https", "http"},
-	Title:            "Atlas - Geographic, Airport, and Passport Data API by DoROAD",
-	Description:      "A comprehensive REST API providing detailed country information, airport data, and passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.",
+	Title:            "Atlas - Global Travel and Aviation Intelligence Data API by DoROAD",
+	Description:      "Version 1 of the Atlas API is licensed under the MIT License. Version 2 and later are proprietary and require a commercial license. Please contact Atlas API Support for details on obtaining a commercial license for v2+.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
