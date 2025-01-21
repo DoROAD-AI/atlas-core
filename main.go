@@ -48,22 +48,22 @@ func getHost() string {
 func main() {
 	// Set Gin mode based on environment
 	env := os.Getenv("ATLAS_ENV")
-	if env == "production" {
+	if env == "development" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	// Load country data from JSON
-	if err := v1.LoadCountriesSafe("countries.json"); err != nil {
+	if err := v1.LoadCountriesSafe("data/countries.json"); err != nil {
 		log.Fatalf("Failed to initialize country data: %v", err)
 	}
 
 	// Load passport data from JSON
-	if err := v2.LoadPassportData("passports.json"); err != nil {
+	if err := v2.LoadPassportData("data/passports.json"); err != nil {
 		log.Fatalf("Failed to initialize passport data: %v", err)
 	}
 
 	// Load airport data from JSON
-	if err := v2.LoadAirportsData("airports.json"); err != nil {
+	if err := v2.LoadAirportsData("data/airports.json"); err != nil {
 		log.Fatalf("Failed to initialize airport data: %v", err)
 	}
 

@@ -29,9 +29,9 @@ WORKDIR /
 COPY --from=builder /app/atlas /
 
 # If your application requires any data files at runtime, copy them as well
-COPY --from=builder /app/countries.json /
-COPY --from=builder /app/passports.json /
-COPY --from=builder /app/airports.json /
+COPY --from=builder /app/data/countries.json /
+COPY --from=builder /app/data/passports.json /
+COPY --from=builder /app/data/airports.json /
 
 # Command to run the application
 ENTRYPOINT ["/atlas"]
