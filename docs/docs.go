@@ -2527,7 +2527,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/v2",
 	Schemes:          []string{"https", "http"},
 	Title:            "Atlas - Global Travel and Aviation Intelligence Data API by DoROAD",
-	Description:      "Version 1 of the Atlas API is licensed under the MIT License. Version 2 and later are proprietary and require a commercial license. Please contact Atlas API Support for details on obtaining a commercial license for v2+.",
+	Description:      "Atlas is DoROAD's flagship Global Travel and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport data, and up-to-date passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

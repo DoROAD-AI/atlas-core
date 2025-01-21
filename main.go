@@ -18,7 +18,7 @@ import (
 
 // @title       Atlas - Global Travel and Aviation Intelligence Data API by DoROAD
 // @version     2.0
-// @description A comprehensive REST API providing detailed country information, airport data, and passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.
+// @description Atlas is DoROAD's flagship Global Travel and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport data, and up-to-date passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.
 // @termsOfService http://atlas.doroad.io/terms/
 
 // @contact.name  Atlas API Support
@@ -27,7 +27,6 @@ import (
 
 // @license.name  MIT / Proprietary
 // @license.url   https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
-// @description   Version 1 of the Atlas API is licensed under the MIT License. Version 2 and later are proprietary and require a commercial license. Please contact Atlas API Support for details on obtaining a commercial license for v2+.
 
 // @BasePath      /v2
 // @schemes       https http
