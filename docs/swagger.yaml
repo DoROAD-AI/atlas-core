@@ -439,45 +439,6 @@ definitions:
       message:
         type: string
     type: object
-  v2.FlightData:
-    properties:
-      arrivalAirportCandidatesCount:
-        example: 3
-        type: integer
-      callsign:
-        example: SVA35
-        type: string
-      departureAirportCandidatesCount:
-        example: 5
-        type: integer
-      estArrivalAirport:
-        example: JFK
-        type: string
-      estArrivalAirportHorizDistance:
-        example: 2000
-        type: integer
-      estArrivalAirportVertDistance:
-        example: 1000
-        type: integer
-      estDepartureAirport:
-        example: RUH
-        type: string
-      estDepartureAirportHorizDistance:
-        example: 1000
-        type: integer
-      estDepartureAirportVertDistance:
-        example: 500
-        type: integer
-      firstSeen:
-        example: 1674345600
-        type: integer
-      icao24:
-        example: "48585773"
-        type: string
-      lastSeen:
-        example: 1674345600
-        type: integer
-    type: object
   v2.FlightTrack:
     properties:
       callsign:
@@ -1247,25 +1208,24 @@ paths:
         name: icao24
         required: true
         type: string
-      - description: Start time in seconds
+      - description: Start time (Unix, RFC3339, or relative)
         in: query
         name: begin
         required: true
-        type: integer
-      - description: End time in seconds
+        type: string
+      - description: End time (Unix, RFC3339, or relative)
         in: query
         name: end
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Enhanced flight data + boundary times
           schema:
-            items:
-              $ref: '#/definitions/v2.FlightData'
-            type: array
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -1287,25 +1247,24 @@ paths:
         name: airport
         required: true
         type: string
-      - description: Start time in seconds
+      - description: Start time (Unix, RFC3339, or relative)
         in: query
         name: begin
         required: true
-        type: integer
-      - description: End time in seconds
+        type: string
+      - description: End time (Unix, RFC3339, or relative)
         in: query
         name: end
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Enhanced flight data + boundary times
           schema:
-            items:
-              $ref: '#/definitions/v2.FlightData'
-            type: array
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -1327,25 +1286,24 @@ paths:
         name: airport
         required: true
         type: string
-      - description: Start time in seconds
+      - description: Start time (Unix, RFC3339, or relative)
         in: query
         name: begin
         required: true
-        type: integer
-      - description: End time in seconds
+        type: string
+      - description: End time (Unix, RFC3339, or relative)
         in: query
         name: end
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Enhanced flight data + boundary times
           schema:
-            items:
-              $ref: '#/definitions/v2.FlightData'
-            type: array
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -1361,25 +1319,24 @@ paths:
     get:
       description: Retrieves flights for a short interval [begin, end], max 2 hours.
       parameters:
-      - description: Start time in seconds
+      - description: Start time (Unix, RFC3339, or relative)
         in: query
         name: begin
         required: true
-        type: integer
-      - description: End time in seconds
+        type: string
+      - description: End time (Unix, RFC3339, or relative)
         in: query
         name: end
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Enhanced flight data + boundary times
           schema:
-            items:
-              $ref: '#/definitions/v2.FlightData'
-            type: array
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -1396,10 +1353,11 @@ paths:
       description: Requires Basic Auth. Retrieves the state vectors from your own
         sensors only.
       parameters:
-      - description: Time in seconds since epoch (0 => now)
+      - description: Time can be Unix, RFC3339, or negative/relative (default=0 =>
+          now)
         in: query
         name: time
-        type: integer
+        type: string
       - description: ICAO24 filter
         in: query
         name: icao24
@@ -1435,10 +1393,11 @@ paths:
       description: 'Retrieves the state vectors for aircraft at a given time (or 0
         for "now"). Optional: filter by icao24 or bounding box.'
       parameters:
-      - description: Time in seconds since epoch (default=0 => now)
+      - description: Time can be Unix, RFC3339, or negative/relative (default=0 =>
+          now)
         in: query
         name: time
-        type: integer
+        type: string
       - description: Single or comma-separated ICAO24 address(es)
         in: query
         name: icao24
@@ -1475,10 +1434,10 @@ paths:
         name: icao24
         required: true
         type: string
-      - description: Unix time (0 => live track)
+      - description: Time can be Unix, RFC3339, or negative/relative (0 => live track)
         in: query
         name: time
-        type: integer
+        type: string
       produces:
       - application/json
       responses:

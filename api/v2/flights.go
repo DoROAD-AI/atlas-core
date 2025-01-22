@@ -13,8 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DoROAD-AI/atlas/types"
+	"regexp"
 
+	"github.com/DoROAD-AI/atlas/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -50,7 +51,8 @@ type OpenSkyStates struct {
 	States []StateVector `json:"states"`
 }
 
-// FlightData represents data about a single flight.
+// FlightData represents data about a single flight
+// as returned by the OpenSky API.
 type FlightData struct {
 	ICAO24                           string  `json:"icao24" example:"48585773"`
 	FirstSeen                        int     `json:"firstSeen" example:"1674345600"`
@@ -64,6 +66,32 @@ type FlightData struct {
 	EstArrivalAirportVertDistance    *int    `json:"estArrivalAirportVertDistance,omitempty" example:"1000"`
 	DepartureAirportCandidatesCount  *int    `json:"departureAirportCandidatesCount,omitempty" example:"5"`
 	ArrivalAirportCandidatesCount    *int    `json:"arrivalAirportCandidatesCount,omitempty" example:"3"`
+}
+
+// ------------------------------------------------------------------------------
+// FlightDataResponse is an "enhanced" version of FlightData for output.
+// It preserves the original Unix fields but also includes human-readable times.
+// ------------------------------------------------------------------------------
+type FlightDataResponse struct {
+	ICAO24 string `json:"icao24"`
+
+	// Original Unix timestamps (for backward compatibility).
+	FirstSeenUnix int `json:"firstSeenUnix"`
+	LastSeenUnix  int `json:"lastSeenUnix"`
+
+	// Human-readable RFC3339 timestamps.
+	FirstSeenUtc string `json:"firstSeenUtc,omitempty"`
+	LastSeenUtc  string `json:"lastSeenUtc,omitempty"`
+
+	EstDepartureAirport              *string `json:"estDepartureAirport,omitempty"`
+	EstArrivalAirport                *string `json:"estArrivalAirport,omitempty"`
+	Callsign                         *string `json:"callsign,omitempty"`
+	EstDepartureAirportHorizDistance *int    `json:"estDepartureAirportHorizDistance,omitempty"`
+	EstDepartureAirportVertDistance  *int    `json:"estDepartureAirportVertDistance,omitempty"`
+	EstArrivalAirportHorizDistance   *int    `json:"estArrivalAirportHorizDistance,omitempty"`
+	EstArrivalAirportVertDistance    *int    `json:"estArrivalAirportVertDistance,omitempty"`
+	DepartureAirportCandidatesCount  *int    `json:"departureAirportCandidatesCount,omitempty"`
+	ArrivalAirportCandidatesCount    *int    `json:"arrivalAirportCandidatesCount,omitempty"`
 }
 
 // Waypoint represents a single waypoint in a flight trajectory.
@@ -97,12 +125,11 @@ type Config struct {
 }
 
 type OpenSkyClient struct {
-	HTTPClient   *http.Client
-	Username     string
-	Password     string
-	BaseURL      string
-	mu           sync.Mutex
-	lastRequests map[string]time.Time // track last request times for rate limiting
+	HTTPClient *http.Client
+	Username   string
+	Password   string
+	BaseURL    string
+	mu         sync.Mutex
 }
 
 // Global instance used by handlers
@@ -134,59 +161,21 @@ func NewOpenSkyClient(config Config) *OpenSkyClient {
 		HTTPClient: &http.Client{
 			Timeout: config.HTTPTimeout,
 		},
-		lastRequests: make(map[string]time.Time),
 	}
 }
 
 //=====================================================
-// 3) Low-Level HTTP + Rate Limiting
+// 3) Low-Level HTTP (Removed local rate-limiting)
 //=====================================================
 
-func (c *OpenSkyClient) doRequest(endpoint string, params url.Values, caller string) ([]byte, int, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+// doRequest performs an HTTP GET with optional params.
+// Basic Auth is applied if configured. We have removed
+// the local rate-limit logic so that we rely on the
+// server-side rate limitations.
+func (c *OpenSkyClient) doRequest(endpoint string, params url.Values) ([]byte, int, error) {
+	// c.mu.Lock() and c.mu.Unlock() can still be used if concurrency is a concern
+	// but local rate-limiting logic has been removed.
 
-	// Basic local rate-limiting, adapted from the Python client's approach:
-	var minInterval time.Duration
-	isAuth := (c.Username != "" && c.Password != "")
-
-	switch caller {
-	case "GetStates":
-		if isAuth {
-			minInterval = 5 * time.Second
-		} else {
-			minInterval = 10 * time.Second
-		}
-	case "GetMyStates":
-		// must be authenticated
-		minInterval = 1 * time.Second
-	case "GetFlightsFromInterval", "GetFlightsByAircraft":
-		if isAuth {
-			minInterval = 5 * time.Second
-		} else {
-			minInterval = 10 * time.Second
-		}
-	case "GetArrivalsByAirport", "GetDeparturesByAirport", "GetTrackByAircraft":
-		if isAuth {
-			minInterval = 5 * time.Second
-		} else {
-			minInterval = 10 * time.Second
-		}
-	default:
-		minInterval = 5 * time.Second
-	}
-
-	// Key by method+endpoint to track last request
-	rateLimitKey := fmt.Sprintf("GET %s", endpoint)
-	lastTime, ok := c.lastRequests[rateLimitKey]
-	if ok {
-		elapsed := time.Since(lastTime)
-		if elapsed < minInterval {
-			time.Sleep(minInterval - elapsed)
-		}
-	}
-
-	// Build the request
 	reqURL := fmt.Sprintf("%s%s", c.BaseURL, endpoint)
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
@@ -196,12 +185,11 @@ func (c *OpenSkyClient) doRequest(endpoint string, params url.Values, caller str
 	if params != nil {
 		req.URL.RawQuery = params.Encode()
 	}
-
 	req.Header.Set("User-Agent", "Go-OpenSky-Client/2.0")
 	req.Header.Set("Accept", "application/json")
 
-	// Basic Auth if credentials present
-	if isAuth {
+	// If credentials are provided, use Basic Auth.
+	if c.Username != "" && c.Password != "" {
 		req.SetBasicAuth(c.Username, c.Password)
 	}
 
@@ -216,9 +204,6 @@ func (c *OpenSkyClient) doRequest(endpoint string, params url.Values, caller str
 		return nil, resp.StatusCode, err
 	}
 
-	// Update last request time
-	c.lastRequests[rateLimitKey] = time.Now()
-
 	return body, resp.StatusCode, nil
 }
 
@@ -226,7 +211,7 @@ func (c *OpenSkyClient) doRequest(endpoint string, params url.Values, caller str
 // 4) Core OpenSky Methods
 //=====================================================
 
-// parseStateVector helper
+// parseStateVector converts an array of interface{} (from JSON) into a typed StateVector.
 func parseStateVector(arr []interface{}) StateVector {
 	sv := StateVector{}
 	if len(arr) > 0 {
@@ -295,7 +280,7 @@ func parseStateVector(arr []interface{}) StateVector {
 		if vs, ok := arr[12].([]interface{}); ok {
 			sensorArr := make([]int, 0, len(vs))
 			for _, s := range vs {
-				if sensorFloat, ok := s.(float64); ok {
+				if sensorFloat, ok2 := s.(float64); ok2 {
 					sensorArr = append(sensorArr, int(sensorFloat))
 				}
 			}
@@ -331,7 +316,7 @@ func parseStateVector(arr []interface{}) StateVector {
 	return sv
 }
 
-// parseFlightData helper
+// parseFlightData converts a map (from JSON) into a typed FlightData.
 func parseFlightData(entry map[string]interface{}) FlightData {
 	fd := FlightData{}
 	if v, ok := entry["icao24"].(string); ok {
@@ -400,11 +385,10 @@ func (c *OpenSkyClient) GetStates(timeSecs int, icao24 string, bbox []float64) (
 		return nil, errors.New("invalid bounding box, must be exactly 4 floats")
 	}
 
-	body, status, err := c.doRequest("/states/all", params, "GetStates")
+	body, status, err := c.doRequest("/states/all", params)
 	if err != nil {
 		return nil, err
 	}
-
 	if status != http.StatusOK {
 		return nil, fmt.Errorf("opensky get_states failed: %d => %s", status, string(body))
 	}
@@ -422,7 +406,6 @@ func (c *OpenSkyClient) GetStates(timeSecs int, icao24 string, bbox []float64) (
 		sv := parseStateVector(arr)
 		states = append(states, sv)
 	}
-
 	return &OpenSkyStates{Time: raw.Time, States: states}, nil
 }
 
@@ -431,7 +414,6 @@ func (c *OpenSkyClient) GetMyStates(timeSecs int, icao24 string, serials string)
 	if c.Username == "" || c.Password == "" {
 		return nil, errors.New("getMyStates requires username/password")
 	}
-
 	params := url.Values{}
 	if timeSecs != 0 {
 		params.Add("time", strconv.Itoa(timeSecs))
@@ -444,11 +426,10 @@ func (c *OpenSkyClient) GetMyStates(timeSecs int, icao24 string, serials string)
 	}
 	params.Add("extended", "true")
 
-	body, status, err := c.doRequest("/states/own", params, "GetMyStates")
+	body, status, err := c.doRequest("/states/own", params)
 	if err != nil {
 		return nil, err
 	}
-
 	if status != http.StatusOK {
 		return nil, fmt.Errorf("opensky get_my_states failed: %d => %s", status, string(body))
 	}
@@ -466,7 +447,6 @@ func (c *OpenSkyClient) GetMyStates(timeSecs int, icao24 string, serials string)
 		sv := parseStateVector(arr)
 		states = append(states, sv)
 	}
-
 	return &OpenSkyStates{Time: raw.Time, States: states}, nil
 }
 
@@ -483,11 +463,10 @@ func (c *OpenSkyClient) GetFlightsFromInterval(begin, end int) ([]FlightData, er
 	params.Add("begin", strconv.Itoa(begin))
 	params.Add("end", strconv.Itoa(end))
 
-	body, status, err := c.doRequest("/flights/all", params, "GetFlightsFromInterval")
+	body, status, err := c.doRequest("/flights/all", params)
 	if err != nil {
 		return nil, err
 	}
-
 	if status != http.StatusOK {
 		return nil, fmt.Errorf("opensky get_flights_from_interval failed: %d => %s", status, string(body))
 	}
@@ -502,7 +481,6 @@ func (c *OpenSkyClient) GetFlightsFromInterval(begin, end int) ([]FlightData, er
 		fd := parseFlightData(entry)
 		flights = append(flights, fd)
 	}
-
 	return flights, nil
 }
 
@@ -520,11 +498,10 @@ func (c *OpenSkyClient) GetFlightsByAircraft(icao24 string, begin, end int) ([]F
 	params.Add("begin", strconv.Itoa(begin))
 	params.Add("end", strconv.Itoa(end))
 
-	body, status, err := c.doRequest("/flights/aircraft", params, "GetFlightsByAircraft")
+	body, status, err := c.doRequest("/flights/aircraft", params)
 	if err != nil {
 		return nil, err
 	}
-
 	if status != http.StatusOK {
 		return nil, fmt.Errorf("opensky get_flights_by_aircraft failed: %d => %s", status, string(body))
 	}
@@ -539,7 +516,6 @@ func (c *OpenSkyClient) GetFlightsByAircraft(icao24 string, begin, end int) ([]F
 		fd := parseFlightData(entry)
 		flights = append(flights, fd)
 	}
-
 	return flights, nil
 }
 
@@ -557,11 +533,10 @@ func (c *OpenSkyClient) GetArrivalsByAirport(airport string, begin, end int) ([]
 	params.Add("begin", strconv.Itoa(begin))
 	params.Add("end", strconv.Itoa(end))
 
-	body, status, err := c.doRequest("/flights/arrival", params, "GetArrivalsByAirport")
+	body, status, err := c.doRequest("/flights/arrival", params)
 	if err != nil {
 		return nil, err
 	}
-
 	if status != http.StatusOK {
 		return nil, fmt.Errorf("opensky get_arrivals_by_airport failed: %d => %s", status, string(body))
 	}
@@ -576,7 +551,6 @@ func (c *OpenSkyClient) GetArrivalsByAirport(airport string, begin, end int) ([]
 		fd := parseFlightData(entry)
 		flights = append(flights, fd)
 	}
-
 	return flights, nil
 }
 
@@ -594,11 +568,10 @@ func (c *OpenSkyClient) GetDeparturesByAirport(airport string, begin, end int) (
 	params.Add("begin", strconv.Itoa(begin))
 	params.Add("end", strconv.Itoa(end))
 
-	body, status, err := c.doRequest("/flights/departure", params, "GetDeparturesByAirport")
+	body, status, err := c.doRequest("/flights/departure", params)
 	if err != nil {
 		return nil, err
 	}
-
 	if status != http.StatusOK {
 		return nil, fmt.Errorf("opensky get_departures_by_airport failed: %d => %s", status, string(body))
 	}
@@ -613,12 +586,13 @@ func (c *OpenSkyClient) GetDeparturesByAirport(airport string, begin, end int) (
 		fd := parseFlightData(entry)
 		flights = append(flights, fd)
 	}
-
 	return flights, nil
 }
 
 // GetTrackByAircraft retrieves the flight track for [icao24] at time [t]. 0 => live track.
 func (c *OpenSkyClient) GetTrackByAircraft(icao24 string, t int) (*FlightTrack, error) {
+	// The official OpenSky docs say you cannot go older than 30 days,
+	// but the user can still request t=0 => "live" track.
 	if t != 0 && (int(time.Now().Unix())-t) > 2592000 {
 		return nil, errors.New("cannot access flight tracks older than 30 days in the past")
 	}
@@ -627,11 +601,10 @@ func (c *OpenSkyClient) GetTrackByAircraft(icao24 string, t int) (*FlightTrack, 
 	params.Add("icao24", icao24)
 	params.Add("time", strconv.Itoa(t))
 
-	body, status, err := c.doRequest("/tracks/all", params, "GetTrackByAircraft")
+	body, status, err := c.doRequest("/tracks/all", params)
 	if err != nil {
 		return nil, err
 	}
-
 	if status != http.StatusOK {
 		return nil, fmt.Errorf("opensky get_track_by_aircraft failed: %d => %s", status, string(body))
 	}
@@ -691,19 +664,143 @@ func (c *OpenSkyClient) GetTrackByAircraft(icao24 string, t int) (*FlightTrack, 
 		Callsign:  raw.Callsign,
 		Path:      waypoints,
 	}
-
 	return ft, nil
 }
 
 //=====================================================
-// 5) Gin Handlers (Swagger-friendly)
+// 5) Helper Functions for Flexible Time Parsing & Output
+//=====================================================
+
+// parseFlexibleTime parses a string time input into a Unix timestamp (int seconds).
+// It supports:
+//  1. Positive Unix timestamps (e.g. 1735022400).
+//  2. Negative integer => relative offset from "now" (e.g. -3600 => now - 1 hour).
+//  3. ISO8601/RFC3339 absolute times (e.g. 2025-01-21T12:00:00Z).
+//  4. Relative patterns with suffix like -24h, -7d, -30m, etc. (optional).
+//
+// Returns an error if it cannot parse.
+func parseFlexibleTime(raw string) (int, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		// If user didn't specify, treat as 0 => "now" for many endpoints, or no filter.
+		return 0, nil
+	}
+
+	// 1) Try integer parse directly (covers positive or negative).
+	if val, err := strconv.Atoi(raw); err == nil {
+		// If negative => offset from now.
+		if val < 0 {
+			now := time.Now().Unix()
+			return int(now) + val, nil
+		}
+		// If positive => treat as a raw Unix timestamp
+		return val, nil
+	}
+
+	// 2) Try scanning for suffix-based patterns (e.g. -24h, -7d, etc.).
+	// Simple approach: use a regex or manual check.
+	// Example pattern: ^(-?\d+)([smhd])$
+	//   If the user typed "-24h", that means now - 24 hours.
+	rx := regexp.MustCompile(`^(-?\d+)([smhd])$`)
+	if match := rx.FindStringSubmatch(raw); match != nil {
+		numStr := match[1] // e.g. "-24"
+		unit := match[2]   // e.g. "h"
+		amount, _ := strconv.Atoi(numStr)
+
+		mult := 1
+		switch unit {
+		case "s":
+			mult = 1
+		case "m":
+			mult = 60
+		case "h":
+			mult = 3600
+		case "d":
+			mult = 86400
+		}
+		offset := amount * mult
+		now := time.Now().Unix()
+		return int(now) + offset, nil
+	}
+
+	// 3) Attempt RFC3339 parse (ISO8601).
+	if t, err := time.Parse(time.RFC3339, raw); err == nil {
+		return int(t.Unix()), nil
+	}
+
+	return 0, fmt.Errorf("could not parse time: %s", raw)
+}
+
+// transformFlightData converts FlightData into FlightDataResponse,
+// preserving Unix times but also adding ISO8601 versions.
+func transformFlightData(f FlightData) FlightDataResponse {
+	fdResp := FlightDataResponse{
+		ICAO24:                           f.ICAO24,
+		FirstSeenUnix:                    f.FirstSeen,
+		LastSeenUnix:                     f.LastSeen,
+		EstDepartureAirport:              f.EstDepartureAirport,
+		EstArrivalAirport:                f.EstArrivalAirport,
+		Callsign:                         f.Callsign,
+		EstDepartureAirportHorizDistance: f.EstDepartureAirportHorizDistance,
+		EstDepartureAirportVertDistance:  f.EstDepartureAirportVertDistance,
+		EstArrivalAirportHorizDistance:   f.EstArrivalAirportHorizDistance,
+		EstArrivalAirportVertDistance:    f.EstArrivalAirportVertDistance,
+		DepartureAirportCandidatesCount:  f.DepartureAirportCandidatesCount,
+		ArrivalAirportCandidatesCount:    f.ArrivalAirportCandidatesCount,
+	}
+
+	// Convert Unix => RFC3339 for the "Utc" fields, if not zero.
+	if f.FirstSeen > 0 {
+		fdResp.FirstSeenUtc = time.Unix(int64(f.FirstSeen), 0).UTC().Format(time.RFC3339)
+	}
+	if f.LastSeen > 0 {
+		fdResp.LastSeenUtc = time.Unix(int64(f.LastSeen), 0).UTC().Format(time.RFC3339)
+	}
+
+	return fdResp
+}
+
+// enhanceFlightsResponse wraps the array of flight data with additional
+// "beginTimeUnix", "beginTimeUtc", "endTimeUnix", and "endTimeUtc" fields.
+func enhanceFlightsResponse(
+	c *gin.Context,
+	flights []FlightData,
+	begin, end int,
+) {
+	// Convert flight slice to response slice
+	results := make([]FlightDataResponse, 0, len(flights))
+	for _, f := range flights {
+		results = append(results, transformFlightData(f))
+	}
+
+	beginTimeUtc := ""
+	endTimeUtc := ""
+	if begin != 0 {
+		beginTimeUtc = time.Unix(int64(begin), 0).UTC().Format(time.RFC3339)
+	}
+	if end != 0 {
+		endTimeUtc = time.Unix(int64(end), 0).UTC().Format(time.RFC3339)
+	}
+
+	// Return a JSON response wrapping the flights plus the time info
+	c.JSON(http.StatusOK, gin.H{
+		"beginTimeUnix": begin,
+		"beginTimeUtc":  beginTimeUtc,
+		"endTimeUnix":   end,
+		"endTimeUtc":    endTimeUtc,
+		"flights":       results,
+	})
+}
+
+//=====================================================
+// 6) Gin Handlers (Swagger-friendly)
 //=====================================================
 
 // GetStatesAllHandler
 // @Summary Get aircraft states (all) [like Python get_states]
 // @Description Retrieves the state vectors for aircraft at a given time (or 0 for "now"). Optional: filter by icao24 or bounding box.
 // @Tags Flights
-// @Param time query int false "Time in seconds since epoch (default=0 => now)"
+// @Param time query string false "Time can be Unix, RFC3339, or negative/relative (default=0 => now)"
 // @Param icao24 query string false "Single or comma-separated ICAO24 address(es)"
 // @Param bbox query string false "min_lat,max_lat,min_lon,max_lon [4 floats]"
 // @Produce json
@@ -716,16 +813,12 @@ func GetStatesAllHandler(c *gin.Context) {
 	icao24Param := c.Query("icao24")
 	bboxStr := c.Query("bbox")
 
-	timeSecs := 0
-	if timeParam != "" {
-		t, err := strconv.Atoi(timeParam)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, types.ErrorResponse{
-				Error: "Invalid 'time' param",
-			})
-			return
-		}
-		timeSecs = t
+	parsedTime, err := parseFlexibleTime(timeParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{
+			Error: fmt.Sprintf("Invalid 'time' param: %v", err),
+		})
+		return
 	}
 
 	var bbox []float64
@@ -749,7 +842,7 @@ func GetStatesAllHandler(c *gin.Context) {
 		}
 	}
 
-	states, err := openSkyApi.GetStates(timeSecs, icao24Param, bbox)
+	states, err := openSkyApi.GetStates(parsedTime, icao24Param, bbox)
 	if err != nil {
 		log.Println("GetStatesAllHandler Error:", err)
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{
@@ -765,7 +858,7 @@ func GetStatesAllHandler(c *gin.Context) {
 // @Summary Get states for your own sensors [like Python get_my_states]
 // @Description Requires Basic Auth. Retrieves the state vectors from your own sensors only.
 // @Tags Flights
-// @Param time query int false "Time in seconds since epoch (0 => now)"
+// @Param time query string false "Time can be Unix, RFC3339, or negative/relative (default=0 => now)"
 // @Param icao24 query string false "ICAO24 filter"
 // @Param serials query string false "Sensor serial(s)"
 // @Produce json
@@ -779,17 +872,15 @@ func GetMyStatesHandler(c *gin.Context) {
 	icao24Param := c.Query("icao24")
 	serialsParam := c.Query("serials")
 
-	timeSecs := 0
-	if timeParam != "" {
-		t, err := strconv.Atoi(timeParam)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "Invalid 'time' parameter"})
-			return
-		}
-		timeSecs = t
+	parsedTime, err := parseFlexibleTime(timeParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{
+			Error: fmt.Sprintf("Invalid 'time' parameter: %v", err),
+		})
+		return
 	}
 
-	result, err := openSkyApi.GetMyStates(timeSecs, icao24Param, serialsParam)
+	result, err := openSkyApi.GetMyStates(parsedTime, icao24Param, serialsParam)
 	if err != nil {
 		if strings.Contains(err.Error(), "requires username/password") {
 			c.JSON(http.StatusUnauthorized, types.ErrorResponse{Error: err.Error()})
@@ -798,7 +889,6 @@ func GetMyStatesHandler(c *gin.Context) {
 		}
 		return
 	}
-
 	c.JSON(http.StatusOK, result)
 }
 
@@ -806,31 +896,30 @@ func GetMyStatesHandler(c *gin.Context) {
 // @Summary Get flights from interval [like Python get_flights_from_interval]
 // @Description Retrieves flights for a short interval [begin, end], max 2 hours.
 // @Tags Flights
-// @Param begin query int true "Start time in seconds"
-// @Param end query int true "End time in seconds"
+// @Param begin query string true "Start time (Unix, RFC3339, or relative)"
+// @Param end query string true "End time (Unix, RFC3339, or relative)"
 // @Produce json
-// @Success 200 {array} FlightData
+// @Success 200 {object} map[string]interface{} "Enhanced flight data + boundary times"
 // @Failure 400 {object} ErrorResponse "Bad Request"
 // @Failure 500 {object} ErrorResponse "Internal Server Error"
 // @Router /flights/interval [get]
 func GetFlightsIntervalHandler(c *gin.Context) {
 	beginStr := c.Query("begin")
 	endStr := c.Query("end")
-
 	if beginStr == "" || endStr == "" {
 		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "both 'begin' and 'end' are required"})
 		return
 	}
 
-	begin, err := strconv.Atoi(beginStr)
+	begin, err := parseFlexibleTime(beginStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'begin' param"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'begin' param: %v", err)})
 		return
 	}
 
-	end, err2 := strconv.Atoi(endStr)
+	end, err2 := parseFlexibleTime(endStr)
 	if err2 != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'end' param"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'end' param: %v", err2)})
 		return
 	}
 
@@ -840,7 +929,8 @@ func GetFlightsIntervalHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, flights)
+	// Return an enhanced response with times
+	enhanceFlightsResponse(c, flights, begin, end)
 }
 
 // GetFlightsByAircraftHandlerV2
@@ -848,10 +938,10 @@ func GetFlightsIntervalHandler(c *gin.Context) {
 // @Description Retrieves flights for [icao24] in [begin, end], up to 30 days.
 // @Tags Flights
 // @Param icao24 path string true "ICAO24 address (hex)"
-// @Param begin query int true "Start time in seconds"
-// @Param end query int true "End time in seconds"
+// @Param begin query string true "Start time (Unix, RFC3339, or relative)"
+// @Param end query string true "End time (Unix, RFC3339, or relative)"
 // @Produce json
-// @Success 200 {array} FlightData
+// @Success 200 {object} map[string]interface{} "Enhanced flight data + boundary times"
 // @Failure 400 {object} ErrorResponse "Bad Request"
 // @Failure 500 {object} ErrorResponse "Internal Server Error"
 // @Router /flights/aircraft/{icao24} [get]
@@ -859,21 +949,19 @@ func GetFlightsByAircraftHandlerV2(c *gin.Context) {
 	icao24 := c.Param("icao24")
 	beginStr := c.Query("begin")
 	endStr := c.Query("end")
-
 	if icao24 == "" || beginStr == "" || endStr == "" {
 		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "icao24, begin, and end are required"})
 		return
 	}
 
-	begin, err := strconv.Atoi(beginStr)
+	begin, err := parseFlexibleTime(beginStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'begin' param"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'begin' param: %v", err)})
 		return
 	}
-
-	end, err2 := strconv.Atoi(endStr)
+	end, err2 := parseFlexibleTime(endStr)
 	if err2 != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'end' param"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'end' param: %v", err2)})
 		return
 	}
 
@@ -883,7 +971,7 @@ func GetFlightsByAircraftHandlerV2(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, flights)
+	enhanceFlightsResponse(c, flights, begin, end)
 }
 
 // GetArrivalsByAirportHandlerV2
@@ -891,10 +979,10 @@ func GetFlightsByAircraftHandlerV2(c *gin.Context) {
 // @Description Retrieves flights that arrived at [airport] in [begin, end], up to 7 days.
 // @Tags Flights
 // @Param airport path string true "ICAO code of airport"
-// @Param begin query int true "Start time in seconds"
-// @Param end query int true "End time in seconds"
+// @Param begin query string true "Start time (Unix, RFC3339, or relative)"
+// @Param end query string true "End time (Unix, RFC3339, or relative)"
 // @Produce json
-// @Success 200 {array} FlightData
+// @Success 200 {object} map[string]interface{} "Enhanced flight data + boundary times"
 // @Failure 400 {object} ErrorResponse "Bad Request"
 // @Failure 500 {object} ErrorResponse "Internal Server Error"
 // @Router /flights/arrivals/{airport} [get]
@@ -908,15 +996,14 @@ func GetArrivalsByAirportHandlerV2(c *gin.Context) {
 		return
 	}
 
-	begin, err := strconv.Atoi(beginStr)
+	begin, err := parseFlexibleTime(beginStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'begin' param"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'begin' param: %v", err)})
 		return
 	}
-
-	end, err2 := strconv.Atoi(endStr)
+	end, err2 := parseFlexibleTime(endStr)
 	if err2 != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'end' param"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'end' param: %v", err2)})
 		return
 	}
 
@@ -926,7 +1013,7 @@ func GetArrivalsByAirportHandlerV2(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, arrivals)
+	enhanceFlightsResponse(c, arrivals, begin, end)
 }
 
 // GetDeparturesByAirportHandlerV2
@@ -934,10 +1021,10 @@ func GetArrivalsByAirportHandlerV2(c *gin.Context) {
 // @Description Retrieves flights that departed [airport] in [begin, end], up to 7 days.
 // @Tags Flights
 // @Param airport path string true "ICAO code of airport"
-// @Param begin query int true "Start time in seconds"
-// @Param end query int true "End time in seconds"
+// @Param begin query string true "Start time (Unix, RFC3339, or relative)"
+// @Param end query string true "End time (Unix, RFC3339, or relative)"
 // @Produce json
-// @Success 200 {array} FlightData
+// @Success 200 {object} map[string]interface{} "Enhanced flight data + boundary times"
 // @Failure 400 {object} ErrorResponse "Bad Request"
 // @Failure 500 {object} ErrorResponse "Internal Server Error"
 // @Router /flights/departures/{airport} [get]
@@ -951,15 +1038,14 @@ func GetDeparturesByAirportHandlerV2(c *gin.Context) {
 		return
 	}
 
-	begin, err := strconv.Atoi(beginStr)
+	begin, err := parseFlexibleTime(beginStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'begin' param"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'begin' param: %v", err)})
 		return
 	}
-
-	end, err2 := strconv.Atoi(endStr)
+	end, err2 := parseFlexibleTime(endStr)
 	if err2 != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'end' param"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'end' param: %v", err2)})
 		return
 	}
 
@@ -969,7 +1055,7 @@ func GetDeparturesByAirportHandlerV2(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, departures)
+	enhanceFlightsResponse(c, departures, begin, end)
 }
 
 // GetTrackByAircraftHandler
@@ -977,7 +1063,7 @@ func GetDeparturesByAirportHandlerV2(c *gin.Context) {
 // @Description Retrieves the trajectory for an aircraft [icao24] at time t. If t=0 => live track.
 // @Tags Flights
 // @Param icao24 query string true "ICAO24 address"
-// @Param time query int false "Unix time (0 => live track)"
+// @Param time query string false "Time can be Unix, RFC3339, or negative/relative (0 => live track)"
 // @Produce json
 // @Success 200 {object} FlightTrack
 // @Failure 400 {object} ErrorResponse "Bad Request"
@@ -986,20 +1072,15 @@ func GetDeparturesByAirportHandlerV2(c *gin.Context) {
 func GetTrackByAircraftHandler(c *gin.Context) {
 	icao24 := c.Query("icao24")
 	timeStr := c.Query("time")
-
 	if icao24 == "" {
 		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "icao24 is required"})
 		return
 	}
 
-	t := 0
-	if timeStr != "" {
-		n, err := strconv.Atoi(timeStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "invalid 'time' param"})
-			return
-		}
-		t = n
+	t, err := parseFlexibleTime(timeStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: fmt.Sprintf("invalid 'time' param: %v", err)})
+		return
 	}
 
 	track, err := openSkyApi.GetTrackByAircraft(icao24, t)

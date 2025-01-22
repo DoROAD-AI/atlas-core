@@ -957,15 +957,15 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Start time in seconds",
+                        "type": "string",
+                        "description": "Start time (Unix, RFC3339, or relative)",
                         "name": "begin",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "End time in seconds",
+                        "type": "string",
+                        "description": "End time (Unix, RFC3339, or relative)",
                         "name": "end",
                         "in": "query",
                         "required": true
@@ -973,12 +973,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Enhanced flight data + boundary times",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v2.FlightData"
-                            }
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -1015,15 +1013,15 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Start time in seconds",
+                        "type": "string",
+                        "description": "Start time (Unix, RFC3339, or relative)",
                         "name": "begin",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "End time in seconds",
+                        "type": "string",
+                        "description": "End time (Unix, RFC3339, or relative)",
                         "name": "end",
                         "in": "query",
                         "required": true
@@ -1031,12 +1029,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Enhanced flight data + boundary times",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v2.FlightData"
-                            }
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -1073,15 +1069,15 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Start time in seconds",
+                        "type": "string",
+                        "description": "Start time (Unix, RFC3339, or relative)",
                         "name": "begin",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "End time in seconds",
+                        "type": "string",
+                        "description": "End time (Unix, RFC3339, or relative)",
                         "name": "end",
                         "in": "query",
                         "required": true
@@ -1089,12 +1085,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Enhanced flight data + boundary times",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v2.FlightData"
-                            }
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -1124,15 +1118,15 @@ const docTemplate = `{
                 "summary": "Get flights from interval [like Python get_flights_from_interval]",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Start time in seconds",
+                        "type": "string",
+                        "description": "Start time (Unix, RFC3339, or relative)",
                         "name": "begin",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "End time in seconds",
+                        "type": "string",
+                        "description": "End time (Unix, RFC3339, or relative)",
                         "name": "end",
                         "in": "query",
                         "required": true
@@ -1140,12 +1134,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Enhanced flight data + boundary times",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v2.FlightData"
-                            }
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -1175,8 +1167,8 @@ const docTemplate = `{
                 "summary": "Get states for your own sensors [like Python get_my_states]",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Time in seconds since epoch (0 =\u003e now)",
+                        "type": "string",
+                        "description": "Time can be Unix, RFC3339, or negative/relative (default=0 =\u003e now)",
                         "name": "time",
                         "in": "query"
                     },
@@ -1233,8 +1225,8 @@ const docTemplate = `{
                 "summary": "Get aircraft states (all) [like Python get_states]",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Time in seconds since epoch (default=0 =\u003e now)",
+                        "type": "string",
+                        "description": "Time can be Unix, RFC3339, or negative/relative (default=0 =\u003e now)",
                         "name": "time",
                         "in": "query"
                     },
@@ -1292,8 +1284,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Unix time (0 =\u003e live track)",
+                        "type": "string",
+                        "description": "Time can be Unix, RFC3339, or negative/relative (0 =\u003e live track)",
                         "name": "time",
                         "in": "query"
                     }
@@ -2860,59 +2852,6 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
-                }
-            }
-        },
-        "v2.FlightData": {
-            "type": "object",
-            "properties": {
-                "arrivalAirportCandidatesCount": {
-                    "type": "integer",
-                    "example": 3
-                },
-                "callsign": {
-                    "type": "string",
-                    "example": "SVA35"
-                },
-                "departureAirportCandidatesCount": {
-                    "type": "integer",
-                    "example": 5
-                },
-                "estArrivalAirport": {
-                    "type": "string",
-                    "example": "JFK"
-                },
-                "estArrivalAirportHorizDistance": {
-                    "type": "integer",
-                    "example": 2000
-                },
-                "estArrivalAirportVertDistance": {
-                    "type": "integer",
-                    "example": 1000
-                },
-                "estDepartureAirport": {
-                    "type": "string",
-                    "example": "RUH"
-                },
-                "estDepartureAirportHorizDistance": {
-                    "type": "integer",
-                    "example": 1000
-                },
-                "estDepartureAirportVertDistance": {
-                    "type": "integer",
-                    "example": 500
-                },
-                "firstSeen": {
-                    "type": "integer",
-                    "example": 1674345600
-                },
-                "icao24": {
-                    "type": "string",
-                    "example": "48585773"
-                },
-                "lastSeen": {
-                    "type": "integer",
-                    "example": 1674345600
                 }
             }
         },
