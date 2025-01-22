@@ -435,11 +435,77 @@ definitions:
         type: string
     type: object
   v2.ErrorResponse:
-    description: ErrorResponse represents an error response.
     properties:
       message:
-        example: Bad request
         type: string
+    type: object
+  v2.FlightData:
+    properties:
+      arrivalAirportCandidatesCount:
+        example: 3
+        type: integer
+      callsign:
+        example: SVA35
+        type: string
+      departureAirportCandidatesCount:
+        example: 5
+        type: integer
+      estArrivalAirport:
+        example: JFK
+        type: string
+      estArrivalAirportHorizDistance:
+        example: 2000
+        type: integer
+      estArrivalAirportVertDistance:
+        example: 1000
+        type: integer
+      estDepartureAirport:
+        example: RUH
+        type: string
+      estDepartureAirportHorizDistance:
+        example: 1000
+        type: integer
+      estDepartureAirportVertDistance:
+        example: 500
+        type: integer
+      firstSeen:
+        example: 1674345600
+        type: integer
+      icao24:
+        example: "48585773"
+        type: string
+      lastSeen:
+        example: 1674345600
+        type: integer
+    type: object
+  v2.FlightTrack:
+    properties:
+      callsign:
+        example: SVA35
+        type: string
+      endTime:
+        example: 1674349200
+        type: integer
+      icao24:
+        example: "48585773"
+        type: string
+      path:
+        items:
+          $ref: '#/definitions/v2.Waypoint'
+        type: array
+      startTime:
+        example: 1674345600
+        type: integer
+    type: object
+  v2.OpenSkyStates:
+    properties:
+      states:
+        items:
+          $ref: '#/definitions/v2.StateVector'
+        type: array
+      time:
+        example: 1674345600
+        type: integer
     type: object
   v2.PassportResponse:
     description: PassportResponse represents the passport data response.
@@ -451,6 +517,64 @@ definitions:
         additionalProperties:
           type: string
         type: object
+    type: object
+  v2.StateVector:
+    properties:
+      baro_altitude:
+        example: 11277.6
+        type: number
+      callsign:
+        example: SVA35
+        type: string
+      category:
+        example: 1
+        type: integer
+      geo_altitude:
+        example: 11887.2
+        type: number
+      icao24:
+        example: "48585773"
+        type: string
+      last_contact:
+        example: 1674345600
+        type: integer
+      latitude:
+        example: 40.641766
+        type: number
+      longitude:
+        example: -73.778925
+        type: number
+      on_ground:
+        example: false
+        type: boolean
+      origin_country:
+        example: Saudi Arabia
+        type: string
+      position_source:
+        example: 0
+        type: integer
+      sensors:
+        items:
+          type: integer
+        type: array
+      spi:
+        example: false
+        type: boolean
+      squawk:
+        example: "2200"
+        type: string
+      time_position:
+        example: 1674345600
+        type: integer
+      true_track:
+        example: 285.7
+        type: number
+      velocity:
+        example: 245.34
+        type: number
+      vertical_rate:
+        example: 0
+        type: number
     type: object
   v2.VisaRequirement:
     description: VisaRequirement represents the visa requirement between two countries.
@@ -464,6 +588,27 @@ definitions:
       to:
         example: DEU
         type: string
+    type: object
+  v2.Waypoint:
+    properties:
+      baro_altitude:
+        example: 10000
+        type: number
+      latitude:
+        example: 40.7789
+        type: number
+      longitude:
+        example: -73.9692
+        type: number
+      on_ground:
+        example: false
+        type: boolean
+      time:
+        example: 1674345600
+        type: integer
+      true_track:
+        example: 270
+        type: number
     type: object
 info:
   contact:
@@ -1093,6 +1238,265 @@ paths:
       summary: Get countries by demonym
       tags:
       - Countries
+  /flights/aircraft/{icao24}:
+    get:
+      description: Retrieves flights for [icao24] in [begin, end], up to 30 days.
+      parameters:
+      - description: ICAO24 address (hex)
+        in: path
+        name: icao24
+        required: true
+        type: string
+      - description: Start time in seconds
+        in: query
+        name: begin
+        required: true
+        type: integer
+      - description: End time in seconds
+        in: query
+        name: end
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.FlightData'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get flights by aircraft [like Python get_flights_by_aircraft]
+      tags:
+      - Flights
+  /flights/arrivals/{airport}:
+    get:
+      description: Retrieves flights that arrived at [airport] in [begin, end], up
+        to 7 days.
+      parameters:
+      - description: ICAO code of airport
+        in: path
+        name: airport
+        required: true
+        type: string
+      - description: Start time in seconds
+        in: query
+        name: begin
+        required: true
+        type: integer
+      - description: End time in seconds
+        in: query
+        name: end
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.FlightData'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get arrivals by airport [like Python get_arrivals_by_airport]
+      tags:
+      - Flights
+  /flights/departures/{airport}:
+    get:
+      description: Retrieves flights that departed [airport] in [begin, end], up to
+        7 days.
+      parameters:
+      - description: ICAO code of airport
+        in: path
+        name: airport
+        required: true
+        type: string
+      - description: Start time in seconds
+        in: query
+        name: begin
+        required: true
+        type: integer
+      - description: End time in seconds
+        in: query
+        name: end
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.FlightData'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get departures by airport [like Python get_departures_by_airport]
+      tags:
+      - Flights
+  /flights/interval:
+    get:
+      description: Retrieves flights for a short interval [begin, end], max 2 hours.
+      parameters:
+      - description: Start time in seconds
+        in: query
+        name: begin
+        required: true
+        type: integer
+      - description: End time in seconds
+        in: query
+        name: end
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.FlightData'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get flights from interval [like Python get_flights_from_interval]
+      tags:
+      - Flights
+  /flights/my-states:
+    get:
+      description: Requires Basic Auth. Retrieves the state vectors from your own
+        sensors only.
+      parameters:
+      - description: Time in seconds since epoch (0 => now)
+        in: query
+        name: time
+        type: integer
+      - description: ICAO24 filter
+        in: query
+        name: icao24
+        type: string
+      - description: Sensor serial(s)
+        in: query
+        name: serials
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.OpenSkyStates'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "401":
+          description: Unauthorized if no username/password configured
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get states for your own sensors [like Python get_my_states]
+      tags:
+      - Flights
+  /flights/states/all:
+    get:
+      description: 'Retrieves the state vectors for aircraft at a given time (or 0
+        for "now"). Optional: filter by icao24 or bounding box.'
+      parameters:
+      - description: Time in seconds since epoch (default=0 => now)
+        in: query
+        name: time
+        type: integer
+      - description: Single or comma-separated ICAO24 address(es)
+        in: query
+        name: icao24
+        type: string
+      - description: min_lat,max_lat,min_lon,max_lon [4 floats]
+        in: query
+        name: bbox
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.OpenSkyStates'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get aircraft states (all) [like Python get_states]
+      tags:
+      - Flights
+  /flights/track:
+    get:
+      description: Retrieves the trajectory for an aircraft [icao24] at time t. If
+        t=0 => live track.
+      parameters:
+      - description: ICAO24 address
+        in: query
+        name: icao24
+        required: true
+        type: string
+      - description: Unix time (0 => live track)
+        in: query
+        name: time
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.FlightTrack'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get flight track by aircraft [like Python get_track_by_aircraft]
+      tags:
+      - Flights
   /independent:
     get:
       consumes:

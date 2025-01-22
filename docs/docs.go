@@ -938,6 +938,388 @@ const docTemplate = `{
                 }
             }
         },
+        "/flights/aircraft/{icao24}": {
+            "get": {
+                "description": "Retrieves flights for [icao24] in [begin, end], up to 30 days.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flights"
+                ],
+                "summary": "Get flights by aircraft [like Python get_flights_by_aircraft]",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ICAO24 address (hex)",
+                        "name": "icao24",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Start time in seconds",
+                        "name": "begin",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "End time in seconds",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.FlightData"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flights/arrivals/{airport}": {
+            "get": {
+                "description": "Retrieves flights that arrived at [airport] in [begin, end], up to 7 days.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flights"
+                ],
+                "summary": "Get arrivals by airport [like Python get_arrivals_by_airport]",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ICAO code of airport",
+                        "name": "airport",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Start time in seconds",
+                        "name": "begin",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "End time in seconds",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.FlightData"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flights/departures/{airport}": {
+            "get": {
+                "description": "Retrieves flights that departed [airport] in [begin, end], up to 7 days.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flights"
+                ],
+                "summary": "Get departures by airport [like Python get_departures_by_airport]",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ICAO code of airport",
+                        "name": "airport",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Start time in seconds",
+                        "name": "begin",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "End time in seconds",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.FlightData"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flights/interval": {
+            "get": {
+                "description": "Retrieves flights for a short interval [begin, end], max 2 hours.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flights"
+                ],
+                "summary": "Get flights from interval [like Python get_flights_from_interval]",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Start time in seconds",
+                        "name": "begin",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "End time in seconds",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.FlightData"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flights/my-states": {
+            "get": {
+                "description": "Requires Basic Auth. Retrieves the state vectors from your own sensors only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flights"
+                ],
+                "summary": "Get states for your own sensors [like Python get_my_states]",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Time in seconds since epoch (0 =\u003e now)",
+                        "name": "time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ICAO24 filter",
+                        "name": "icao24",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sensor serial(s)",
+                        "name": "serials",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.OpenSkyStates"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized if no username/password configured",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flights/states/all": {
+            "get": {
+                "description": "Retrieves the state vectors for aircraft at a given time (or 0 for \"now\"). Optional: filter by icao24 or bounding box.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flights"
+                ],
+                "summary": "Get aircraft states (all) [like Python get_states]",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Time in seconds since epoch (default=0 =\u003e now)",
+                        "name": "time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Single or comma-separated ICAO24 address(es)",
+                        "name": "icao24",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "min_lat,max_lat,min_lon,max_lon [4 floats]",
+                        "name": "bbox",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.OpenSkyStates"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flights/track": {
+            "get": {
+                "description": "Retrieves the trajectory for an aircraft [icao24] at time t. If t=0 =\u003e live track.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Flights"
+                ],
+                "summary": "Get flight track by aircraft [like Python get_track_by_aircraft]",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ICAO24 address",
+                        "name": "icao24",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Unix time (0 =\u003e live track)",
+                        "name": "time",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.FlightTrack"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/independent": {
             "get": {
                 "description": "Get countries filtered by independence. Defaults to status=true if not specified.",
@@ -2474,12 +2856,105 @@ const docTemplate = `{
             }
         },
         "v2.ErrorResponse": {
-            "description": "ErrorResponse represents an error response.",
             "type": "object",
             "properties": {
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2.FlightData": {
+            "type": "object",
+            "properties": {
+                "arrivalAirportCandidatesCount": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "callsign": {
                     "type": "string",
-                    "example": "Bad request"
+                    "example": "SVA35"
+                },
+                "departureAirportCandidatesCount": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "estArrivalAirport": {
+                    "type": "string",
+                    "example": "JFK"
+                },
+                "estArrivalAirportHorizDistance": {
+                    "type": "integer",
+                    "example": 2000
+                },
+                "estArrivalAirportVertDistance": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "estDepartureAirport": {
+                    "type": "string",
+                    "example": "RUH"
+                },
+                "estDepartureAirportHorizDistance": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "estDepartureAirportVertDistance": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "firstSeen": {
+                    "type": "integer",
+                    "example": 1674345600
+                },
+                "icao24": {
+                    "type": "string",
+                    "example": "48585773"
+                },
+                "lastSeen": {
+                    "type": "integer",
+                    "example": 1674345600
+                }
+            }
+        },
+        "v2.FlightTrack": {
+            "type": "object",
+            "properties": {
+                "callsign": {
+                    "type": "string",
+                    "example": "SVA35"
+                },
+                "endTime": {
+                    "type": "integer",
+                    "example": 1674349200
+                },
+                "icao24": {
+                    "type": "string",
+                    "example": "48585773"
+                },
+                "path": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.Waypoint"
+                    }
+                },
+                "startTime": {
+                    "type": "integer",
+                    "example": 1674345600
+                }
+            }
+        },
+        "v2.OpenSkyStates": {
+            "type": "object",
+            "properties": {
+                "states": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.StateVector"
+                    }
+                },
+                "time": {
+                    "type": "integer",
+                    "example": 1674345600
                 }
             }
         },
@@ -2499,6 +2974,85 @@ const docTemplate = `{
                 }
             }
         },
+        "v2.StateVector": {
+            "type": "object",
+            "properties": {
+                "baro_altitude": {
+                    "type": "number",
+                    "example": 11277.6
+                },
+                "callsign": {
+                    "type": "string",
+                    "example": "SVA35"
+                },
+                "category": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "geo_altitude": {
+                    "type": "number",
+                    "example": 11887.2
+                },
+                "icao24": {
+                    "type": "string",
+                    "example": "48585773"
+                },
+                "last_contact": {
+                    "type": "integer",
+                    "example": 1674345600
+                },
+                "latitude": {
+                    "type": "number",
+                    "example": 40.641766
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": -73.778925
+                },
+                "on_ground": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "origin_country": {
+                    "type": "string",
+                    "example": "Saudi Arabia"
+                },
+                "position_source": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "sensors": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "spi": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "squawk": {
+                    "type": "string",
+                    "example": "2200"
+                },
+                "time_position": {
+                    "type": "integer",
+                    "example": 1674345600
+                },
+                "true_track": {
+                    "type": "number",
+                    "example": 285.7
+                },
+                "velocity": {
+                    "type": "number",
+                    "example": 245.34
+                },
+                "vertical_rate": {
+                    "type": "number",
+                    "example": 0
+                }
+            }
+        },
         "v2.VisaRequirement": {
             "description": "VisaRequirement represents the visa requirement between two countries.",
             "type": "object",
@@ -2514,6 +3068,35 @@ const docTemplate = `{
                 "to": {
                     "type": "string",
                     "example": "DEU"
+                }
+            }
+        },
+        "v2.Waypoint": {
+            "type": "object",
+            "properties": {
+                "baro_altitude": {
+                    "type": "number",
+                    "example": 10000
+                },
+                "latitude": {
+                    "type": "number",
+                    "example": 40.7789
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": -73.9692
+                },
+                "on_ground": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "time": {
+                    "type": "integer",
+                    "example": 1674345600
+                },
+                "true_track": {
+                    "type": "number",
+                    "example": 270
                 }
             }
         }

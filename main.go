@@ -3,34 +3,30 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
-
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files" // Swagger files
-	ginSwagger "github.com/swaggo/gin-swagger"
 
 	v1 "github.com/DoROAD-AI/atlas/api/v1"
 	v2 "github.com/DoROAD-AI/atlas/api/v2"
-
 	"github.com/DoROAD-AI/atlas/docs" // Swagger docs
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files" // Swagger files
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title       Atlas - Global Travel and Aviation Intelligence Data API by DoROAD
 // @version     2.0
 // @description Atlas is DoROAD's flagship Global Travel and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport data, and up-to-date passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.
 // @termsOfService http://atlas.doroad.io/terms/
-
 // @contact.name  Atlas API Support
 // @contact.url   https://github.com/DoROAD-AI/atlas/issues
 // @contact.email support@doroad.ai
-
 // @license.name  MIT / Proprietary
 // @license.url   https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
-
 // @BasePath      /v2
 // @schemes       https http
-
 func getHost() string {
 	env := os.Getenv("ATLAS_ENV")
 	switch env {
@@ -46,10 +42,23 @@ func getHost() string {
 }
 
 func main() {
+	// Load environment variables from .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file in main.go, relying on environment variables.")
+	} else {
+		log.Println(".env file loaded successfully in main.go")
+	}
+
+	// Initialize OpenSkyClient with credentials (or leave empty for anonymous access)
+	v2.InitializeOpenSkyClient(os.Getenv("OPENSKY_USERNAME"), os.Getenv("OPENSKY_PASSWORD"))
+
 	// Set Gin mode based on environment
 	env := os.Getenv("ATLAS_ENV")
 	if env == "development" {
-		gin.SetMode(gin.ReleaseMode)
+		gin.SetMode(gin.DebugMode) // Use DebugMode for development
+	} else {
+		gin.SetMode(gin.ReleaseMode) // Use ReleaseMode for other environments
 	}
 
 	// Load country data from JSON
@@ -70,8 +79,12 @@ func main() {
 	// Create Gin router with default middleware
 	router := gin.Default()
 
-	// Enable CORS
-	router.Use(cors.Default())
+	// Enable CORS - Configure to be more restrictive in production
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true // Be more specific in production
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	router.Use(cors.New(config))
 
 	// Dynamically set Swagger host
 	docs.SwaggerInfo.Host = getHost()
@@ -154,10 +167,26 @@ func main() {
 		v2Group.GET("/airports/distance", v2.CalculateDistanceBetweenAirports)
 		v2Group.GET("/airports/keyword/:keyword", v2.GetAirportsByKeyword)
 
+		// Flights routes (OpenSky API integration)
+		flightsGroup := v2Group.Group("/flights")
+		{
+			flightsGroup.GET("/states/all", v2.GetStatesAllHandler)
+			flightsGroup.GET("/my-states", v2.GetMyStatesHandler)
+			flightsGroup.GET("/interval", v2.GetFlightsIntervalHandler)
+			flightsGroup.GET("/aircraft/:icao24", v2.GetFlightsByAircraftHandlerV2)
+			flightsGroup.GET("/arrivals/:airport", v2.GetArrivalsByAirportHandlerV2)
+			flightsGroup.GET("/departures/:airport", v2.GetDeparturesByAirportHandlerV2)
+			flightsGroup.GET("/track", v2.GetTrackByAircraftHandler)
+		}
 	}
 
 	// Swagger documentation endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Health check endpoint
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	// Determine port, default to 3101
 	port := os.Getenv("PORT")

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/DoROAD-AI/atlas/types"
 	"github.com/gin-gonic/gin"
 
 	v1 "github.com/DoROAD-AI/atlas/api/v1" // Import v1 to access Countries data
@@ -36,12 +37,6 @@ type VisaRequirement struct {
 	From        string `json:"from" example:"USA"`
 	To          string `json:"to" example:"DEU"`
 	Requirement string `json:"requirement" example:"90"`
-}
-
-// ErrorResponse represents an error response.
-// @Description ErrorResponse represents an error response.
-type ErrorResponse struct {
-	Message string `json:"message" example:"Bad request"`
 }
 
 // AirportFrequency represents the frequency data for an airport.
@@ -217,12 +212,12 @@ func GetPassportData(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid passport country code"})
 		return
 	}
 	visaRules, ok := Passports[passportCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found"})
 		return
 	}
 	passportData := PassportResponse{
@@ -246,12 +241,12 @@ func GetVisaRequirementsForPassport(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid passport country code"})
 		return
 	}
 	visaRules, ok := Passports[passportCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found"})
 		return
 	}
 	passportData := PassportResponse{
@@ -278,29 +273,29 @@ func GetVisaRequirements(c *gin.Context) {
 	toCountryInput := strings.ToUpper(c.Query("toCountry"))
 
 	if fromCountryInput == "" || toCountryInput == "" {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "fromCountry and toCountry query parameters are required"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "fromCountry and toCountry query parameters are required"})
 		return
 	}
 
 	fromCountryCCA3, ok := codeToCCA3[fromCountryInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid fromCountry code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid fromCountry code"})
 		return
 	}
 	toCountryCCA3, ok := codeToCCA3[toCountryInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid toCountry code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid toCountry code"})
 		return
 	}
 
 	visaRules, ok := Passports[fromCountryCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found for origin country"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found for origin country"})
 		return
 	}
 	requirement, ok := visaRules[toCountryCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Visa requirement data not found for this country pair"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Visa requirement data not found for this country pair"})
 		return
 	}
 	c.JSON(http.StatusOK, VisaRequirement{
@@ -324,13 +319,13 @@ func GetVisaFreeCountries(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid passport country code"})
 		return
 	}
 
 	visaRules, ok := Passports[passportCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found"})
 		return
 	}
 
@@ -360,13 +355,13 @@ func GetVisaOnArrivalCountries(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid passport country code"})
 		return
 	}
 
 	visaRules, ok := Passports[passportCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found"})
 		return
 	}
 
@@ -395,13 +390,13 @@ func GetEVisaCountries(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid passport country code"})
 		return
 	}
 
 	visaRules, ok := Passports[passportCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found"})
 		return
 	}
 
@@ -430,13 +425,13 @@ func GetVisaRequiredCountries(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid passport country code"})
 		return
 	}
 
 	visaRules, ok := Passports[passportCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found"})
 		return
 	}
 
@@ -468,25 +463,25 @@ func GetVisaDetails(c *gin.Context) {
 
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid passport country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid passport country code"})
 		return
 	}
 
 	destinationCCA3, ok := codeToCCA3[destinationCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid destination country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid destination country code"})
 		return
 	}
 
 	visaRules, ok := Passports[passportCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found"})
 		return
 	}
 
 	requirement, ok := visaRules[destinationCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Visa requirement data not found for this destination"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Visa requirement data not found for this destination"})
 		return
 	}
 
@@ -516,25 +511,25 @@ func GetReciprocalVisaRequirements(c *gin.Context) {
 
 	countryCCA3_1, ok := codeToCCA3[countryCode1Input]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid country code for countryCode1"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid country code for countryCode1"})
 		return
 	}
 
 	countryCCA3_2, ok := codeToCCA3[countryCode2Input]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid country code for countryCode2"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid country code for countryCode2"})
 		return
 	}
 
 	visaRules1, ok := Passports[countryCCA3_1]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found for the first country"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found for the first country"})
 		return
 	}
 
 	visaRules2, ok := Passports[countryCCA3_2]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Passport data not found for the second country"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found for the second country"})
 		return
 	}
 
@@ -581,14 +576,14 @@ func CompareVisaRequirements(c *gin.Context) {
 	destinationCodeInput := strings.ToUpper(c.Query("destination"))
 
 	if passportCodesInput == "" || destinationCodeInput == "" {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "passports and destination query parameters are required"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "passports and destination query parameters are required"})
 		return
 	}
 
 	passportCodes := strings.Split(passportCodesInput, ",")
 	destinationCCA3, ok := codeToCCA3[destinationCodeInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid destination country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid destination country code"})
 		return
 	}
 
@@ -699,7 +694,7 @@ func GetPassportRanking(c *gin.Context) {
 func GetCommonVisaFreeDestinations(c *gin.Context) {
 	passportCodesInput := c.Query("passports")
 	if passportCodesInput == "" {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "passports query parameter is required"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "passports query parameter is required"})
 		return
 	}
 
@@ -770,14 +765,14 @@ func GetAirportsByCountry(c *gin.Context) {
 	// Convert any recognized code to alpha-2
 	alpha2, ok := toAlpha2(countryParam)
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid or unrecognized country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid or unrecognized country code"})
 		return
 	}
 
 	// Retrieve airport data by alpha-2 code
 	countryAirports, found := AirportData[strings.ToUpper(alpha2)]
 	if !found {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airport data found for this country"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airport data found for this country"})
 		return
 	}
 
@@ -802,13 +797,13 @@ func GetAirportByIdent(c *gin.Context) {
 	// Convert any recognized code to alpha-2
 	alpha2, ok := toAlpha2(countryParam)
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid or unrecognized country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid or unrecognized country code"})
 		return
 	}
 
 	countryAirports, found := AirportData[strings.ToUpper(alpha2)]
 	if !found {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airport data found for this country"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airport data found for this country"})
 		return
 	}
 
@@ -820,7 +815,7 @@ func GetAirportByIdent(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found in this country"})
+	c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Airport not found in this country"})
 }
 
 // ----------------------------------------------------------------------------
@@ -858,7 +853,7 @@ func GetAirportByCode(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found"})
+	c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Airport not found"})
 }
 
 // GetAirportsByRegion handles GET /v2/airports/region/{isoRegion}
@@ -884,7 +879,7 @@ func GetAirportsByRegion(c *gin.Context) {
 	}
 
 	if len(airportsInRegion) == 0 {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found for this ISO region"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airports found for this ISO region"})
 		return
 	}
 
@@ -914,7 +909,7 @@ func GetAirportsByMunicipality(c *gin.Context) {
 	}
 
 	if len(airportsInMunicipality) == 0 {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found in this municipality"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airports found in this municipality"})
 		return
 	}
 
@@ -944,7 +939,7 @@ func GetAirportsByType(c *gin.Context) {
 	}
 
 	if len(matchingAirports) == 0 {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found for this type"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airports found for this type"})
 		return
 	}
 
@@ -972,7 +967,7 @@ func GetAirportsWithScheduledService(c *gin.Context) {
 	}
 
 	if len(scheduledAirports) == 0 {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports with scheduled service found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airports with scheduled service found"})
 		return
 	}
 
@@ -996,13 +991,13 @@ func GetAirportRunways(c *gin.Context) {
 
 	alpha2, ok := toAlpha2(countryParam)
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid or unrecognized country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid or unrecognized country code"})
 		return
 	}
 
 	countryAirports, found := AirportData[strings.ToUpper(alpha2)]
 	if !found {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airport data found for this country"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airport data found for this country"})
 		return
 	}
 
@@ -1013,7 +1008,7 @@ func GetAirportRunways(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found in this country"})
+	c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Airport not found in this country"})
 }
 
 // GetAirportFrequencies handles GET /v2/airports/{countryCode}/{airportIdent}/frequencies
@@ -1033,13 +1028,13 @@ func GetAirportFrequencies(c *gin.Context) {
 
 	alpha2, ok := toAlpha2(countryParam)
 	if !ok {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "Invalid or unrecognized country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid or unrecognized country code"})
 		return
 	}
 
 	countryAirports, found := AirportData[strings.ToUpper(alpha2)]
 	if !found {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airport data found for this country"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airport data found for this country"})
 		return
 	}
 
@@ -1050,7 +1045,7 @@ func GetAirportFrequencies(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNotFound, ErrorResponse{Message: "Airport not found in this country"})
+	c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Airport not found in this country"})
 }
 
 // SearchAirports handles GET /v2/airports/search?query={searchString}
@@ -1066,7 +1061,7 @@ func GetAirportFrequencies(c *gin.Context) {
 func SearchAirports(c *gin.Context) {
 	searchString := strings.ToUpper(c.Query("query"))
 	if searchString == "" {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Query parameter 'query' is required"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "Query parameter 'query' is required"})
 		return
 	}
 
@@ -1084,7 +1079,7 @@ func SearchAirports(c *gin.Context) {
 	}
 
 	if len(matchingAirports) == 0 {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found matching the search criteria"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airports found matching the search criteria"})
 		return
 	}
 
@@ -1106,17 +1101,17 @@ func SearchAirports(c *gin.Context) {
 func GetAirportsWithinRadius(c *gin.Context) {
 	latitude, err := parseFloatQueryParam(c, "latitude")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid latitude"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "Invalid latitude"})
 		return
 	}
 	longitude, err := parseFloatQueryParam(c, "longitude")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid longitude"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "Invalid longitude"})
 		return
 	}
 	radius, err := parseFloatQueryParam(c, "radius")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid radius"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "Invalid radius"})
 		return
 	}
 
@@ -1133,7 +1128,7 @@ func GetAirportsWithinRadius(c *gin.Context) {
 	}
 
 	if len(airportsWithinRadius) == 0 {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found within the specified radius"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airports found within the specified radius"})
 		return
 	}
 
@@ -1191,7 +1186,7 @@ func CalculateDistanceBetweenAirports(c *gin.Context) {
 	airportCode2 := strings.ToUpper(c.Query("airport2"))
 
 	if airportCode1 == "" || airportCode2 == "" {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Both airport1 and airport2 query parameters are required"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "Both airport1 and airport2 query parameters are required"})
 		return
 	}
 
@@ -1199,7 +1194,7 @@ func CalculateDistanceBetweenAirports(c *gin.Context) {
 	airport2, found2 := findAirportByCode(airportCode2)
 
 	if !found1 || !found2 {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "One or both airports not found"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "One or both airports not found"})
 		return
 	}
 
@@ -1254,7 +1249,7 @@ func GetAirportsByKeyword(c *gin.Context) {
 	}
 
 	if len(matchingAirports) == 0 {
-		c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found matching the keyword"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airports found matching the keyword"})
 		return
 	}
 
@@ -1297,7 +1292,7 @@ func SuperTypeQuery(c *gin.Context) {
 
 	// If queryParams is empty, return error
 	if len(queryParams) == 0 {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "At least one query parameter is required"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "At least one query parameter is required"})
 		return
 	}
 
@@ -1305,7 +1300,7 @@ func SuperTypeQuery(c *gin.Context) {
 	case "country":
 		results := searchCountries(queryParams)
 		if len(results) == 0 {
-			c.JSON(http.StatusNotFound, ErrorResponse{Message: "No countries found matching the criteria"})
+			c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No countries found matching the criteria"})
 			return
 		}
 		c.JSON(http.StatusOK, results)
@@ -1313,7 +1308,7 @@ func SuperTypeQuery(c *gin.Context) {
 	case "airport":
 		results := searchAirports(queryParams)
 		if len(results) == 0 {
-			c.JSON(http.StatusNotFound, ErrorResponse{Message: "No airports found matching the criteria"})
+			c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No airports found matching the criteria"})
 			return
 		}
 		c.JSON(http.StatusOK, results)
@@ -1331,14 +1326,14 @@ func SuperTypeQuery(c *gin.Context) {
 		combinedResults.Airports = airports
 
 		if len(countries) == 0 && len(airports) == 0 {
-			c.JSON(http.StatusNotFound, ErrorResponse{Message: "No results found matching the criteria"})
+			c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No results found matching the criteria"})
 			return
 		}
 
 		c.JSON(http.StatusOK, combinedResults)
 
 	default:
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Invalid type parameter. Allowed values are 'country', 'airport', or 'all'"})
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "Invalid type parameter. Allowed values are 'country', 'airport', or 'all'"})
 		return
 	}
 }
