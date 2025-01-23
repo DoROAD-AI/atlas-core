@@ -81,6 +81,11 @@ func main() {
 		log.Fatalf("Failed to initialize airport data: %v", err)
 	}
 
+	// In main.go, inside the main function:
+	if err := v2.LoadAirlinesData("data/airlines.json"); err != nil {
+		log.Fatalf("Failed to initialize airline data: %v", err)
+	}
+
 	// Create Gin router with default middleware
 	router := gin.Default()
 
@@ -173,15 +178,13 @@ func main() {
 		v2Group.GET("/airports/keyword/:keyword", v2.GetAirportsByKeyword)
 
 		// v2 airline routes
-		airlinesGroup := v2Group.Group("/airlines")
-		{
-			airlinesGroup.GET("/icao/:icao", v2.GetAirlinesByICAO)
-			airlinesGroup.GET("/iata/:iata", v2.GetAirlinesByIATA)
-			airlinesGroup.GET("/name/:name", v2.GetAirlinesByName)
-
-			// IMPORTANT: Revert this route so /v2/airlines/XXX/details works
-			airlinesGroup.GET("/:icao/details", v2.GetAirlineDetails)
-		}
+		v2Group.GET("/airlines", v2.GetAllAirlines)
+		v2Group.GET("/airlines/id/:airlineID", v2.GetAirlineByID)
+		v2Group.GET("/airlines/country/:countryName", v2.GetAirlinesByCountry)
+		v2Group.GET("/airlines/icao/:icaoCode", v2.GetAirlineByICAO)
+		v2Group.GET("/airlines/iata/:iataCode", v2.GetAirlineByIATA)
+		v2Group.GET("/airlines/active", v2.GetActiveAirlines)
+		v2Group.GET("/airlines/search", v2.SearchAirlines)
 
 		// Flights routes (OpenSky API integration)
 		flightsGroup := v2Group.Group("/flights")

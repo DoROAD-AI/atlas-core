@@ -24,9 +24,114 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/airlines/iata/{iata}": {
+        "/airlines": {
             "get": {
-                "description": "Retrieves airline information based on the IATA code.",
+                "description": "Retrieves a list of all airlines.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airlines"
+                ],
+                "summary": "Get all airlines",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airline"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airlines/active": {
+            "get": {
+                "description": "Retrieves all airlines that are currently active.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airlines"
+                ],
+                "summary": "Get active airlines",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airline"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airlines/country/{countryName}": {
+            "get": {
+                "description": "Retrieves all airlines based in a specific country.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airlines"
+                ],
+                "summary": "Get airlines by country",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country name",
+                        "name": "countryName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Airline"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airlines/iata/{iataCode}": {
+            "get": {
+                "description": "Retrieves an airline by its IATA code.",
                 "consumes": [
                     "application/json"
                 ],
@@ -40,8 +145,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "IATA code of the airline",
-                        "name": "iata",
+                        "description": "IATA code",
+                        "name": "iataCode",
                         "in": "path",
                         "required": true
                     }
@@ -50,30 +155,21 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v2.Airline"
-                            }
+                            "$ref": "#/definitions/v2.Airline"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/airlines/icao/{icao}": {
+        "/airlines/icao/{icaoCode}": {
             "get": {
-                "description": "Retrieves airline information based on the ICAO code.",
+                "description": "Retrieves an airline by its ICAO code.",
                 "consumes": [
                     "application/json"
                 ],
@@ -87,9 +183,85 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ICAO code of the airline",
-                        "name": "icao",
+                        "description": "ICAO code",
+                        "name": "icaoCode",
                         "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.Airline"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airlines/id/{airlineID}": {
+            "get": {
+                "description": "Retrieves a specific airline by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airlines"
+                ],
+                "summary": "Get airline by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Airline ID",
+                        "name": "airlineID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.Airline"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/airlines/search": {
+            "get": {
+                "description": "Performs a flexible search for airlines based on a query string.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airlines"
+                ],
+                "summary": "Search airlines",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search string (can match airline name, country, ICAO/IATA code, etc.)",
+                        "name": "query",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -106,104 +278,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/airlines/name/{name}": {
-            "get": {
-                "description": "Retrieves airline information based on the name or callsign.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Airlines"
-                ],
-                "summary": "Get airlines by name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Name or callsign of the airline",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v2.Airline"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/airlines/{icao}/details": {
-            "get": {
-                "description": "Retrieves detailed information about a specific airline, including fleet, history, and accidents.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Airlines"
-                ],
-                "summary": "Get detailed airline information",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ICAO code of the airline (e.g. 'BAW')",
-                        "name": "icao",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v2.AirlineDetails"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -235,7 +316,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -273,7 +354,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -318,13 +399,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -365,7 +446,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -406,7 +487,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -461,7 +542,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -502,7 +583,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -534,7 +615,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -575,7 +656,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -616,7 +697,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -654,7 +735,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -699,7 +780,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -747,7 +828,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -795,7 +876,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1167,13 +1248,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1223,13 +1304,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1279,13 +1360,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1328,13 +1409,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1380,19 +1461,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized if no username/password configured",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1438,13 +1519,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1485,13 +1566,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1682,7 +1763,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1734,13 +1815,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1815,7 +1896,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1860,13 +1941,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1904,7 +1985,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1945,7 +2026,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -1990,7 +2071,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -2031,7 +2112,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -2072,7 +2153,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -2113,7 +2194,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -2151,7 +2232,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -2311,13 +2392,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse"
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -2419,14 +2500,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_DoROAD-AI_atlas_api_v2.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                }
-            }
-        },
         "v1.CapitalInfo": {
             "type": "object",
             "properties": {
@@ -2767,135 +2840,41 @@ const docTemplate = `{
                 }
             }
         },
-        "v2.AccidentEntry": {
-            "type": "object",
-            "properties": {
-                "aircraft": {
-                    "type": "string"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "details": {
-                    "type": "string"
-                },
-                "location": {
-                    "type": "string"
-                }
-            }
-        },
         "v2.Airline": {
+            "description": "Airline represents data for a single airline.",
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
+                "active": {
+                    "type": "string",
+                    "example": "Y"
+                },
+                "airline_id": {
+                    "type": "integer",
+                    "example": 28
+                },
+                "alias": {
+                    "type": "string",
+                    "example": "\\N"
                 },
                 "callsign": {
-                    "type": "string"
-                },
-                "cert": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ASIANA"
                 },
                 "country": {
-                    "type": "string"
-                },
-                "country_code": {
-                    "type": "string"
-                },
-                "from": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Republic of Korea"
                 },
                 "iata": {
-                    "type": "string"
-                },
-                "iata_num": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "OZ"
                 },
                 "icao": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "AAR"
                 },
                 "name": {
-                    "type": "string"
-                },
-                "remarks": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "until": {
-                    "type": "string"
-                },
-                "website": {
-                    "type": "string"
-                }
-            }
-        },
-        "v2.AirlineDetails": {
-            "type": "object",
-            "properties": {
-                "accidents": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/v2.AccidentEntry"
-                    }
-                },
-                "address": {
-                    "type": "string"
-                },
-                "callsign": {
-                    "type": "string"
-                },
-                "cert": {
-                    "type": "string"
-                },
-                "country": {
-                    "type": "string"
-                },
-                "country_code": {
-                    "type": "string"
-                },
-                "fleet": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/v2.FleetEntry"
-                    }
-                },
-                "from": {
-                    "type": "string"
-                },
-                "history": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/v2.HistoryEntry"
-                    }
-                },
-                "iata": {
-                    "type": "string"
-                },
-                "icao": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "other_details": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "remarks": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "until": {
-                    "type": "string"
-                },
-                "website": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Asiana Airlines"
                 }
             }
         },
@@ -3172,16 +3151,10 @@ const docTemplate = `{
                 }
             }
         },
-        "v2.FleetEntry": {
+        "v2.ErrorResponse": {
             "type": "object",
             "properties": {
-                "aircraft_type": {
-                    "type": "string"
-                },
-                "count": {
-                    "type": "integer"
-                },
-                "details": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -3210,17 +3183,6 @@ const docTemplate = `{
                 "startTime": {
                     "type": "integer",
                     "example": 1674345600
-                }
-            }
-        },
-        "v2.HistoryEntry": {
-            "type": "object",
-            "properties": {
-                "date": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
                 }
             }
         },
@@ -3391,7 +3353,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/v2",
 	Schemes:          []string{"https", "http"},
 	Title:            "Atlas - Global Travel and Aviation Intelligence Data API by DoROAD",
-	Description:      "Atlas is DoROAD's flagship Global Travel and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport data, and up-to-date passport visa requirements worldwide.",
+	Description:      "Atlas is DoROAD's flagship Global Travel and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport data, and up-to-date passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

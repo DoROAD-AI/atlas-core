@@ -1,10 +1,5 @@
 basePath: /v2
 definitions:
-  github_com_DoROAD-AI_atlas_api_v2.ErrorResponse:
-    properties:
-      error:
-        type: string
-    type: object
   v1.CapitalInfo:
     properties:
       latlng:
@@ -239,91 +234,32 @@ definitions:
         example: ^\d{5}(-\d{4})?$
         type: string
     type: object
-  v2.AccidentEntry:
-    properties:
-      aircraft:
-        type: string
-      date:
-        type: string
-      details:
-        type: string
-      location:
-        type: string
-    type: object
   v2.Airline:
+    description: Airline represents data for a single airline.
     properties:
-      address:
+      active:
+        example: "Y"
+        type: string
+      airline_id:
+        example: 28
+        type: integer
+      alias:
+        example: \N
         type: string
       callsign:
-        type: string
-      cert:
-        type: string
-      country:
-        type: string
-      country_code:
-        type: string
-      from:
-        type: string
-      iata:
-        type: string
-      iata_num:
-        type: string
-      icao:
-        type: string
-      name:
-        type: string
-      remarks:
-        type: string
-      status:
-        type: string
-      until:
-        type: string
-      website:
-        type: string
-    type: object
-  v2.AirlineDetails:
-    properties:
-      accidents:
-        items:
-          $ref: '#/definitions/v2.AccidentEntry'
-        type: array
-      address:
-        type: string
-      callsign:
-        type: string
-      cert:
+        example: ASIANA
         type: string
       country:
+        example: Republic of Korea
         type: string
-      country_code:
-        type: string
-      fleet:
-        items:
-          $ref: '#/definitions/v2.FleetEntry'
-        type: array
-      from:
-        type: string
-      history:
-        items:
-          $ref: '#/definitions/v2.HistoryEntry'
-        type: array
       iata:
+        example: OZ
         type: string
       icao:
+        example: AAR
         type: string
       name:
-        type: string
-      other_details:
-        additionalProperties:
-          type: string
-        type: object
-      remarks:
-        type: string
-      status:
-        type: string
-      until:
-        type: string
-      website:
+        example: Asiana Airlines
         type: string
     type: object
   v2.Airport:
@@ -526,13 +462,9 @@ definitions:
         example: https://en.wikipedia.org/wiki/Saint_Vincent_and_the_Grenadines
         type: string
     type: object
-  v2.FleetEntry:
+  v2.ErrorResponse:
     properties:
-      aircraft_type:
-        type: string
-      count:
-        type: integer
-      details:
+      message:
         type: string
     type: object
   v2.FlightTrack:
@@ -553,13 +485,6 @@ definitions:
       startTime:
         example: 1674345600
         type: integer
-    type: object
-  v2.HistoryEntry:
-    properties:
-      date:
-        type: string
-      description:
-        type: string
     type: object
   v2.OpenSkyStates:
     properties:
@@ -682,7 +607,9 @@ info:
   description: Atlas is DoROAD's flagship Global Travel and Aviation Intelligence
     Data API. Version 2.0 represents a significant leap forward, providing a comprehensive,
     high-performance RESTful API for accessing detailed country information, extensive
-    airport data, and up-to-date passport visa requirements worldwide.
+    airport data, and up-to-date passport visa requirements worldwide. This service
+    offers extensive data about countries (demographics, geography, international
+    codes, etc.), airports, and visa regulations for various passports.
   license:
     name: MIT / Proprietary
     url: https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
@@ -690,45 +617,57 @@ info:
   title: Atlas - Global Travel and Aviation Intelligence Data API by DoROAD
   version: "2.0"
 paths:
-  /airlines/{icao}/details:
+  /airlines:
     get:
       consumes:
       - application/json
-      description: Retrieves detailed information about a specific airline, including
-        fleet, history, and accidents.
-      parameters:
-      - description: ICAO code of the airline (e.g. 'BAW')
-        in: path
-        name: icao
-        required: true
-        type: string
+      description: Retrieves a list of all airlines.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v2.AirlineDetails'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            items:
+              $ref: '#/definitions/v2.Airline'
+            type: array
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
-      summary: Get detailed airline information
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get all airlines
       tags:
       - Airlines
-  /airlines/iata/{iata}:
+  /airlines/active:
     get:
       consumes:
       - application/json
-      description: Retrieves airline information based on the IATA code.
+      description: Retrieves all airlines that are currently active.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Airline'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get active airlines
+      tags:
+      - Airlines
+  /airlines/country/{countryName}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all airlines based in a specific country.
       parameters:
-      - description: IATA code of the airline
+      - description: Country name
         in: path
-        name: iata
+        name: countryName
         required: true
         type: string
       produces:
@@ -740,26 +679,47 @@ paths:
             items:
               $ref: '#/definitions/v2.Airline'
             type: array
-        "400":
-          description: Bad Request
+        "404":
+          description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
-        "500":
-          description: Internal Server Error
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airlines by country
+      tags:
+      - Airlines
+  /airlines/iata/{iataCode}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an airline by its IATA code.
+      parameters:
+      - description: IATA code
+        in: path
+        name: iataCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.Airline'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airline by IATA code
       tags:
       - Airlines
-  /airlines/icao/{icao}:
+  /airlines/icao/{icaoCode}:
     get:
       consumes:
       - application/json
-      description: Retrieves airline information based on the ICAO code.
+      description: Retrieves an airline by its ICAO code.
       parameters:
-      - description: ICAO code of the airline
+      - description: ICAO code
         in: path
-        name: icao
+        name: icaoCode
         required: true
         type: string
       produces:
@@ -768,29 +728,49 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/v2.Airline'
-            type: array
-        "400":
-          description: Bad Request
+            $ref: '#/definitions/v2.Airline'
+        "404":
+          description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airline by ICAO code
       tags:
       - Airlines
-  /airlines/name/{name}:
+  /airlines/id/{airlineID}:
     get:
       consumes:
       - application/json
-      description: Retrieves airline information based on the name or callsign.
+      description: Retrieves a specific airline by its ID.
       parameters:
-      - description: Name or callsign of the airline
+      - description: Airline ID
         in: path
-        name: name
+        name: airlineID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.Airline'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get airline by ID
+      tags:
+      - Airlines
+  /airlines/search:
+    get:
+      consumes:
+      - application/json
+      description: Performs a flexible search for airlines based on a query string.
+      parameters:
+      - description: Search string (can match airline name, country, ICAO/IATA code,
+          etc.)
+        in: query
+        name: query
         required: true
         type: string
       produces:
@@ -805,12 +785,12 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
-        "500":
-          description: Internal Server Error
+            $ref: '#/definitions/v2.ErrorResponse'
+        "404":
+          description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
-      summary: Get airlines by name
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Search airlines
       tags:
       - Airlines
   /airports:
@@ -831,7 +811,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get all airports
       tags:
       - Airports
@@ -857,7 +837,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airports by country
       tags:
       - Airports
@@ -889,7 +869,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get a single airport by identifier
       tags:
       - Airports
@@ -921,7 +901,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airport frequencies
       tags:
       - Airports
@@ -953,7 +933,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airport runways
       tags:
       - Airports
@@ -978,7 +958,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airport by ICAO or IATA code
       tags:
       - Airports
@@ -1008,11 +988,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Calculate distance between two airports
       tags:
       - Airports
@@ -1039,7 +1019,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airports by keyword
       tags:
       - Airports
@@ -1066,7 +1046,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airports by municipality
       tags:
       - Airports
@@ -1104,7 +1084,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airports within a radius
       tags:
       - Airports
@@ -1131,7 +1111,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airports by ISO region
       tags:
       - Airports
@@ -1152,7 +1132,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airports with scheduled service
       tags:
       - Airports
@@ -1180,7 +1160,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Search airports
       tags:
       - Airports
@@ -1207,7 +1187,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get airports by type
       tags:
       - Airports
@@ -1453,11 +1433,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get flights by aircraft [like Python get_flights_by_aircraft]
       tags:
       - Flights
@@ -1492,11 +1472,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get arrivals by airport [like Python get_arrivals_by_airport]
       tags:
       - Flights
@@ -1531,11 +1511,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get departures by airport [like Python get_departures_by_airport]
       tags:
       - Flights
@@ -1564,11 +1544,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get flights from interval [like Python get_flights_from_interval]
       tags:
       - Flights
@@ -1600,15 +1580,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "401":
           description: Unauthorized if no username/password configured
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get states for your own sensors [like Python get_my_states]
       tags:
       - Flights
@@ -1640,11 +1620,11 @@ paths:
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get aircraft states (all) [like Python get_states]
       tags:
       - Flights
@@ -1672,11 +1652,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get flight track by aircraft [like Python get_track_by_aircraft]
       tags:
       - Flights
@@ -1799,7 +1779,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get passport data
       tags:
       - Passports
@@ -1827,7 +1807,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get e-visa destinations for a passport
       tags:
       - Passports
@@ -1858,7 +1838,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get detailed visa requirements for a passport and destination
       tags:
       - Passports
@@ -1886,7 +1866,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get visa-free destinations for a passport
       tags:
       - Passports
@@ -1914,7 +1894,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get visa-on-arrival destinations for a passport
       tags:
       - Passports
@@ -1942,7 +1922,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get visa-required destinations for a passport
       tags:
       - Passports
@@ -1967,7 +1947,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get visa requirements for a passport
       tags:
       - Passports
@@ -1998,7 +1978,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Find common visa-free destinations for multiple passports
       tags:
       - Passports
@@ -2034,11 +2014,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Compare visa requirements for multiple passports to a single destination
       tags:
       - Passports
@@ -2089,7 +2069,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get reciprocal visa requirements between two countries
       tags:
       - Passports
@@ -2120,11 +2100,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Get visa requirements between two countries
       tags:
       - Passports
@@ -2232,11 +2212,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_DoROAD-AI_atlas_api_v2.ErrorResponse'
+            $ref: '#/definitions/v2.ErrorResponse'
       summary: Super Type Query
       tags:
       - Search
