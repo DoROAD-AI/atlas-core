@@ -9,9 +9,11 @@ import (
 	v1 "github.com/DoROAD-AI/atlas/api/v1"
 	v2 "github.com/DoROAD-AI/atlas/api/v2"
 	"github.com/DoROAD-AI/atlas/docs" // Swagger docs
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
 	swaggerFiles "github.com/swaggo/files" // Swagger files
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -20,11 +22,14 @@ import (
 // @version     2.0
 // @description Atlas is DoROAD's flagship Global Travel and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport data, and up-to-date passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.
 // @termsOfService http://atlas.doroad.io/terms/
+//
 // @contact.name  Atlas API Support
 // @contact.url   https://github.com/DoROAD-AI/atlas/issues
 // @contact.email support@doroad.ai
+//
 // @license.name  MIT / Proprietary
 // @license.url   https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+//
 // @BasePath      /v2
 // @schemes       https http
 func getHost() string {
@@ -166,6 +171,17 @@ func main() {
 		v2Group.GET("/airports/radius", v2.GetAirportsWithinRadius)
 		v2Group.GET("/airports/distance", v2.CalculateDistanceBetweenAirports)
 		v2Group.GET("/airports/keyword/:keyword", v2.GetAirportsByKeyword)
+
+		// v2 airline routes
+		airlinesGroup := v2Group.Group("/airlines")
+		{
+			airlinesGroup.GET("/icao/:icao", v2.GetAirlinesByICAO)
+			airlinesGroup.GET("/iata/:iata", v2.GetAirlinesByIATA)
+			airlinesGroup.GET("/name/:name", v2.GetAirlinesByName)
+
+			// IMPORTANT: Revert this route so /v2/airlines/XXX/details works
+			airlinesGroup.GET("/:icao/details", v2.GetAirlineDetails)
+		}
 
 		// Flights routes (OpenSky API integration)
 		flightsGroup := v2Group.Group("/flights")

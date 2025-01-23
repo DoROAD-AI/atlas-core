@@ -10,8 +10,11 @@ require (
 	github.com/swaggo/swag v1.16.4
 )
 
+require github.com/andybalholm/cascadia v1.3.3 // indirect
+
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
