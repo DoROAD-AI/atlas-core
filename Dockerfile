@@ -23,16 +23,13 @@ FROM gcr.io/distroless/base-debian12
 EXPOSE 3101
 
 # Set the working directory
-WORKDIR /
+WORKDIR /app
 
 # Copy the built binary from the builder stage
-COPY --from=builder /app/atlas /
+COPY --from=builder /app/atlas ./
 
-# If your application requires any data files at runtime, copy them as well
-COPY --from=builder /app/data/countries.json /
-COPY --from=builder /app/data/passports.json /
-COPY --from=builder /app/data/airports.json /
-COPY --from=builder /app/data/airlines.json /
+# Create the data directory and copy the JSON files there
+COPY --from=builder /app/data /app/data
 
 # Command to run the application
-ENTRYPOINT ["/atlas"]
+ENTRYPOINT ["./atlas"]
