@@ -32,6 +32,7 @@ COPY --from=builder /app/atlas /
 COPY --from=builder /app/data/countries.json /
 COPY --from=builder /app/data/passports.json /
 COPY --from=builder /app/data/airports.json /
+COPY --from=builder /app/data/airlines.json /
 
 # Command to run the application
 ENTRYPOINT ["/atlas"]
