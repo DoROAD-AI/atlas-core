@@ -1721,51 +1721,6 @@
                 }
             }
         },
-        "/passports/common-visa-free": {
-            "get": {
-                "description": "Determines the common countries that a set of passports can access visa-free.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Find common visa-free destinations for multiple passports",
-                "parameters": [
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Comma-separated list of passport codes (e.g., USA,DEU,JPN)",
-                        "name": "passports",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/passports/compare": {
             "get": {
                 "description": "Compares visa requirements for a list of passports to a single destination.",
@@ -1824,132 +1779,6 @@
                 }
             }
         },
-        "/passports/ranking": {
-            "get": {
-                "description": "Returns a ranked list of passports based on the number of countries they can access visa-free or with visa-on-arrival.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Get a ranked list of passports based on visa-free access",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "additionalProperties": true
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/passports/reciprocal/{countryCode1}/{countryCode2}": {
-            "get": {
-                "description": "Checks the visa requirements both ways between two countries.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Get reciprocal visa requirements between two countries",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "First country code (e.g., USA, US, 840, etc.)",
-                        "name": "countryCode1",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Second country code (e.g., DEU, DE, 276, etc.)",
-                        "name": "countryCode2",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "$ref": "#/definitions/v2.VisaRequirement"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/passports/visa": {
-            "get": {
-                "description": "Get visa requirements for a passport holder from one country traveling to another.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Get visa requirements between two countries",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Origin country code (e.g., USA, US, 840, etc.)",
-                        "name": "fromCountry",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Destination country code (e.g., DEU, DE, 276, etc.)",
-                        "name": "toCountry",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v2.VisaRequirement"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/passports/{passportCode}": {
             "get": {
                 "description": "Get visa requirement data for a specific passport.",
@@ -1977,47 +1806,6 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v2.PassportResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/passports/{passportCode}/e-visa": {
-            "get": {
-                "description": "Retrieves a list of countries where the given passport holder can apply for an e-visa.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Get e-visa destinations for a passport",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Passport code (e.g., USA, US, 840, etc.)",
-                        "name": "passportCode",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
                         }
                     },
                     "404": {
@@ -2063,167 +1851,6 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v2.VisaRequirement"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/passports/{passportCode}/visa-free": {
-            "get": {
-                "description": "Retrieves a list of countries where the given passport holder can travel visa-free.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Get visa-free destinations for a passport",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Passport code (e.g., USA, US, 840, etc.)",
-                        "name": "passportCode",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/passports/{passportCode}/visa-on-arrival": {
-            "get": {
-                "description": "Retrieves a list of countries where the given passport holder can obtain a visa on arrival.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Get visa-on-arrival destinations for a passport",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Passport code (e.g., USA, US, 840, etc.)",
-                        "name": "passportCode",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/passports/{passportCode}/visa-required": {
-            "get": {
-                "description": "Retrieves a list of countries where the given passport holder requires a visa before arrival.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Get visa-required destinations for a passport",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Passport code (e.g., USA, US, 840, etc.)",
-                        "name": "passportCode",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v2.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/passports/{passportCode}/visas": {
-            "get": {
-                "description": "Get visa requirements for all destinations for a specific passport.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Passports"
-                ],
-                "summary": "Get visa requirements for a passport",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Passport code (e.g., USA, US, 840, etc.)",
-                        "name": "passportCode",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v2.PassportResponse"
                         }
                     },
                     "404": {
@@ -2490,6 +2117,790 @@
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas": {
+            "get": {
+                "description": "Returns the entire visa dataset for all countries.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get all visa data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.VisaData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/common-visa-free": {
+            "get": {
+                "description": "Determines the common countries that a set of passports can access visa-free (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Find common visa-free destinations for multiple passports (basic)",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Comma-separated list of passport codes (e.g., USA,DEU,JPN)",
+                        "name": "passports",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/compare": {
+            "get": {
+                "description": "Compares the visa requirements for citizens of two countries, showing each to the other, plus listing common countries both can access without a standard visa.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Compare visa requirements between two countries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "First country code (ISO2, ISO3, or mapped key)",
+                        "name": "country1",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Second country code (ISO2, ISO3, or mapped key)",
+                        "name": "country2",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.VisaComparisonResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/destination/{destinationCode}": {
+            "get": {
+                "description": "Retrieves the visa requirements *for* a specific destination country (who can enter visa-free, who needs a visa, etc.).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get visa requirements *for* a destination country",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination country code (ISO2, ISO3, or mapped key)",
+                        "name": "destinationCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.VisaDestinationInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/destination/{destinationCode}/sorted": {
+            "get": {
+                "description": "Retrieves visa requirements for a destination, sorted by a specified field (passport_country, visa_requirement, allowed_stay, iso2, iso3).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get sorted visa requirements for a destination",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination country code (ISO2, ISO3, or mapped key)",
+                        "name": "destinationCode",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "passport_country",
+                            "visa_requirement",
+                            "allowed_stay",
+                            "iso2",
+                            "iso3"
+                        ],
+                        "type": "string",
+                        "description": "Field to sort by",
+                        "name": "sort_by",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.SortedVisaDestinationInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/passport/{passportCode}": {
+            "get": {
+                "description": "Get basic visa requirement data for a specific passport (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get passport data (basic)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.PassportResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/passport/{passportCode}/all": {
+            "get": {
+                "description": "Get visa requirements for all destinations for a specific passport (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get all visa requirements for a passport (basic)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.PassportResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/passport/{passportCode}/e-visa": {
+            "get": {
+                "description": "Retrieves a list of countries where the given passport holder can apply for an e-visa (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get e-visa destinations for a passport (basic)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/passport/{passportCode}/visa-free": {
+            "get": {
+                "description": "Retrieves a list of countries where the given passport holder can travel visa-free (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get visa-free destinations for a passport (basic)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/passport/{passportCode}/visa-on-arrival": {
+            "get": {
+                "description": "Retrieves a list of countries where the given passport holder can obtain a visa on arrival (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get visa-on-arrival destinations for a passport (basic)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/passport/{passportCode}/visa-required": {
+            "get": {
+                "description": "Retrieves a list of countries where the given passport holder requires a visa before arrival (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get visa-required destinations for a passport (basic)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Passport code (e.g., USA, US, 840, etc.)",
+                        "name": "passportCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/ranking": {
+            "get": {
+                "description": "Returns a ranked list of passports based on the number of countries they can access visa-free or with visa-on-arrival (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get a ranked list of passports based on visa-free access (basic)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/reciprocal/{countryCode1}/{countryCode2}": {
+            "get": {
+                "description": "Checks the visa requirements both ways between two countries.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get reciprocal visa requirements between two countries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "First country code (e.g., USA, US, 840, etc.)",
+                        "name": "countryCode1",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Second country code (e.g., DEU, DE, 276, etc.)",
+                        "name": "countryCode2",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/v2.VisaRequirement"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/requirements": {
+            "get": {
+                "description": "Get visa requirements for a passport holder from one country traveling to another (using passports.json).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get visa requirements between two countries (basic)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Origin country code (e.g., USA, US, 840, etc.)",
+                        "name": "fromCountry",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination country code (e.g., DEU, DE, 276, etc.)",
+                        "name": "toCountry",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.VisaRequirement"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/search": {
+            "get": {
+                "description": "Performs flexible filtering on the entire dataset of countries by region, subregion, name, or minVisaFree, etc. Also supports sorting and pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Search across all country visa data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search in country Name (case-insensitive substring)",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by region (exact match)",
+                        "name": "region",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by subregion (exact match)",
+                        "name": "subregion",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Minimum visa-free count (PassportIndex.VisaFreeCount \u003e= ?)",
+                        "name": "minVisaFree",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort by 'name', 'region', or 'visa_free_count' (defaults to 'name')",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "asc or desc (default asc)",
+                        "name": "sortOrder",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit number of results (0 = no limit)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset for pagination",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.CountryVisaInfo"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/{countryCode}": {
+            "get": {
+                "description": "Retrieves detailed visa and entry requirements for citizens of a specific country. Accepts ISO2, ISO3, or the internal map key.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get visa requirements for a country",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country code (ISO2, ISO3, or mapped key)",
+                        "name": "countryCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.CountryVisaInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/visas/{countryCode}/filtered": {
+            "get": {
+                "description": "Retrieves visa requirements for a specific country, filtered by various criteria (e.g., visa_requirement=, region=, subregion=, notes=, destination=).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get filtered visa requirements for a country",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country code (ISO2, ISO3)",
+                        "name": "countryCode",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "e.g., 'Visa required', 'Visa not required'",
+                        "name": "visa_requirement",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "e.g., '90 days'",
+                        "name": "allowed_stay",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "case-insensitive substring match in the 'notes' field",
+                        "name": "notes",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "e.g., 'Asia'",
+                        "name": "region",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "e.g., 'Southern Asia'",
+                        "name": "subregion",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination country code (ISO2 or ISO3) - to see requirement for that specific destination.",
+                        "name": "destination",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.VisaRequirementEntry"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
                         }
                     }
                 }
@@ -3112,6 +3523,27 @@
                 }
             }
         },
+        "v2.CommonAccessResult": {
+            "type": "object",
+            "properties": {
+                "country_code": {
+                    "type": "string",
+                    "example": "MEX"
+                },
+                "country_name": {
+                    "type": "string",
+                    "example": "Mexico"
+                },
+                "requirement_1": {
+                    "type": "string",
+                    "example": "Visa not required"
+                },
+                "requirement_2": {
+                    "type": "string",
+                    "example": "Visa not required"
+                }
+            }
+        },
         "v2.CountryAirports": {
             "description": "CountryAirports represents the airport data for a country.",
             "type": "object",
@@ -3145,6 +3577,84 @@
                 "wikipedia_link": {
                     "type": "string",
                     "example": "https://en.wikipedia.org/wiki/Saint_Vincent_and_the_Grenadines"
+                }
+            }
+        },
+        "v2.CountryCodes": {
+            "type": "object",
+            "properties": {
+                "iso2": {
+                    "type": "string",
+                    "example": "VC"
+                },
+                "iso3": {
+                    "type": "string",
+                    "example": "VCT"
+                },
+                "region": {
+                    "type": "string",
+                    "example": "Americas"
+                },
+                "subregion": {
+                    "type": "string",
+                    "example": "Caribbean"
+                }
+            }
+        },
+        "v2.CountryVisaInfo": {
+            "type": "object",
+            "properties": {
+                "codes": {
+                    "$ref": "#/definitions/v2.CountryCodes"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Saint Vincent and the Grenadines"
+                },
+                "passport_index": {
+                    "$ref": "#/definitions/v2.PassportIndex"
+                },
+                "requirements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.VisaRequirementEntry"
+                    }
+                },
+                "visa_map": {
+                    "$ref": "#/definitions/v2.VisaMap"
+                },
+                "wiki_url": {
+                    "type": "string",
+                    "example": "https://en.wikipedia.org/wiki/Visa_requirements_for_Saint_Vincent_and_the_Grenadines_citizens"
+                }
+            }
+        },
+        "v2.DestinationVisaRequirement": {
+            "type": "object",
+            "properties": {
+                "allowed_stay": {
+                    "type": "string",
+                    "example": "90 days"
+                },
+                "iso2": {
+                    "type": "string",
+                    "example": "US"
+                },
+                "iso3": {
+                    "type": "string",
+                    "example": "USA"
+                },
+                "notes": {
+                    "type": "string",
+                    "example": ""
+                },
+                "passport_country": {
+                    "type": "string",
+                    "example": "United States"
+                },
+                "visa_requirement": {
+                    "type": "string",
+                    "example": "Visa not required"
                 }
             }
         },
@@ -3198,6 +3708,24 @@
                 }
             }
         },
+        "v2.PassportIndex": {
+            "type": "object",
+            "properties": {
+                "ranking": {
+                    "description": "Use pointer for nullable int",
+                    "type": "integer",
+                    "example": 25
+                },
+                "ranking_source": {
+                    "type": "string",
+                    "example": "Henley Passport Index"
+                },
+                "visa_free_count": {
+                    "type": "integer",
+                    "example": 157
+                }
+            }
+        },
         "v2.PassportResponse": {
             "description": "PassportResponse represents the passport data response.",
             "type": "object",
@@ -3211,6 +3739,25 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "v2.SortedVisaDestinationInfo": {
+            "type": "object",
+            "properties": {
+                "destination_country": {
+                    "type": "string",
+                    "example": "France"
+                },
+                "requirements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.DestinationVisaRequirement"
+                    }
+                },
+                "sorted_by": {
+                    "type": "string",
+                    "example": "visa_requirement"
                 }
             }
         },
@@ -3293,6 +3840,69 @@
                 }
             }
         },
+        "v2.VisaComparisonResult": {
+            "description": "VisaComparisonResult represents the result of comparing visa requirements.",
+            "type": "object",
+            "properties": {
+                "common_access": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.CommonAccessResult"
+                    }
+                },
+                "country1": {
+                    "type": "string",
+                    "example": "USA"
+                },
+                "country2": {
+                    "type": "string",
+                    "example": "CAN"
+                },
+                "requirements": {
+                    "description": "e.g. \"USA_to_CAN\" : \"Visa required\"",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "v2.VisaData": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/v2.CountryVisaInfo"
+            }
+        },
+        "v2.VisaDestinationInfo": {
+            "type": "object",
+            "properties": {
+                "destination_country": {
+                    "type": "string",
+                    "example": "France"
+                },
+                "requirements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.DestinationVisaRequirement"
+                    }
+                }
+            }
+        },
+        "v2.VisaMap": {
+            "type": "object",
+            "properties": {
+                "legend": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "map_url": {
+                    "type": "string",
+                    "example": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Visa_requirements_for_Saint_Vincent_and_the_Grenadines_citizens.png/800px-Visa_requirements_for_Saint_Vincent_and_the_Grenadines_citizens.png"
+                }
+            }
+        },
         "v2.VisaRequirement": {
             "description": "VisaRequirement represents the visa requirement between two countries.",
             "type": "object",
@@ -3308,6 +3918,43 @@
                 "to": {
                     "type": "string",
                     "example": "DEU"
+                }
+            }
+        },
+        "v2.VisaRequirementEntry": {
+            "type": "object",
+            "properties": {
+                "allowed_stay": {
+                    "type": "string",
+                    "example": ""
+                },
+                "country": {
+                    "type": "string",
+                    "example": "Afghanistan"
+                },
+                "iso2": {
+                    "type": "string",
+                    "example": "AF"
+                },
+                "iso3": {
+                    "type": "string",
+                    "example": "AFG"
+                },
+                "notes": {
+                    "type": "string",
+                    "example": ""
+                },
+                "region": {
+                    "type": "string",
+                    "example": "Asia"
+                },
+                "subregion": {
+                    "type": "string",
+                    "example": "Southern Asia"
+                },
+                "visa_requirement": {
+                    "type": "string",
+                    "example": "Visa required"
                 }
             }
         },

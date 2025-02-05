@@ -81,9 +81,14 @@ func main() {
 		log.Fatalf("Failed to initialize airport data: %v", err)
 	}
 
-	// In main.go, inside the main function:
+	// Load airline data from JSON
 	if err := v2.LoadAirlinesData("data/airlines.json"); err != nil {
 		log.Fatalf("Failed to initialize airline data: %v", err)
+	}
+
+	// Load visa data from JSON
+	if err := v2.LoadVisaData("data/visas.json"); err != nil {
+		log.Fatalf("Failed to initialize visa data: %v", err)
 	}
 
 	// Create Gin router with default middleware
@@ -146,19 +151,11 @@ func main() {
 		v2Group.GET("/ccn3/:code", v1.GetCountryByCCN3)
 		v2Group.GET("/callingcode/:callingcode", v1.GetCountriesByCallingCode)
 
-		// v2 passport routes
-		v2Group.GET("/passports/:passportCode", v2.GetPassportData)
+		// v2 passport routes (basic, using passports.json)
+		v2Group.GET("/passports/:passportCode", v2.GetBasicPassportData)
 		v2Group.GET("/passports/:passportCode/visas", v2.GetVisaRequirementsForPassport)
-		v2Group.GET("/passports/visa", v2.GetVisaRequirements)
-		v2Group.GET("/passports/:passportCode/visa-free", v2.GetVisaFreeCountries)
-		v2Group.GET("/passports/:passportCode/visa-on-arrival", v2.GetVisaOnArrivalCountries)
-		v2Group.GET("/passports/:passportCode/e-visa", v2.GetEVisaCountries)
-		v2Group.GET("/passports/:passportCode/visa-required", v2.GetVisaRequiredCountries)
-		v2Group.GET("/passports/:passportCode/visa-details/:destinationCode", v2.GetVisaDetails)
-		v2Group.GET("/passports/reciprocal/:countryCode1/:countryCode2", v2.GetReciprocalVisaRequirements)
-		v2Group.GET("/passports/compare", v2.CompareVisaRequirements)
 		v2Group.GET("/passports/ranking", v2.GetPassportRanking)
-		v2Group.GET("/passports/common-visa-free", v2.GetCommonVisaFreeDestinations)
+		v2Group.GET("/passports/compare", v2.CompareVisaRequirements) // Keep basic comparison
 
 		// v2 airport routes
 		v2Group.GET("/search", v2.SuperTypeQuery)
@@ -185,6 +182,9 @@ func main() {
 		v2Group.GET("/airlines/iata/:iataCode", v2.GetAirlineByIATA)
 		v2Group.GET("/airlines/active", v2.GetActiveAirlines)
 		v2Group.GET("/airlines/search", v2.SearchAirlines)
+
+		// v2 visa routes (using visas.json - more comprehensive)
+		v2.RegisterVisaRoutes(v2Group) // Use the registration function
 
 		// Flights routes (OpenSky API integration)
 		flightsGroup := v2Group.Group("/flights")
