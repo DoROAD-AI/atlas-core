@@ -2193,9 +2193,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieves risk advisory information for a given country code (ISO2).
+      description: Retrieves risk advisory information for a given country identifier
+        (ISO2, ISO3, or country name).
       parameters:
-      - description: Country code (ISO2)
+      - description: Country identifier (ISO2, ISO3, or country name)
         in: path
         name: countryCode
         required: true

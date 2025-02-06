@@ -1945,7 +1945,7 @@ const docTemplate = `{
         },
         "/risks/{countryCode}": {
             "get": {
-                "description": "Retrieves risk advisory information for a given country code (ISO2).",
+                "description": "Retrieves risk advisory information for a given country identifier (ISO2, ISO3, or country name).",
                 "consumes": [
                     "application/json"
                 ],
@@ -1959,7 +1959,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Country code (ISO2)",
+                        "description": "Country identifier (ISO2, ISO3, or country name)",
                         "name": "countryCode",
                         "in": "path",
                         "required": true

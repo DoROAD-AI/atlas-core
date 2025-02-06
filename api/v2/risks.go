@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	v1 "github.com/DoROAD-AI/atlas/api/v1"
 	"github.com/DoROAD-AI/atlas/types"
 	"github.com/gin-gonic/gin"
 )
@@ -119,9 +120,9 @@ func LoadRiskData(filename string) error {
 func RegisterRiskRoutes(r *gin.RouterGroup) {
 	risks := r.Group("/risks")
 	{
-		risks.GET("", GetAllRiskData)                              // Get all risk data.
-		risks.GET("/:countryCode", GetRiskByCountry)               // Get risk data for a specific country.
-		risks.GET("/advisory/:level", GetCountriesByAdvisoryLevel) // Get countries by advisory level
+		risks.GET("", GetAllRiskData)
+		risks.GET("/:countryCode", GetRiskByCountry) // This endpoint will be modified
+		risks.GET("/advisory/:level", GetCountriesByAdvisoryLevel)
 	}
 }
 
@@ -145,6 +146,41 @@ func getCountryRiskInfo(countryCode string) (*CountryRiskInfo, bool) {
 	countryCode = strings.ToUpper(countryCode)
 	info, ok := riskData[countryCode]
 	return &info, ok
+}
+
+// findCountryCode is a NEW helper function to find the ISO2 code by various identifiers.
+func findCountryCode(identifier string) (string, bool) {
+	identifier = strings.ToUpper(identifier)
+
+	// 1. Direct lookup (ISO2) - fastest
+	if _, ok := riskData[identifier]; ok {
+		return identifier, true
+	}
+
+	// 2. Lookup in v1.Countries (ISO3, names)
+	for _, country := range v1.Countries {
+		if strings.ToUpper(country.CCA3) == identifier ||
+			strings.ToUpper(country.CCA2) == identifier || //check for iso2 as well
+			strings.EqualFold(country.Name.Common, identifier) ||
+			strings.EqualFold(country.Name.Official, identifier) {
+			// Found a match, return the ISO2 code
+			if riskInfo, ok := getCountryRiskInfo(country.CCA2); ok {
+				return strings.ToUpper(riskInfo.CountryISO), true
+			}
+
+		}
+		//check translations
+		for _, translation := range country.Translations {
+			if strings.EqualFold(translation.Common, identifier) ||
+				strings.EqualFold(translation.Official, identifier) {
+				if riskInfo, ok := getCountryRiskInfo(country.CCA2); ok {
+					return strings.ToUpper(riskInfo.CountryISO), true
+				}
+			}
+		}
+	}
+
+	return "", false // Not found
 }
 
 // ----------------------------------------------------------------------------
@@ -175,29 +211,34 @@ func GetAllRiskData(c *gin.Context) {
 
 // GetRiskByCountry handles GET /v2/risks/:countryCode
 // @Summary Get risk data for a specific country
-// @Description Retrieves risk advisory information for a given country code (ISO2).
+// @Description Retrieves risk advisory information for a given country identifier (ISO2, ISO3, or country name).
 // @Tags Risks
 // @Accept json
 // @Produce json
-// @Param countryCode path string true "Country code (ISO2)"
+// @Param countryCode path string true "Country identifier (ISO2, ISO3, or country name)"
 // @Success 200 {object} CountryRiskInfo
 // @Failure 404 {object} types.ErrorResponse
 // @Router /risks/{countryCode} [get]
-// GetRiskByCountry retrieves risk information for a specific country.
+// GetRiskByCountry retrieves risk information for a specific country,
+// supporting lookups by ISO2, ISO3, and country name.
 //
 // Parameters:
-//   - countryCode: The ISO2 country code (e.g., "CA").
+//   - countryCode: The country identifier (e.g., "CA", "CAN", "Canada").
 //
 // For enterprise, governmental, commercial, and military use, this endpoint
-// allows for focused risk assessment for specific countries, supporting
-// travel planning, security briefings, and due diligence processes.
+// provides flexible access to risk data, allowing users to query using
+// different identifiers they might have available.
 func GetRiskByCountry(c *gin.Context) {
-	countryCode := c.Param("countryCode")
-	riskInfo, found := getCountryRiskInfo(countryCode)
+	identifier := c.Param("countryCode")
+
+	// Use the helper function to find the ISO2 code
+	countryCode, found := findCountryCode(identifier)
 	if !found {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Risk data not found for this country code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Risk data not found for this country identifier"})
 		return
 	}
+
+	riskInfo, _ := getCountryRiskInfo(countryCode) // We know it exists now
 	c.JSON(http.StatusOK, riskInfo)
 }
 
