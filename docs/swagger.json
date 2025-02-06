@@ -19,6 +19,7 @@
         },
         "version": "2.0"
     },
+    "host": "atlas-guauaxfgd2enghft.francecentral-01.azurewebsites.net",
     "basePath": "/v2",
     "paths": {
         "/airlines": {

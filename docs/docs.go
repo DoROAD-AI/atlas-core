@@ -3995,7 +3995,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "",
+	Host:             "atlas-guauaxfgd2enghft.francecentral-01.azurewebsites.net",
 	BasePath:         "/v2",
 	Schemes:          []string{"https", "http"},
 	Title:            "Atlas - Global Travel and Aviation Intelligence Data API by DoROAD",

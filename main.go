@@ -32,6 +32,7 @@ import (
 //
 // @BasePath      /v2
 // @schemes       https http
+// @host atlas-guauaxfgd2enghft.francecentral-01.azurewebsites.net
 func getHost() string {
 	env := os.Getenv("ATLAS_ENV")
 	switch env {
