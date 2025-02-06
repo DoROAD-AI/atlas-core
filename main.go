@@ -228,6 +228,13 @@ func main() {
 		port = "3101"
 	}
 
+	// In your main.go, before router.Run():
+	docs.SwaggerInfo.Title = "Atlas - Global Travel and Aviation Intelligence Data API by DoROAD"
+	docs.SwaggerInfo.Description = "Atlas is DoROAD's flagship Global Travel..."
+	docs.SwaggerInfo.Version = "2.0"
+	docs.SwaggerInfo.BasePath = "/v2"
+	docs.SwaggerInfo.Schemes = []string{"https", "http"}
+
 	// Start server
 	router.Run(":" + port)
 }
