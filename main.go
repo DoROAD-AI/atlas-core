@@ -5,13 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	v1 "github.com/DoROAD-AI/atlas/api/v1"
 	v2 "github.com/DoROAD-AI/atlas/api/v2"
 	"github.com/DoROAD-AI/atlas/docs" // Swagger docs
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
@@ -101,15 +99,11 @@ func main() {
 	router := gin.Default()
 
 	// Enable CORS - Configure to be more restrictive in production
-	config := cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "TRACE"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Content-Length", "X-Requested-With"},
-		ExposeHeaders:    []string{"*"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}
-	router.Use(cors.New(config))
+	// config := cors.DefaultConfig()
+	// config.AllowAllOrigins = true // Be more specific in production
+	// config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "TRACE"}
+	// config.AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Content-Length", "X-Requested-With"}
+	// router.Use(cors.New(config))
 
 	// Dynamically set Swagger host
 	docs.SwaggerInfo.Host = getHost()
