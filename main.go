@@ -206,7 +206,9 @@ func main() {
 	}
 
 	// Serve swagger.json at the top-level path /swagger.json
-	router.StaticFile("/swagger.json", "./docs/swagger.json")
+	router.StaticFile("/v2/swagger.json", "./docs/swagger.json") // /v2
+	router.StaticFile("/swagger.json", "./docs/swagger.json")    // root
+	router.StaticFile("/v1/swagger.json", "./docs/swagger.json") // /v1
 
 	// Serve Swagger UI at /swagger/*any
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(
