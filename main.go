@@ -153,8 +153,6 @@ func main() {
 
 		// v2 passport routes (basic, using passports.json)
 		v2Group.GET("/passports/:passportCode", v2.GetBasicPassportData)
-		v2Group.GET("/passports/:passportCode/visas", v2.GetVisaRequirementsForPassport)
-		v2Group.GET("/passports/ranking", v2.GetPassportRanking)
 		v2Group.GET("/passports/compare", v2.CompareVisaRequirements) // Keep basic comparison
 
 		// v2 airport routes

@@ -1,5 +1,11 @@
 basePath: /v2
 definitions:
+  types.ErrorResponse:
+    properties:
+      error:
+        example: error message
+        type: string
+    type: object
   v1.CapitalInfo:
     properties:
       latlng:
@@ -462,6 +468,86 @@ definitions:
         example: https://en.wikipedia.org/wiki/Saint_Vincent_and_the_Grenadines
         type: string
     type: object
+  v2.CountryCodes:
+    properties:
+      iso2:
+        description: ISO 3166-1 alpha-2 code (e.g., "VC" for Saint Vincent and the
+          Grenadines).
+        example: VC
+        type: string
+      iso3:
+        description: ISO 3166-1 alpha-3 code (e.g., "VCT" for Saint Vincent and the
+          Grenadines).
+        example: VCT
+        type: string
+      region:
+        description: Geographic region the country belongs to (e.g., "Americas").
+        example: Americas
+        type: string
+      subregion:
+        description: Geographic subregion the country belongs to (e.g., "Caribbean").
+        example: Caribbean
+        type: string
+    type: object
+  v2.CountryVisaInfo:
+    properties:
+      codes:
+        allOf:
+        - $ref: '#/definitions/v2.CountryCodes'
+        description: Various codes associated with the country (ISO2, ISO3, region,
+          subregion).
+      name:
+        description: Common name of the country.
+        example: Saint Vincent and the Grenadines
+        type: string
+      passport_index:
+        allOf:
+        - $ref: '#/definitions/v2.PassportIndex'
+        description: Information about the passport ranking of this country.
+      requirements:
+        description: List of visa requirements for citizens of this country traveling
+          to other countries.
+        items:
+          $ref: '#/definitions/v2.VisaRequirementEntry'
+        type: array
+      visa_map:
+        allOf:
+        - $ref: '#/definitions/v2.VisaMap'
+        description: Information about the visa map image, including URL and legend.
+      wiki_url:
+        description: URL to the Wikipedia page detailing visa requirements for citizens
+          of this country.
+        example: https://en.wikipedia.org/wiki/Visa_requirements_for_Saint_Vincent_and_the_Grenadines_citizens
+        type: string
+    type: object
+  v2.DestinationVisaRequirement:
+    properties:
+      allowed_stay:
+        description: Allowed duration of stay.
+        example: 90 days
+        type: string
+      iso2:
+        description: ISO 3166-1 alpha-2 code of the passport country.
+        example: US
+        type: string
+      iso3:
+        description: ISO 3166-1 alpha-3 code of the passport country.
+        example: USA
+        type: string
+      notes:
+        description: Additional notes about the visa requirement.
+        example: ""
+        type: string
+      passport_country:
+        description: Name of the passport country.
+        example: United States
+        type: string
+      visa_requirement:
+        description: Visa requirement (e.g., "Visa required", "Visa not required",
+          "e-Visa").
+        example: Visa not required
+        type: string
+    type: object
   v2.EnhancedVisaRequirement:
     description: EnhancedVisaRequirement represents the detailed visa requirement
       between two countries.
@@ -523,6 +609,34 @@ definitions:
         example: 1674345600
         type: integer
     type: object
+  v2.PassportIndex:
+    properties:
+      ranking:
+        description: Passport ranking.  This is a pointer to allow for null values
+          (no ranking data).
+        example: 25
+        type: integer
+      ranking_source:
+        description: Source of the passport ranking (e.g., "Henley Passport Index").
+        example: Henley Passport Index
+        type: string
+      visa_free_count:
+        description: Number of countries accessible visa-free with this passport.
+        example: 157
+        type: integer
+    type: object
+  v2.PassportRank:
+    properties:
+      passportCode:
+        description: The ISO3 code of the passport's country.
+        type: string
+      rank:
+        description: The passport's rank (1 being the highest).
+        type: integer
+      visaFreeCount:
+        description: The number of countries accessible visa-free.
+        type: integer
+    type: object
   v2.PassportResponse:
     description: PassportResponse represents the passport data response.
     properties:
@@ -533,6 +647,23 @@ definitions:
         additionalProperties:
           type: string
         type: object
+    type: object
+  v2.SortedVisaDestinationInfo:
+    properties:
+      destination_country:
+        description: Name of the destination country.
+        example: France
+        type: string
+      requirements:
+        description: List of visa requirements for all passports visiting the destination,
+          sorted.
+        items:
+          $ref: '#/definitions/v2.DestinationVisaRequirement'
+        type: array
+      sorted_by:
+        description: Field by which the requirements are sorted.
+        example: visa_requirement
+        type: string
     type: object
   v2.StateVector:
     properties:
@@ -592,6 +723,34 @@ definitions:
         example: 0
         type: number
     type: object
+  v2.VisaData:
+    additionalProperties:
+      $ref: '#/definitions/v2.CountryVisaInfo'
+    type: object
+  v2.VisaDestinationInfo:
+    properties:
+      destination_country:
+        description: Name of the destination country.
+        example: France
+        type: string
+      requirements:
+        description: List of visa requirements for all passports visiting the destination.
+        items:
+          $ref: '#/definitions/v2.DestinationVisaRequirement'
+        type: array
+    type: object
+  v2.VisaMap:
+    properties:
+      legend:
+        additionalProperties:
+          type: string
+        description: Legend explaining the color coding of the visa map.
+        type: object
+      map_url:
+        description: URL to the visa map image.
+        example: https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Visa_requirements_for_Saint_Vincent_and_the_Grenadines_citizens.png/800px-Visa_requirements_for_Saint_Vincent_and_the_Grenadines_citizens.png
+        type: string
+    type: object
   v2.VisaRequirement:
     description: VisaRequirement represents the visa requirement between two countries.
     properties:
@@ -603,6 +762,42 @@ definitions:
         type: string
       to:
         example: DEU
+        type: string
+    type: object
+  v2.VisaRequirementEntry:
+    properties:
+      allowed_stay:
+        description: Allowed duration of stay (e.g., "90 days", "30 days").
+        example: ""
+        type: string
+      country:
+        description: Destination country name.
+        example: Afghanistan
+        type: string
+      iso2:
+        description: ISO 3166-1 alpha-2 code of the destination country.
+        example: AF
+        type: string
+      iso3:
+        description: ISO 3166-1 alpha-3 code of the destination country.
+        example: AFG
+        type: string
+      notes:
+        description: Additional notes about the visa requirement.
+        example: ""
+        type: string
+      region:
+        description: Region of the destination country.
+        example: Asia
+        type: string
+      subregion:
+        description: Subregion of the destination country.
+        example: Southern Asia
+        type: string
+      visa_requirement:
+        description: Visa requirement (e.g., "Visa required", "Visa not required",
+          "e-Visa").
+        example: Visa required
         type: string
     type: object
   v2.Waypoint:
@@ -1810,37 +2005,6 @@ paths:
       summary: Get passport data
       tags:
       - Passports
-  /passports/{passportCode}/visa-details/{destinationCode}:
-    get:
-      consumes:
-      - application/json
-      description: Provides specific visa requirement details (duration, type, etc.)
-        for a given passport and destination.
-      parameters:
-      - description: Passport code (e.g., USA, US, 840, etc.)
-        in: path
-        name: passportCode
-        required: true
-        type: string
-      - description: Destination country code (e.g., DEU, DE, 276, etc.)
-        in: path
-        name: destinationCode
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v2.VisaRequirement'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get detailed visa requirements for a passport and destination
-      tags:
-      - Passports
   /passports/compare:
     get:
       consumes:
@@ -2055,6 +2219,325 @@ paths:
       summary: Get countries by translation
       tags:
       - Countries
+  /visas:
+    get:
+      consumes:
+      - application/json
+      description: Get complete visa requirement data for all countries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.VisaData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get all visa data
+      tags:
+      - Visas
+  /visas/common-visa-free:
+    get:
+      consumes:
+      - application/json
+      description: Get destinations that are visa-free for multiple passports
+      parameters:
+      - description: Comma-separated list of passport codes
+        in: query
+        name: passports
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get common visa-free destinations
+      tags:
+      - Visas
+  /visas/destination/{destinationCode}:
+    get:
+      consumes:
+      - application/json
+      description: Get visa requirements for all passports visiting a specific destination
+      parameters:
+      - description: Destination country code
+        in: path
+        name: destinationCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.VisaDestinationInfo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get visa requirements for destination
+      tags:
+      - Visas
+  /visas/destination/{destinationCode}/sorted:
+    get:
+      consumes:
+      - application/json
+      description: Get sorted visa requirements for all passports visiting a specific
+        destination
+      parameters:
+      - description: Destination country code
+        in: path
+        name: destinationCode
+        required: true
+        type: string
+      - description: Sort field (passport_country, visa_requirement, allowed_stay,
+          iso2, iso3)
+        in: query
+        name: sort_by
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.SortedVisaDestinationInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get sorted visa requirements for destination
+      tags:
+      - Visas
+  /visas/passport/{passportCode}:
+    get:
+      consumes:
+      - application/json
+      description: Get visa requirements for a specific passport
+      parameters:
+      - description: Passport code (e.g., USA, US, 840)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.PassportResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get passport visa requirements
+      tags:
+      - Visas
+  /visas/passport/{passportCode}/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all visa requirements for a specific passport (same as /visas/passport/:passportCode)
+      parameters:
+      - description: Passport code (e.g., USA, US, 840)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.PassportResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get all visa requirements for a passport
+      tags:
+      - Visas
+  /visas/passport/{passportCode}/e-visa:
+    get:
+      consumes:
+      - application/json
+      description: Get list of countries that offer e-visa for a specific passport
+      parameters:
+      - description: Passport code (e.g., USA, US, 840)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get e-visa countries
+      tags:
+      - Visas
+  /visas/passport/{passportCode}/visa-free:
+    get:
+      consumes:
+      - application/json
+      description: Get list of countries that are visa-free for a specific passport
+      parameters:
+      - description: Passport code (e.g., USA, US, 840)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get visa-free countries
+      tags:
+      - Visas
+  /visas/passport/{passportCode}/visa-on-arrival:
+    get:
+      consumes:
+      - application/json
+      description: Get list of countries that offer visa on arrival for a specific
+        passport
+      parameters:
+      - description: Passport code (e.g., USA, US, 840)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get visa-on-arrival countries
+      tags:
+      - Visas
+  /visas/passport/{passportCode}/visa-required:
+    get:
+      consumes:
+      - application/json
+      description: Get list of countries that require a visa for a specific passport
+      parameters:
+      - description: Passport code (e.g., USA, US, 840)
+        in: path
+        name: passportCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get visa-required countries
+      tags:
+      - Visas
+  /visas/ranking:
+    get:
+      consumes:
+      - application/json
+      description: Get global passport rankings based on visa-free access
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.PassportRank'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get passport rankings
+      tags:
+      - Visas
+  /visas/reciprocal/{countryCode1}/{countryCode2}:
+    get:
+      consumes:
+      - application/json
+      description: Get mutual visa requirements between two countries
+      parameters:
+      - description: First country code
+        in: path
+        name: countryCode1
+        required: true
+        type: string
+      - description: Second country code
+        in: path
+        name: countryCode2
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/v2.VisaRequirement'
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get reciprocal visa requirements
+      tags:
+      - Visas
   /visas/requirements:
     get:
       consumes:
