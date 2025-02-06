@@ -1604,7 +1604,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get flights by aircraft [like Python get_flights_by_aircraft]
+      summary: Get flights by aircraft
       tags:
       - Flights
   /flights/arrivals/{airport}:
@@ -1643,7 +1643,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get arrivals by airport [like Python get_arrivals_by_airport]
+      summary: Get arrivals by airport
       tags:
       - Flights
   /flights/departures/{airport}:
@@ -1682,7 +1682,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get departures by airport [like Python get_departures_by_airport]
+      summary: Get departures by airport
       tags:
       - Flights
   /flights/interval:
@@ -1715,7 +1715,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get flights from interval [like Python get_flights_from_interval]
+      summary: Get flights from interval
       tags:
       - Flights
   /flights/my-states:
@@ -1755,7 +1755,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get states for your own sensors [like Python get_my_states]
+      summary: Get states for your own sensors
       tags:
       - Flights
   /flights/states/all:
@@ -1791,7 +1791,7 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get aircraft states (all) [like Python get_states]
+      summary: Get aircraft states (all)
       tags:
       - Flights
   /flights/track:
@@ -1823,7 +1823,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v2.ErrorResponse'
-      summary: Get flight track by aircraft [like Python get_track_by_aircraft]
+      summary: Get flight track by aircraft
       tags:
       - Flights
   /independent:

@@ -1213,7 +1213,7 @@ const docTemplate = `{
                 "tags": [
                     "Flights"
                 ],
-                "summary": "Get flights by aircraft [like Python get_flights_by_aircraft]",
+                "summary": "Get flights by aircraft",
                 "parameters": [
                     {
                         "type": "string",
@@ -1269,7 +1269,7 @@ const docTemplate = `{
                 "tags": [
                     "Flights"
                 ],
-                "summary": "Get arrivals by airport [like Python get_arrivals_by_airport]",
+                "summary": "Get arrivals by airport",
                 "parameters": [
                     {
                         "type": "string",
@@ -1325,7 +1325,7 @@ const docTemplate = `{
                 "tags": [
                     "Flights"
                 ],
-                "summary": "Get departures by airport [like Python get_departures_by_airport]",
+                "summary": "Get departures by airport",
                 "parameters": [
                     {
                         "type": "string",
@@ -1381,7 +1381,7 @@ const docTemplate = `{
                 "tags": [
                     "Flights"
                 ],
-                "summary": "Get flights from interval [like Python get_flights_from_interval]",
+                "summary": "Get flights from interval",
                 "parameters": [
                     {
                         "type": "string",
@@ -1430,7 +1430,7 @@ const docTemplate = `{
                 "tags": [
                     "Flights"
                 ],
-                "summary": "Get states for your own sensors [like Python get_my_states]",
+                "summary": "Get states for your own sensors",
                 "parameters": [
                     {
                         "type": "string",
@@ -1488,7 +1488,7 @@ const docTemplate = `{
                 "tags": [
                     "Flights"
                 ],
-                "summary": "Get aircraft states (all) [like Python get_states]",
+                "summary": "Get aircraft states (all)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1540,7 +1540,7 @@ const docTemplate = `{
                 "tags": [
                     "Flights"
                 ],
-                "summary": "Get flight track by aircraft [like Python get_track_by_aircraft]",
+                "summary": "Get flight track by aircraft",
                 "parameters": [
                     {
                         "type": "string",

@@ -797,7 +797,7 @@ func enhanceFlightsResponse(
 //=====================================================
 
 // GetStatesAllHandler
-// @Summary Get aircraft states (all) [like Python get_states]
+// @Summary Get aircraft states (all)
 // @Description Retrieves the state vectors for aircraft at a given time (or 0 for "now"). Optional: filter by icao24 or bounding box.
 // @Tags Flights
 // @Param time query string false "Time can be Unix, RFC3339, or negative/relative (default=0 => now)"
@@ -855,7 +855,7 @@ func GetStatesAllHandler(c *gin.Context) {
 }
 
 // GetMyStatesHandler
-// @Summary Get states for your own sensors [like Python get_my_states]
+// @Summary Get states for your own sensors
 // @Description Requires Basic Auth. Retrieves the state vectors from your own sensors only.
 // @Tags Flights
 // @Param time query string false "Time can be Unix, RFC3339, or negative/relative (default=0 => now)"
@@ -893,7 +893,7 @@ func GetMyStatesHandler(c *gin.Context) {
 }
 
 // GetFlightsIntervalHandler
-// @Summary Get flights from interval [like Python get_flights_from_interval]
+// @Summary Get flights from interval
 // @Description Retrieves flights for a short interval [begin, end], max 2 hours.
 // @Tags Flights
 // @Param begin query string true "Start time (Unix, RFC3339, or relative)"
@@ -934,7 +934,7 @@ func GetFlightsIntervalHandler(c *gin.Context) {
 }
 
 // GetFlightsByAircraftHandlerV2
-// @Summary Get flights by aircraft [like Python get_flights_by_aircraft]
+// @Summary Get flights by aircraft
 // @Description Retrieves flights for [icao24] in [begin, end], up to 30 days.
 // @Tags Flights
 // @Param icao24 path string true "ICAO24 address (hex)"
@@ -975,7 +975,7 @@ func GetFlightsByAircraftHandlerV2(c *gin.Context) {
 }
 
 // GetArrivalsByAirportHandlerV2
-// @Summary Get arrivals by airport [like Python get_arrivals_by_airport]
+// @Summary Get arrivals by airport
 // @Description Retrieves flights that arrived at [airport] in [begin, end], up to 7 days.
 // @Tags Flights
 // @Param airport path string true "ICAO code of airport"
@@ -1017,7 +1017,7 @@ func GetArrivalsByAirportHandlerV2(c *gin.Context) {
 }
 
 // GetDeparturesByAirportHandlerV2
-// @Summary Get departures by airport [like Python get_departures_by_airport]
+// @Summary Get departures by airport
 // @Description Retrieves flights that departed [airport] in [begin, end], up to 7 days.
 // @Tags Flights
 // @Param airport path string true "ICAO code of airport"
@@ -1059,7 +1059,7 @@ func GetDeparturesByAirportHandlerV2(c *gin.Context) {
 }
 
 // GetTrackByAircraftHandler
-// @Summary Get flight track by aircraft [like Python get_track_by_aircraft]
+// @Summary Get flight track by aircraft
 // @Description Retrieves the trajectory for an aircraft [icao24] at time t. If t=0 => live track.
 // @Tags Flights
 // @Param icao24 query string true "ICAO24 address"
