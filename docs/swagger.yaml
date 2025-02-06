@@ -915,7 +915,6 @@ definitions:
         example: 270
         type: number
     type: object
-host: atlas-guauaxfgd2enghft.francecentral-01.azurewebsites.net
 info:
   contact:
     email: support@doroad.ai
