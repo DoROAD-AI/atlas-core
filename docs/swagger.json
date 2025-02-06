@@ -1864,6 +1864,120 @@
                 }
             }
         },
+        "/risks": {
+            "get": {
+                "description": "Retrieves risk advisories for all countries.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Risks"
+                ],
+                "summary": "Get all country risk data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.RiskData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/risks/advisory/{level}": {
+            "get": {
+                "description": "Retrieves a list of countries that have a specific advisory level.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Risks"
+                ],
+                "summary": "Get countries by advisory level",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Advisory level",
+                        "name": "level",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/risks/{countryCode}": {
+            "get": {
+                "description": "Retrieves risk advisory information for a given country code (ISO2).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Risks"
+                ],
+                "summary": "Get risk data for a specific country",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Country code (ISO2)",
+                        "name": "countryCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.CountryRiskInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/search": {
             "get": {
                 "description": "Performs a comprehensive search across all data types (countries, airports) based on query parameters.",
@@ -3294,6 +3408,80 @@
                 }
             }
         },
+        "v2.CountryRiskInfo": {
+            "type": "object",
+            "properties": {
+                "advisory-state": {
+                    "description": "Advisory level (numerical representation).",
+                    "type": "integer",
+                    "example": 3
+                },
+                "country-eng": {
+                    "description": "English name of the country.",
+                    "type": "string",
+                    "example": "Afghanistan"
+                },
+                "country-fra": {
+                    "description": "French name of the country.",
+                    "type": "string",
+                    "example": "Afghanistan"
+                },
+                "country-id": {
+                    "description": "Internal country ID.",
+                    "type": "integer",
+                    "example": 1000
+                },
+                "country-iso": {
+                    "description": "ISO 3166-1 alpha-2 country code.",
+                    "type": "string",
+                    "example": "AF"
+                },
+                "date-published": {
+                    "description": "Date and time when the advisory was published.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v2.RiskDate"
+                        }
+                    ]
+                },
+                "eng": {
+                    "description": "English-specific risk details.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v2.RiskLanguageDetails"
+                        }
+                    ]
+                },
+                "fra": {
+                    "description": "French-specific risk details.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v2.RiskLanguageDetails"
+                        }
+                    ]
+                },
+                "has-advisory-warning": {
+                    "description": "Flag indicating if there's an advisory warning (1 = yes, 0 = no).",
+                    "type": "integer",
+                    "example": 1
+                },
+                "has-content": {
+                    "description": "Flag indicating if there's content associated with the advisory (1 = yes, 0 = no).",
+                    "type": "integer",
+                    "example": 1
+                },
+                "has-regional-advisory": {
+                    "description": "Flag indicating if there are regional advisories (1 = yes, 0 = no).",
+                    "type": "integer",
+                    "example": 0
+                },
+                "recent-updates-type": {
+                    "description": "Description of the most recent update.",
+                    "type": "string",
+                    "example": "Editorial change"
+                }
+            }
+        },
         "v2.CountryVisaInfo": {
             "type": "object",
             "properties": {
@@ -3509,6 +3697,59 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "v2.RiskData": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/v2.CountryRiskInfo"
+            }
+        },
+        "v2.RiskDate": {
+            "type": "object",
+            "properties": {
+                "asp": {
+                    "description": "ASP.NET-formatted date and time.",
+                    "type": "string"
+                },
+                "date": {
+                    "description": "Human-readable date and time of the publication.",
+                    "type": "string"
+                },
+                "timestamp": {
+                    "description": "Unix timestamp of the publication date.",
+                    "type": "integer"
+                }
+            }
+        },
+        "v2.RiskLanguageDetails": {
+            "type": "object",
+            "properties": {
+                "advisory-text": {
+                    "description": "Advisory text (e.g., \"Avoid all travel\", \"Exercise normal security precautions\").",
+                    "type": "string",
+                    "example": "Avoid all travel"
+                },
+                "friendly-date": {
+                    "description": "Human-readable publication date.",
+                    "type": "string",
+                    "example": "January 22, 2025 14:48 EST"
+                },
+                "name": {
+                    "description": "Country name in the specific language.",
+                    "type": "string",
+                    "example": "Afghanistan"
+                },
+                "recent-updates": {
+                    "description": "Description of the most recent update.",
+                    "type": "string",
+                    "example": "Editorial change"
+                },
+                "url-slug": {
+                    "description": "URL-friendly slug of the country name.",
+                    "type": "string",
+                    "example": "afghanistan"
                 }
             }
         },

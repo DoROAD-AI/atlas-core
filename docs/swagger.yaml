@@ -489,6 +489,60 @@ definitions:
         example: Caribbean
         type: string
     type: object
+  v2.CountryRiskInfo:
+    properties:
+      advisory-state:
+        description: Advisory level (numerical representation).
+        example: 3
+        type: integer
+      country-eng:
+        description: English name of the country.
+        example: Afghanistan
+        type: string
+      country-fra:
+        description: French name of the country.
+        example: Afghanistan
+        type: string
+      country-id:
+        description: Internal country ID.
+        example: 1000
+        type: integer
+      country-iso:
+        description: ISO 3166-1 alpha-2 country code.
+        example: AF
+        type: string
+      date-published:
+        allOf:
+        - $ref: '#/definitions/v2.RiskDate'
+        description: Date and time when the advisory was published.
+      eng:
+        allOf:
+        - $ref: '#/definitions/v2.RiskLanguageDetails'
+        description: English-specific risk details.
+      fra:
+        allOf:
+        - $ref: '#/definitions/v2.RiskLanguageDetails'
+        description: French-specific risk details.
+      has-advisory-warning:
+        description: Flag indicating if there's an advisory warning (1 = yes, 0 =
+          no).
+        example: 1
+        type: integer
+      has-content:
+        description: Flag indicating if there's content associated with the advisory
+          (1 = yes, 0 = no).
+        example: 1
+        type: integer
+      has-regional-advisory:
+        description: Flag indicating if there are regional advisories (1 = yes, 0
+          = no).
+        example: 0
+        type: integer
+      recent-updates-type:
+        description: Description of the most recent update.
+        example: Editorial change
+        type: string
+    type: object
   v2.CountryVisaInfo:
     properties:
       codes:
@@ -647,6 +701,46 @@ definitions:
         additionalProperties:
           type: string
         type: object
+    type: object
+  v2.RiskData:
+    additionalProperties:
+      $ref: '#/definitions/v2.CountryRiskInfo'
+    type: object
+  v2.RiskDate:
+    properties:
+      asp:
+        description: ASP.NET-formatted date and time.
+        type: string
+      date:
+        description: Human-readable date and time of the publication.
+        type: string
+      timestamp:
+        description: Unix timestamp of the publication date.
+        type: integer
+    type: object
+  v2.RiskLanguageDetails:
+    properties:
+      advisory-text:
+        description: Advisory text (e.g., "Avoid all travel", "Exercise normal security
+          precautions").
+        example: Avoid all travel
+        type: string
+      friendly-date:
+        description: Human-readable publication date.
+        example: January 22, 2025 14:48 EST
+        type: string
+      name:
+        description: Country name in the specific language.
+        example: Afghanistan
+        type: string
+      recent-updates:
+        description: Description of the most recent update.
+        example: Editorial change
+        type: string
+      url-slug:
+        description: URL-friendly slug of the country name.
+        example: afghanistan
+        type: string
     type: object
   v2.SortedVisaDestinationInfo:
     properties:
@@ -2076,6 +2170,81 @@ paths:
       summary: Get countries by region
       tags:
       - Countries
+  /risks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves risk advisories for all countries.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.RiskData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get all country risk data
+      tags:
+      - Risks
+  /risks/{countryCode}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves risk advisory information for a given country code (ISO2).
+      parameters:
+      - description: Country code (ISO2)
+        in: path
+        name: countryCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.CountryRiskInfo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get risk data for a specific country
+      tags:
+      - Risks
+  /risks/advisory/{level}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of countries that have a specific advisory level.
+      parameters:
+      - description: Advisory level
+        in: path
+        name: level
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get countries by advisory level
+      tags:
+      - Risks
   /search:
     get:
       consumes:

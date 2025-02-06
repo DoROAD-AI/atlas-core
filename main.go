@@ -91,6 +91,11 @@ func main() {
 		log.Fatalf("Failed to initialize passport data: %v", err)
 	}
 
+	// Load risk data from JSON
+	if err := v2.LoadRiskData("data/advisories_ca.json"); err != nil {
+		log.Fatal(err) // Or handle the error more gracefully
+	}
+
 	// Create Gin router with default middleware
 	router := gin.Default()
 
@@ -183,6 +188,9 @@ func main() {
 
 		// v2 visa routes (using visas.json - more comprehensive)
 		v2.RegisterVisaRoutes(v2Group) // Use the registration function
+
+		// v2 risk routes
+		v2.RegisterRiskRoutes(v2Group)
 
 		// Flights routes (OpenSky API integration)
 		flightsGroup := v2Group.Group("/flights")
