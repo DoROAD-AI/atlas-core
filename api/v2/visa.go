@@ -91,12 +91,12 @@ func LoadVisaData(filename string) error {
 	if err := json.Unmarshal(data, &outer); err != nil {
 		return fmt.Errorf("failed to parse visa data: %w", err)
 	}
-	if outer.Countries == nil { // Add this check
+	if outer.Countries == nil {
 		return fmt.Errorf("visa data file is missing 'countries' field")
 	}
-	visaData = outer.Countries // Use ISO3 keys directly
+	visaData = outer.Countries
 
-	// Add ISO2 and ISO3 to the codeToCCA3 map in handlers.go.  This is crucial.
+	// Add ISO2 and ISO3 to the codeToCCA3 map in handlers.go.
 	for _, info := range visaData {
 		AddCodesToCCA3Map(info.Codes.ISO2, info.Codes.ISO3)
 	}
@@ -559,44 +559,6 @@ func GetVisaRequirementsForPassport(c *gin.Context) {
 	// This is the *exact* same logic as the original GetPassportData,
 	// just with a different route and description.
 	GetPassportData(c) // Reuse the existing handler
-}
-
-// GetVisaRequirements handles GET /v2/visas/requirements
-func GetVisaRequirements(c *gin.Context) {
-	fromCountryInput := strings.ToUpper(c.Query("fromCountry"))
-	toCountryInput := strings.ToUpper(c.Query("toCountry"))
-
-	if fromCountryInput == "" || toCountryInput == "" {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "fromCountry and toCountry query parameters are required"})
-		return
-	}
-
-	fromCountryCCA3, ok := codeToCCA3[fromCountryInput]
-	if !ok {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: fmt.Sprintf("Invalid fromCountry code: %s", fromCountryInput)})
-		return
-	}
-	toCountryCCA3, ok := codeToCCA3[toCountryInput]
-	if !ok {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: fmt.Sprintf("Invalid toCountry code: %s", toCountryInput)})
-		return
-	}
-
-	visaRules, ok := Passports[fromCountryCCA3]
-	if !ok {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: fmt.Sprintf("Passport data not found for origin country: %s", fromCountryCCA3)})
-		return
-	}
-	requirement, ok := visaRules[toCountryCCA3]
-	if !ok {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: fmt.Sprintf("Visa requirement data not found for this country pair: %s to %s", fromCountryCCA3, toCountryCCA3)})
-		return
-	}
-	c.JSON(http.StatusOK, VisaRequirement{
-		From:        fromCountryInput,
-		To:          toCountryInput,
-		Requirement: requirement,
-	})
 }
 
 // GetVisaFreeCountries handles GET /v2/visas/passport/{passportCode}/visa-free

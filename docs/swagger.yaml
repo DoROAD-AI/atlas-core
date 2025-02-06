@@ -462,6 +462,33 @@ definitions:
         example: https://en.wikipedia.org/wiki/Saint_Vincent_and_the_Grenadines
         type: string
     type: object
+  v2.EnhancedVisaRequirement:
+    description: EnhancedVisaRequirement represents the detailed visa requirement
+      between two countries.
+    properties:
+      allowed_stay:
+        description: From visas.json
+        example: 90 days
+        type: string
+      basic_requirement:
+        description: From passports.json (optional)
+        example: "90"
+        type: string
+      from:
+        example: USA
+        type: string
+      notes:
+        description: From visas.json
+        example: ""
+        type: string
+      to:
+        example: DEU
+        type: string
+      visa_requirement:
+        description: From visas.json
+        example: Visa not required
+        type: string
+    type: object
   v2.ErrorResponse:
     properties:
       message:
@@ -2028,6 +2055,42 @@ paths:
       summary: Get countries by translation
       tags:
       - Countries
+  /visas/requirements:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed visa requirements for a passport holder from one country
+        traveling to another, using visas.json data primarily and falling back to
+        passports.json if needed.
+      parameters:
+      - description: Origin country code (e.g., USA, US, 840, etc.)
+        in: query
+        name: fromCountry
+        required: true
+        type: string
+      - description: Destination country code (e.g., DEU, DE, 276, etc.)
+        in: query
+        name: toCountry
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.EnhancedVisaRequirement'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v2.ErrorResponse'
+      summary: Get visa requirements between two countries (enhanced)
+      tags:
+      - Visas
 schemes:
 - https
 - http

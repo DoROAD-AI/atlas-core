@@ -2124,6 +2124,57 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/visas/requirements": {
+            "get": {
+                "description": "Get detailed visa requirements for a passport holder from one country traveling to another, using visas.json data primarily and falling back to passports.json if needed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Visas"
+                ],
+                "summary": "Get visa requirements between two countries (enhanced)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Origin country code (e.g., USA, US, 840, etc.)",
+                        "name": "fromCountry",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination country code (e.g., DEU, DE, 276, etc.)",
+                        "name": "toCountry",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.EnhancedVisaRequirement"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v2.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2775,6 +2826,40 @@ const docTemplate = `{
                 "wikipedia_link": {
                     "type": "string",
                     "example": "https://en.wikipedia.org/wiki/Saint_Vincent_and_the_Grenadines"
+                }
+            }
+        },
+        "v2.EnhancedVisaRequirement": {
+            "description": "EnhancedVisaRequirement represents the detailed visa requirement between two countries.",
+            "type": "object",
+            "properties": {
+                "allowed_stay": {
+                    "description": "From visas.json",
+                    "type": "string",
+                    "example": "90 days"
+                },
+                "basic_requirement": {
+                    "description": "From passports.json (optional)",
+                    "type": "string",
+                    "example": "90"
+                },
+                "from": {
+                    "type": "string",
+                    "example": "USA"
+                },
+                "notes": {
+                    "description": "From visas.json",
+                    "type": "string",
+                    "example": ""
+                },
+                "to": {
+                    "type": "string",
+                    "example": "DEU"
+                },
+                "visa_requirement": {
+                    "description": "From visas.json",
+                    "type": "string",
+                    "example": "Visa not required"
                 }
             }
         },
