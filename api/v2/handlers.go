@@ -1,4 +1,4 @@
-// handlers.go - handlers for the v2 API.
+// handlers.go
 package v2
 
 import (
@@ -123,6 +123,7 @@ type PassportResponse struct {
 // mapping any recognized country code to its CCA3 form).
 func init() {
 	codeToCCA3 = make(map[string]string)
+	initCodeMapping() // Initialize with v1.Countries
 }
 
 // LoadPassportData reads local JSON data into the global Passports variable.
@@ -134,8 +135,7 @@ func LoadPassportData(filename string) error {
 	if err := json.Unmarshal(data, &Passports); err != nil {
 		return fmt.Errorf("failed to parse passports data: %w", err)
 	}
-	// Initialize code mapping after loading passports
-	initCodeMapping()
+	initCodeMapping() // Re-initialize the mapping after loading passports!
 	return nil
 }
 
@@ -152,9 +152,8 @@ func LoadAirportsData(filename string) error {
 }
 
 // initCodeMapping builds a mapping from various country codes to CCA3 codes.
-// This mapping is used both for passport data and to route "country codes"
-// to a single standard (CCA3).
 func initCodeMapping() {
+	// No need to re-make the map here; it's already initialized in init()
 	for _, country := range v1.Countries {
 		cca3 := country.CCA3
 		codes := []string{
@@ -176,8 +175,17 @@ func initCodeMapping() {
 	}
 }
 
-// toAlpha2 attempts to convert an arbitrary country code (CCA2, CCA3, CCN3, etc.)
-// to its ISO alpha-2 equivalent. It returns the alpha-2 code if found.
+// AddCodesToCCA3Map adds mappings to the codeToCCA3 map.
+func AddCodesToCCA3Map(iso2, iso3 string) {
+	if iso2 != "" {
+		codeToCCA3[strings.ToUpper(iso2)] = strings.ToUpper(iso3)
+	}
+	if iso3 != "" {
+		codeToCCA3[strings.ToUpper(iso3)] = strings.ToUpper(iso3)
+	}
+}
+
+// toAlpha2 attempts to convert an arbitrary country code to its ISO alpha-2 equivalent.
 func toAlpha2(code string) (string, bool) {
 	upper := strings.ToUpper(code)
 	cca3, ok := codeToCCA3[upper]
@@ -191,6 +199,17 @@ func toAlpha2(code string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+// isVisaFreeOrSimilar is a helper to check visa-free/on-arrival/e-visa status.
+func isVisaFreeOrSimilar(requirement string) bool {
+	req := strings.ToLower(requirement)
+	return req == "visa free" ||
+		req == "visa not required" ||
+		req == "visa on arrival" ||
+		req == "e-visa" ||
+		req == "eta" ||
+		strings.Contains(req, "days") // Covers "90 days", "30 days", etc.
 }
 
 // ----------------------------------------------------------------------------

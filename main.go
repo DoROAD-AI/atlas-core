@@ -71,11 +71,6 @@ func main() {
 		log.Fatalf("Failed to initialize country data: %v", err)
 	}
 
-	// Load passport data from JSON
-	if err := v2.LoadPassportData("data/passports.json"); err != nil {
-		log.Fatalf("Failed to initialize passport data: %v", err)
-	}
-
 	// Load airport data from JSON
 	if err := v2.LoadAirportsData("data/airports.json"); err != nil {
 		log.Fatalf("Failed to initialize airport data: %v", err)
@@ -89,6 +84,11 @@ func main() {
 	// Load visa data from JSON
 	if err := v2.LoadVisaData("data/visas.json"); err != nil {
 		log.Fatalf("Failed to initialize visa data: %v", err)
+	}
+
+	// Load passport data from JSON
+	if err := v2.LoadPassportData("data/passports.json"); err != nil {
+		log.Fatalf("Failed to initialize passport data: %v", err)
 	}
 
 	// Create Gin router with default middleware
@@ -199,8 +199,14 @@ func main() {
 		}
 	}
 
-	// Swagger documentation endpoint
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Serve swagger.json at the top-level path /swagger.json
+	router.StaticFile("/swagger.json", "./docs/swagger.json")
+
+	// Serve Swagger UI at /swagger/*any
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(
+		swaggerFiles.Handler,
+		ginSwagger.URL("/swagger.json"), // The UI will fetch /swagger.json
+	))
 
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {

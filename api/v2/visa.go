@@ -1,4 +1,4 @@
-// visa.go - handlers for detailed visa and entry requirements in the v2 API.
+// visa.go
 package v2
 
 import (
@@ -21,7 +21,7 @@ import (
 // ----------------------------------------------------------------------------
 
 // VisaData represents the complete visa requirements data structure.
-// Keyed by an upper-case country code, or a "country key".
+// Keyed by an upper-case ISO3 country code.
 type VisaData map[string]CountryVisaInfo
 
 // OuterVisaJSON is the JSON structure you actually have at the top level.
@@ -81,7 +81,7 @@ var visaData VisaData
 // LOADING / INITIAL SETUP
 // ----------------------------------------------------------------------------
 
-// Then modify your LoadVisaData:
+// LoadVisaData loads and parses the visa data from the JSON file
 func LoadVisaData(filename string) error {
 	data, err := os.ReadFile(filename)
 	if err != nil {
@@ -91,56 +91,51 @@ func LoadVisaData(filename string) error {
 	if err := json.Unmarshal(data, &outer); err != nil {
 		return fmt.Errorf("failed to parse visa data: %w", err)
 	}
-	// Now outer.Countries is map[string]CountryVisaInfo
-	visaData = outer.Countries
+	if outer.Countries == nil { // Add this check
+		return fmt.Errorf("visa data file is missing 'countries' field")
+	}
+	visaData = outer.Countries // Use ISO3 keys directly
+
+	// Add ISO2 and ISO3 to the codeToCCA3 map in handlers.go.  This is crucial.
+	for _, info := range visaData {
+		AddCodesToCCA3Map(info.Codes.ISO2, info.Codes.ISO3)
+	}
 	return nil
 }
 
 // RegisterVisaRoutes sets up all the visa-related routes under /v2/visas/*.
-// For example:
-//
-//	v2Group := router.Group("/v2")
-//	RegisterVisaRoutes(v2Group)
-//
-// You can then call them like:
-//
-//	GET /v2/visas
-//	GET /v2/visas/{countryCode}
-//	GET /v2/visas/{countryCode}/filtered
-//	GET /v2/visas/destination/{destinationCode}
 func RegisterVisaRoutes(r *gin.RouterGroup) {
 	visas := r.Group("/visas")
 	{
-		// 1) All data
+		// Base endpoints
 		visas.GET("", GetAllVisaData)
+		visas.GET("/search", SearchVisaData)
 
-		// 2) Single country
+		// Country-specific endpoints
 		visas.GET("/:countryCode", GetVisaRequirementsByCountry)
 		visas.GET("/:countryCode/filtered", GetFilteredVisaRequirements)
 
-		// 3) Destination
+		// Destination endpoints
 		dest := visas.Group("/destination")
 		{
 			dest.GET("/:destinationCode", GetVisaRequirementsForDestination)
 			dest.GET("/:destinationCode/sorted", GetSortedVisaRequirementsForDestination)
 		}
 
-		// 4) Comparison
+		// Comparison and analysis endpoints
 		visas.GET("/compare", CompareVisaRequirementsCountries)
 
-		// 5) Searching all data
-		visas.GET("/search", SearchVisaData)
-
 		// --- Routes moved from /v2/passports ---
-		visas.GET("/passport/:passportCode", GetPassportData)                    // Renamed route
-		visas.GET("/passport/:passportCode/all", GetVisaRequirementsForPassport) // Renamed
-		visas.GET("/requirements", GetVisaRequirements)                          // Renamed and moved
 		visas.GET("/passport/:passportCode/visa-free", GetVisaFreeCountries)
 		visas.GET("/passport/:passportCode/visa-on-arrival", GetVisaOnArrivalCountries)
 		visas.GET("/passport/:passportCode/e-visa", GetEVisaCountries)
 		visas.GET("/passport/:passportCode/visa-required", GetVisaRequiredCountries)
+		visas.GET("/passport/:passportCode", GetPassportData) // Renamed route
+		visas.GET("/requirements", GetVisaRequirements)       // Renamed and moved
 		visas.GET("/ranking", GetPassportRanking)
 		visas.GET("/common-visa-free", GetCommonVisaFreeDestinations)
+		visas.GET("/reciprocal/:countryCode1/:countryCode2", GetReciprocalVisaRequirements)
+		visas.GET("/passport/:passportCode/all", GetVisaRequirementsForPassport) // Renamed
 	}
 }
 
@@ -149,24 +144,10 @@ func RegisterVisaRoutes(r *gin.RouterGroup) {
 // ----------------------------------------------------------------------------
 
 // getCountryVisaInfo is a helper function to retrieve visa info by country code.
-// It handles various code types (ISO2, ISO3) and returns a pointer to the
-// CountryVisaInfo and a boolean indicating success.
 func getCountryVisaInfo(countryCode string) (*CountryVisaInfo, bool) {
 	countryCode = strings.ToUpper(countryCode)
-
-	// Try direct lookup by "key" in the map
-	if info, ok := visaData[countryCode]; ok {
-		return &info, true
-	}
-
-	// Otherwise iterate to see if the ISO2 or ISO3 within the data matches
-	for _, info := range visaData {
-		if strings.ToUpper(info.Codes.ISO2) == countryCode || strings.ToUpper(info.Codes.ISO3) == countryCode {
-			return &info, true
-		}
-	}
-
-	return nil, false
+	info, ok := visaData[countryCode] // Direct lookup!
+	return &info, ok
 }
 
 // parseInt is a simple helper to parse a query param as an integer.
@@ -174,19 +155,13 @@ func parseInt(s string) (int, error) {
 	return strconv.Atoi(s)
 }
 
+// isVisaFreeOrOnArrival is moved to handlers.go
+
 // ----------------------------------------------------------------------------
 // ROUTE HANDLERS
 // ----------------------------------------------------------------------------
 
 // GetAllVisaData handles GET /v2/visas
-// @Summary     Get all visa data
-// @Description Returns the entire visa dataset for all countries.
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} VisaData
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas [get]
 func GetAllVisaData(c *gin.Context) {
 	if len(visaData) == 0 {
 		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "No visa data found or not loaded."})
@@ -196,15 +171,6 @@ func GetAllVisaData(c *gin.Context) {
 }
 
 // GetVisaRequirementsByCountry handles GET /v2/visas/{countryCode}
-// @Summary     Get visa requirements for a country
-// @Description Retrieves detailed visa and entry requirements for citizens of a specific country. Accepts ISO2, ISO3, or the internal map key.
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       countryCode path string true "Country code (ISO2, ISO3, or mapped key)"
-// @Success     200 {object} CountryVisaInfo
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/{countryCode} [get]
 func GetVisaRequirementsByCountry(c *gin.Context) {
 	countryCode := c.Param("countryCode")
 	visaInfo, found := getCountryVisaInfo(countryCode)
@@ -256,21 +222,6 @@ func filterVisaRequirements(requirements []VisaRequirementEntry, filters url.Val
 }
 
 // GetFilteredVisaRequirements handles GET /v2/visas/{countryCode}/filtered
-// @Summary     Get filtered visa requirements for a country
-// @Description Retrieves visa requirements for a specific country, filtered by various criteria (e.g., visa_requirement=, region=, subregion=, notes=, destination=).
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       countryCode path string true "Country code (ISO2, ISO3)"
-// @Param       visa_requirement query string false "e.g., 'Visa required', 'Visa not required'"
-// @Param       allowed_stay query string false "e.g., '90 days'"
-// @Param       notes query string false "case-insensitive substring match in the 'notes' field"
-// @Param       region query string false "e.g., 'Asia'"
-// @Param       subregion query string false "e.g., 'Southern Asia'"
-// @Param       destination query string false "Destination country code (ISO2 or ISO3) - to see requirement for that specific destination."
-// @Success     200 {array} VisaRequirementEntry
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/{countryCode}/filtered [get]
 func GetFilteredVisaRequirements(c *gin.Context) {
 	countryCode := c.Param("countryCode")
 	visaInfo, found := getCountryVisaInfo(countryCode)
@@ -284,17 +235,6 @@ func GetFilteredVisaRequirements(c *gin.Context) {
 }
 
 // CompareVisaRequirementsCountries handles GET /v2/visas/compare
-// @Summary     Compare visa requirements between two countries
-// @Description Compares the visa requirements for citizens of two countries, showing each to the other, plus listing common countries both can access without a standard visa.
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       country1 query string true "First country code (ISO2, ISO3, or mapped key)"
-// @Param       country2 query string true "Second country code (ISO2, ISO3, or mapped key)"
-// @Success     200 {object} VisaComparisonResult
-// @Failure     400 {object} ErrorResponse
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/compare [get]
 func CompareVisaRequirementsCountries(c *gin.Context) {
 	countryCode1 := c.Query("country1")
 	countryCode2 := c.Query("country2")
@@ -313,10 +253,12 @@ func CompareVisaRequirementsCountries(c *gin.Context) {
 	}
 
 	result := VisaComparisonResult{
-		Country1:     visaInfo1.Name,
-		Country2:     visaInfo2.Name,
-		Requirements: make(map[string]string),
-		CommonAccess: []CommonAccessResult{},
+		Country1:              visaInfo1.Name,
+		Country2:              visaInfo2.Name,
+		Requirements:          make(map[string]string),
+		CommonAccess:          []CommonAccessResult{},
+		Country1PassportIndex: visaInfo1.PassportIndex,
+		Country2PassportIndex: visaInfo2.PassportIndex,
 	}
 
 	// (1) Requirement for country1 -> country2
@@ -345,9 +287,8 @@ func CompareVisaRequirementsCountries(c *gin.Context) {
 	for _, req := range visaInfo2.Requirements {
 		key := strings.ToUpper(req.ISO3)
 		if req1, ok := accessMap1[key]; ok {
-			// Define what "common access" means here:
-			// e.g., "Visa not required", "Visa on arrival", or "eVisa" for both
-			if isVisaFreeOrOnArrival(req1) && isVisaFreeOrOnArrival(req.VisaRequirement) {
+			// Use the isVisaFreeOrSimilar helper function from handlers.go
+			if isVisaFreeOrSimilar(req1) && isVisaFreeOrSimilar(req.VisaRequirement) {
 				// Try to find the actual country name from v1 data or fallback
 				countryName := req.Country
 				for _, cData := range v1.Countries {
@@ -369,22 +310,14 @@ func CompareVisaRequirementsCountries(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// isVisaFreeOrOnArrival is a helper to check if a requirement implies no standard visa needed.
-func isVisaFreeOrOnArrival(req string) bool {
-	req = strings.ToLower(req)
-	return strings.Contains(req, "visa not required") ||
-		strings.Contains(req, "on arrival") ||
-		strings.Contains(req, "evisa") ||
-		strings.Contains(req, "electronic visa") // Adjust for your data strings
-}
-
 // VisaComparisonResult represents the result of comparing visa requirements.
-// @Description VisaComparisonResult represents the result of comparing visa requirements.
 type VisaComparisonResult struct {
-	Country1     string               `json:"country1" example:"USA"`
-	Country2     string               `json:"country2" example:"CAN"`
-	Requirements map[string]string    `json:"requirements"` // e.g. "USA_to_CAN" : "Visa required"
-	CommonAccess []CommonAccessResult `json:"common_access"`
+	Country1              string               `json:"country1" example:"USA"`
+	Country2              string               `json:"country2" example:"CAN"`
+	Requirements          map[string]string    `json:"requirements"` // e.g. "USA_to_CAN" : "Visa required"
+	CommonAccess          []CommonAccessResult `json:"common_access"`
+	Country1PassportIndex PassportIndex        `json:"country1_passport_index"`
+	Country2PassportIndex PassportIndex        `json:"country2_passport_index"`
 }
 
 // CommonAccessResult represents a country accessible by both compared countries.
@@ -396,15 +329,6 @@ type CommonAccessResult struct {
 }
 
 // GetVisaRequirementsForDestination handles GET /v2/visas/destination/{destinationCode}
-// @Summary     Get visa requirements *for* a destination country
-// @Description Retrieves the visa requirements *for* a specific destination country (who can enter visa-free, who needs a visa, etc.).
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       destinationCode path string true "Destination country code (ISO2, ISO3, or mapped key)"
-// @Success     200 {object} VisaDestinationInfo
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/destination/{destinationCode} [get]
 func GetVisaRequirementsForDestination(c *gin.Context) {
 	destinationCode := c.Param("destinationCode")
 	destinationInfo, destinationFound := getCountryVisaInfo(destinationCode)
@@ -456,17 +380,6 @@ type DestinationVisaRequirement struct {
 }
 
 // GetSortedVisaRequirementsForDestination handles GET /v2/visas/destination/{destinationCode}/sorted
-// @Summary     Get sorted visa requirements for a destination
-// @Description Retrieves visa requirements for a destination, sorted by a specified field (passport_country, visa_requirement, allowed_stay, iso2, iso3).
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       destinationCode path string true "Destination country code (ISO2, ISO3, or mapped key)"
-// @Param       sort_by query string true "Field to sort by" Enums(passport_country, visa_requirement, allowed_stay, iso2, iso3)
-// @Success     200 {object} SortedVisaDestinationInfo
-// @Failure     400 {object} ErrorResponse
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/destination/{destinationCode}/sorted [get]
 func GetSortedVisaRequirementsForDestination(c *gin.Context) {
 	destinationCode := c.Param("destinationCode")
 	sortBy := c.Query("sort_by")
@@ -539,22 +452,6 @@ type SortedVisaDestinationInfo struct {
 // ----------------------------------------------------------------------------
 
 // SearchVisaData handles GET /v2/visas/search
-// @Summary     Search across all country visa data
-// @Description Performs flexible filtering on the entire dataset of countries by region, subregion, name, or minVisaFree, etc. Also supports sorting and pagination.
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       name           query string false "Search in country Name (case-insensitive substring)"
-// @Param       region         query string false "Filter by region (exact match)"
-// @Param       subregion      query string false "Filter by subregion (exact match)"
-// @Param       minVisaFree    query int    false "Minimum visa-free count (PassportIndex.VisaFreeCount >= ?)"
-// @Param       sortBy         query string false "Sort by 'name', 'region', or 'visa_free_count' (defaults to 'name')"
-// @Param       sortOrder      query string false "asc or desc (default asc)"
-// @Param       limit          query int    false "Limit number of results (0 = no limit)"
-// @Param       offset         query int    false "Offset for pagination"
-// @Success     200 {array} CountryVisaInfo
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/search [get]
 func SearchVisaData(c *gin.Context) {
 	// Copy query params
 	q := c.Request.URL.Query()
@@ -569,8 +466,8 @@ func SearchVisaData(c *gin.Context) {
 		sortOrder = "asc"
 	}
 
-	limit, _ := parseInt(q.Get("limit"))
-	offset, _ := parseInt(q.Get("offset"))
+	limit, _ := strconv.Atoi(q.Get("limit"))
+	offset, _ := strconv.Atoi(q.Get("offset"))
 
 	// Convert minVisaFree to int
 	minVisaFree := 0
@@ -638,15 +535,6 @@ func SearchVisaData(c *gin.Context) {
 }
 
 // GetPassportData handles GET /v2/visas/passport/:passportCode
-// @Summary     Get passport data (basic)
-// @Description Get basic visa requirement data for a specific passport (using passports.json).
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
-// @Success     200 {object} PassportResponse
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/passport/{passportCode} [get]
 func GetPassportData(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
@@ -667,15 +555,6 @@ func GetPassportData(c *gin.Context) {
 }
 
 // GetVisaRequirementsForPassport handles GET /v2/visas/passport/:passportCode/all
-// @Summary     Get all visa requirements for a passport (basic)
-// @Description Get visa requirements for all destinations for a specific passport (using passports.json).
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
-// @Success     200 {object} PassportResponse
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/passport/{passportCode}/all [get]
 func GetVisaRequirementsForPassport(c *gin.Context) {
 	// This is the *exact* same logic as the original GetPassportData,
 	// just with a different route and description.
@@ -683,17 +562,6 @@ func GetVisaRequirementsForPassport(c *gin.Context) {
 }
 
 // GetVisaRequirements handles GET /v2/visas/requirements
-// @Summary     Get visa requirements between two countries (basic)
-// @Description Get visa requirements for a passport holder from one country traveling to another (using passports.json).
-// @Tags        Visas
-// @Accept      json
-// @Produce     json
-// @Param       fromCountry query string true "Origin country code (e.g., USA, US, 840, etc.)"
-// @Param       toCountry   query string true "Destination country code (e.g., DEU, DE, 276, etc.)"
-// @Success     200 {object} VisaRequirement
-// @Failure     400 {object} ErrorResponse
-// @Failure     404 {object} ErrorResponse
-// @Router      /visas/requirements [get]
 func GetVisaRequirements(c *gin.Context) {
 	fromCountryInput := strings.ToUpper(c.Query("fromCountry"))
 	toCountryInput := strings.ToUpper(c.Query("toCountry"))
@@ -705,23 +573,23 @@ func GetVisaRequirements(c *gin.Context) {
 
 	fromCountryCCA3, ok := codeToCCA3[fromCountryInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid fromCountry code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: fmt.Sprintf("Invalid fromCountry code: %s", fromCountryInput)})
 		return
 	}
 	toCountryCCA3, ok := codeToCCA3[toCountryInput]
 	if !ok {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Invalid toCountry code"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: fmt.Sprintf("Invalid toCountry code: %s", toCountryInput)})
 		return
 	}
 
-	visaRules, ok := Passports[fromCountryCCA3] // Uses Passports from handlers.go
+	visaRules, ok := Passports[fromCountryCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Passport data not found for origin country"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: fmt.Sprintf("Passport data not found for origin country: %s", fromCountryCCA3)})
 		return
 	}
 	requirement, ok := visaRules[toCountryCCA3]
 	if !ok {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "Visa requirement data not found for this country pair"})
+		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: fmt.Sprintf("Visa requirement data not found for this country pair: %s to %s", fromCountryCCA3, toCountryCCA3)})
 		return
 	}
 	c.JSON(http.StatusOK, VisaRequirement{
@@ -732,15 +600,6 @@ func GetVisaRequirements(c *gin.Context) {
 }
 
 // GetVisaFreeCountries handles GET /v2/visas/passport/{passportCode}/visa-free
-// @Summary Get visa-free destinations for a passport (basic)
-// @Description Retrieves a list of countries where the given passport holder can travel visa-free (using passports.json).
-// @Tags Visas
-// @Accept json
-// @Produce json
-// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
-// @Success 200 {array} string
-// @Failure 404 {object} ErrorResponse
-// @Router /visas/passport/{passportCode}/visa-free [get]
 func GetVisaFreeCountries(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
@@ -757,8 +616,7 @@ func GetVisaFreeCountries(c *gin.Context) {
 
 	visaFreeCountries := []string{}
 	for countryCode, requirement := range visaRules {
-		// Visa-free is typically indicated by "90", "visa free", "visa on arrival", etc.
-		if requirement == "visa free" || strings.Contains(requirement, "90") || requirement == "visa on arrival" || requirement == "eta" {
+		if isVisaFreeOrSimilar(requirement) { // Use the helper function!
 			visaFreeCountries = append(visaFreeCountries, countryCode)
 		}
 	}
@@ -767,15 +625,6 @@ func GetVisaFreeCountries(c *gin.Context) {
 }
 
 // GetVisaOnArrivalCountries handles GET /v2/visas/passport/{passportCode}/visa-on-arrival
-// @Summary Get visa-on-arrival destinations for a passport (basic)
-// @Description Retrieves a list of countries where the given passport holder can obtain a visa on arrival (using passports.json).
-// @Tags Visas
-// @Accept json
-// @Produce json
-// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
-// @Success 200 {array} string
-// @Failure 404 {object} ErrorResponse
-// @Router /visas/passport/{passportCode}/visa-on-arrival [get]
 func GetVisaOnArrivalCountries(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
@@ -792,7 +641,7 @@ func GetVisaOnArrivalCountries(c *gin.Context) {
 
 	visaOnArrivalCountries := []string{}
 	for countryCode, requirement := range visaRules {
-		if requirement == "visa on arrival" {
+		if isVisaFreeOrSimilar(requirement) { // Use the helper function
 			visaOnArrivalCountries = append(visaOnArrivalCountries, countryCode)
 		}
 	}
@@ -801,15 +650,6 @@ func GetVisaOnArrivalCountries(c *gin.Context) {
 }
 
 // GetEVisaCountries handles GET /v2/visas/passport/{passportCode}/e-visa
-// @Summary Get e-visa destinations for a passport (basic)
-// @Description Retrieves a list of countries where the given passport holder can apply for an e-visa (using passports.json).
-// @Tags Visas
-// @Accept json
-// @Produce json
-// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
-// @Success 200 {array} string
-// @Failure 404 {object} ErrorResponse
-// @Router /visas/passport/{passportCode}/e-visa [get]
 func GetEVisaCountries(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
@@ -826,7 +666,7 @@ func GetEVisaCountries(c *gin.Context) {
 
 	eVisaCountries := []string{}
 	for countryCode, requirement := range visaRules {
-		if requirement == "e-visa" || requirement == "eta" {
+		if isVisaFreeOrSimilar(requirement) { // Use the helper function!
 			eVisaCountries = append(eVisaCountries, countryCode)
 		}
 	}
@@ -835,15 +675,6 @@ func GetEVisaCountries(c *gin.Context) {
 }
 
 // GetVisaRequiredCountries handles GET /v2/visas/passport/{passportCode}/visa-required
-// @Summary Get visa-required destinations for a passport (basic)
-// @Description Retrieves a list of countries where the given passport holder requires a visa before arrival (using passports.json).
-// @Tags Visas
-// @Accept json
-// @Produce json
-// @Param passportCode path string true "Passport code (e.g., USA, US, 840, etc.)"
-// @Success 200 {array} string
-// @Failure 404 {object} ErrorResponse
-// @Router /visas/passport/{passportCode}/visa-required [get]
 func GetVisaRequiredCountries(c *gin.Context) {
 	passportCodeInput := strings.ToUpper(c.Param("passportCode"))
 	passportCCA3, ok := codeToCCA3[passportCodeInput]
@@ -869,13 +700,6 @@ func GetVisaRequiredCountries(c *gin.Context) {
 }
 
 // GetPassportRanking handles GET /v2/visas/ranking
-// @Summary Get a ranked list of passports based on visa-free access (basic)
-// @Description Returns a ranked list of passports based on the number of countries they can access visa-free or with visa-on-arrival (using passports.json).
-// @Tags Visas
-// @Accept json
-// @Produce json
-// @Success 200 {array} map[string]interface{}
-// @Router /visas/ranking [get]
 func GetPassportRanking(c *gin.Context) {
 	type PassportRank struct {
 		PassportCode  string `json:"passportCode"`
@@ -888,7 +712,7 @@ func GetPassportRanking(c *gin.Context) {
 	for passportCode, visaRules := range Passports { // Uses Passports from handlers.go
 		visaFreeCount := 0
 		for _, requirement := range visaRules {
-			if requirement == "visa free" || strings.Contains(requirement, "90") || requirement == "visa on arrival" || requirement == "eta" {
+			if isVisaFreeOrSimilar(requirement) { // Use the helper function!
 				visaFreeCount++
 			}
 		}
@@ -921,15 +745,6 @@ func GetPassportRanking(c *gin.Context) {
 }
 
 // GetCommonVisaFreeDestinations handles GET /v2/visas/common-visa-free
-// @Summary Find common visa-free destinations for multiple passports (basic)
-// @Description Determines the common countries that a set of passports can access visa-free (using passports.json).
-// @Tags Visas
-// @Accept json
-// @Produce json
-// @Param passports query []string true "Comma-separated list of passport codes (e.g., USA,DEU,JPN)"
-// @Success 200 {array} string
-// @Failure 400 {object} ErrorResponse
-// @Router /visas/common-visa-free [get]
 func GetCommonVisaFreeDestinations(c *gin.Context) {
 	passportCodesInput := c.Query("passports")
 	if passportCodesInput == "" {
@@ -954,7 +769,7 @@ func GetCommonVisaFreeDestinations(c *gin.Context) {
 		}
 
 		for countryCode, requirement := range visaRules {
-			if requirement == "visa free" || strings.Contains(requirement, "90") || requirement == "visa on arrival" || requirement == "eta" {
+			if isVisaFreeOrSimilar(requirement) { // Use the helper function!
 				commonVisaFree[countryCode]++
 			}
 		}
@@ -972,16 +787,6 @@ func GetCommonVisaFreeDestinations(c *gin.Context) {
 }
 
 // GetReciprocalVisaRequirements handles GET /v2/visas/reciprocal/{countryCode1}/{countryCode2}
-// @Summary Get reciprocal visa requirements between two countries
-// @Description Checks the visa requirements both ways between two countries.
-// @Tags Visas
-// @Accept json
-// @Produce json
-// @Param countryCode1 path string true "First country code (e.g., USA, US, 840, etc.)"
-// @Param countryCode2 path string true "Second country code (e.g., DEU, DE, 276, etc.)"
-// @Success 200 {object} map[string]VisaRequirement
-// @Failure 404 {object} ErrorResponse
-// @Router /visas/reciprocal/{countryCode1}/{countryCode2} [get]
 func GetReciprocalVisaRequirements(c *gin.Context) {
 	countryCode1Input := strings.ToUpper(c.Param("countryCode1"))
 	countryCode2Input := strings.ToUpper(c.Param("countryCode2"))
