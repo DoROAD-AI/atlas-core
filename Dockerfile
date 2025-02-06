@@ -31,5 +31,8 @@ COPY --from=builder /app/atlas ./
 # Create the data directory and copy the JSON files there
 COPY --from=builder /app/data /app/data
 
+# Create the docs directory and copy the JSON files there
+COPY --from=builder /app/docs /app/docs
+
 # Command to run the application
 ENTRYPOINT ["./atlas"]
