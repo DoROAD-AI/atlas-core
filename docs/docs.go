@@ -3999,7 +3999,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/v2",
 	Schemes:          []string{"https", "http"},
 	Title:            "Atlas - Global Travel and Aviation Intelligence Data API by DoROAD",
-	Description:      "Atlas is DoROAD's flagship Global Travel and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport data, and up-to-date passport visa requirements worldwide. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, and visa regulations for various passports.",
+	Description:      "Atlas is DoROAD's flagship Global Travel, Risk and Aviation Intelligence Data API. Version 2.0 represents a significant leap forward, providing a comprehensive, high-performance RESTful API for accessing detailed country information, extensive airport and flight data, up-to-date passport visa requirements worldwide, and country-specific risk advisories. This service offers extensive data about countries (demographics, geography, international codes, etc.), airports, visa regulations for various passports, flight tracking and travel risk assessments.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
