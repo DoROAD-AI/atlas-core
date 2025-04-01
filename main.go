@@ -14,7 +14,7 @@ import (
 	"github.com/gin-contrib/cors"
 )
 
-// @title       Atlas - Geographic Data API by DoROAD
+// @title       Atlas Core - Geographic Data API by DoROAD
 // @version     1.0
 // @description A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.
 // @termsOfService http://atlas.doroad.io/terms/
@@ -35,6 +35,8 @@ func getHost() string {
 		return "atlas.doroad.dev"
 	case "dev":
 		return "atlas-guauaxfgd2enghft.francecentral-01.azurewebsites.net"
+	case "core":
+		return "atlas-core-aphef3cbeehjavhy.francecentral-01.azurewebsites.net"
 	default:
 		return "localhost:3101"
 	}
@@ -48,8 +50,8 @@ func main() {
 	}
 
 	// Load country data from JSON
-	if err := v1.LoadCountriesSafe("countries.json"); err != nil {
-		log.Fatalf("Failed to initialize API: %v", err)
+	if err := v1.LoadCountriesSafe("data/countries.json"); err != nil {
+		log.Fatalf("Failed to initialize country data: %v", err)
 	}
 
 	// Create Gin router with default middleware

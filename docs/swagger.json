@@ -6,7 +6,7 @@
     "swagger": "2.0",
     "info": {
         "description": "A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.",
-        "title": "Atlas - Geographic Data API by DoROAD",
+        "title": "Atlas Core - Geographic Data API by DoROAD",
         "termsOfService": "http://atlas.doroad.io/terms/",
         "contact": {
             "name": "Atlas API Support",
