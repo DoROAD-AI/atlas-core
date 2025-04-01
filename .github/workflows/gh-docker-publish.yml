@@ -7,13 +7,13 @@ name: Docker
 
 on:
   schedule:
-    - cron: '23 14 * * *'
+    - cron: '30 14 * * *' # Runs at 2:30 PM UTC daily
   push:
-    branches: [ "main" ]
+    branches: [ "atlas-core" ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "atlas-core" ]
 
 env:
   # Use docker.io for Docker Hub if empty
