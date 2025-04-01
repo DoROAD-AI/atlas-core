@@ -1,0 +1,51 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy container app to Azure Web App - atlas(core)
+
+on:
+  push:
+    branches:
+      - atlas-core
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to registry
+      uses: docker/login-action@v2
+      with:
+        registry: https://ghcr.io/
+        username: ${{ secrets.AzureAppService_ContainerUsername_aa8a328663014bd590a73a365a4d9ca0 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_01073d614ef54b2fb20479c538a86bd2 }}
+
+    - name: Build and push container image to registry
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_aa8a328663014bd590a73a365a4d9ca0 }}/doroad-ai/atlas:${{ github.sha }}
+        file: ./Dockerfile
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'core'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'atlas'
+        slot-name: 'core'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_0f839cb37f5b4ca2924bf0a1f9ccd00d }}
+        images: 'ghcr.io/${{ secrets.AzureAppService_ContainerUsername_aa8a328663014bd590a73a365a4d9ca0 }}/doroad-ai/atlas:${{ github.sha }}'
