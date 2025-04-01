@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://ghcr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_aa8a328663014bd590a73a365a4d9ca0 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_01073d614ef54b2fb20479c538a86bd2 }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_3eef76625e0347ff9c6b3ec09ac89cd4 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_81b85055653144a188e6b52625bd08c6 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_aa8a328663014bd590a73a365a4d9ca0 }}/doroad-ai/atlas:${{ github.sha }}
+        tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_3eef76625e0347ff9c6b3ec09ac89cd4 }}/doroad-ai/atlas:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'atlas'
         slot-name: 'core'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_0f839cb37f5b4ca2924bf0a1f9ccd00d }}
-        images: 'ghcr.io/${{ secrets.AzureAppService_ContainerUsername_aa8a328663014bd590a73a365a4d9ca0 }}/doroad-ai/atlas:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_343dd7d0791a4873ba1ce957ba279a25 }}
+        images: 'ghcr.io/${{ secrets.AzureAppService_ContainerUsername_3eef76625e0347ff9c6b3ec09ac89cd4 }}/doroad-ai/atlas:${{ github.sha }}'
