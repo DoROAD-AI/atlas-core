@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o atlas .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o atlas-core .
 
 # Runtime Stage
 FROM gcr.io/distroless/base-debian12
@@ -26,13 +26,15 @@ EXPOSE 3101
 WORKDIR /app
 
 # Copy the built binary from the builder stage
-COPY --from=builder /app/atlas ./
+COPY --from=builder /app/atlas-core ./
 
 # Create the data directory and copy the JSON files there
 COPY --from=builder /app/data /app/data
 
 # Create the docs directory and copy the JSON files there
 COPY --from=builder /app/docs /app/docs
+
+USER nonroot:nonroot
 
 # Command to run the application
 ENTRYPOINT ["./atlas-core"]
