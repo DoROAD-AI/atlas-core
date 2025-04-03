@@ -238,13 +238,13 @@ info:
   contact:
     email: support@doroad.ai
     name: Atlas API Support
-    url: https://github.com/DoROAD-AI/atlas/issues
+    url: https://github.com/DoROAD-AI/atlas-core/issues
   description: A comprehensive REST API providing detailed country information worldwide.
     This modern, high-performance service offers extensive data about countries, including
     demographics, geography, and international codes.
   license:
     name: MIT
-    url: https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+    url: https://github.com/DoROAD-AI/atlas-core/blob/main/LICENSE
   termsOfService: http://atlas.doroad.io/terms/
   title: Atlas Core - Geographic Data API by DoROAD
   version: "1.0"

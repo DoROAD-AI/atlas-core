@@ -1,4 +1,4 @@
-// main.go - Atlas API entry point
+// main.go - Atlas-Core API entry point
 package main
 
 import (
@@ -9,20 +9,20 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	v1 "github.com/DoROAD-AI/atlas/api/v1"
-	"github.com/DoROAD-AI/atlas/docs"
+	v1 "github.com/DoROAD-AI/atlas-core/api/v1"
+	"github.com/DoROAD-AI/atlas-core/docs"
 	"github.com/gin-contrib/cors"
 )
 
 // @title       Atlas Core - Geographic Data API by DoROAD
 // @version     1.0
 // @description A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.
-// @termsOfService http://atlas.doroad.io/terms/
+// @termsOfService http://atlas.doroad.dev/terms/
 // @contact.name  Atlas API Support
-// @contact.url   https://github.com/DoROAD-AI/atlas/issues
-// @contact.email support@doroad.ai
+// @contact.url   https://github.com/DoROAD-AI/atlas-core/issues
+// @contact.email atlas-core@doroad.dev
 // @license.name  MIT
-// @license.url   https://github.com/DoROAD-AI/atlas/blob/main/LICENSE
+// @license.url   https://github.com/DoROAD-AI/atlas-core/blob/main/LICENSE
 // @BasePath      /v1
 // @schemes       https http
 
@@ -30,13 +30,13 @@ func getHost() string {
 	env := os.Getenv("ATLAS_ENV")
 	switch env {
 	case "production":
-		return "atlas.doroad.io"
-	case "test":
 		return "atlas.doroad.dev"
+	case "test":
+		return "atlas-test.doroad.dev"
 	case "dev":
-		return "atlas-guauaxfgd2enghft.francecentral-01.azurewebsites.net"
+		return "atlas-dev.doroad.dev"
 	case "core":
-		return "atlas-core-aphef3cbeehjavhy.francecentral-01.azurewebsites.net"
+		return "atlas-core.doroad.dev"
 	default:
 		return "localhost:3101"
 	}

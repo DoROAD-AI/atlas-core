@@ -12,12 +12,12 @@ const docTemplate = `{
         "termsOfService": "http://atlas.doroad.io/terms/",
         "contact": {
             "name": "Atlas API Support",
-            "url": "https://github.com/DoROAD-AI/atlas/issues",
+            "url": "https://github.com/DoROAD-AI/atlas-core/issues",
             "email": "support@doroad.ai"
         },
         "license": {
             "name": "MIT",
-            "url": "https://github.com/DoROAD-AI/atlas/blob/main/LICENSE"
+            "url": "https://github.com/DoROAD-AI/atlas-core/blob/main/LICENSE"
         },
         "version": "{{.Version}}"
     },

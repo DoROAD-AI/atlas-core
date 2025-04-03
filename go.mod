@@ -1,7 +1,8 @@
-module github.com/DoROAD-AI/atlas
+module github.com/DoROAD-AI/atlas-core
 
-go 1.23.5
-toolchain go1.24.1
+go 1.23.0
+
+toolchain go1.23.8
 
 require (
 	github.com/gin-contrib/cors v1.7.5

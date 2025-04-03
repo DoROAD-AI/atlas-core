@@ -35,4 +35,4 @@ COPY --from=builder /app/data /app/data
 COPY --from=builder /app/docs /app/docs
 
 # Command to run the application
-ENTRYPOINT ["./atlas"]
+ENTRYPOINT ["./atlas-core"]
