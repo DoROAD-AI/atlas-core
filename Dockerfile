@@ -34,7 +34,15 @@ COPY --from=builder /app/data /app/data
 # Create the docs directory and copy the JSON files there
 COPY --from=builder /app/docs /app/docs
 
+# Set proper permissions for nonroot user
+USER root
+RUN chown -R nonroot:nonroot /app
+
+# Switch to nonroot user for security
 USER nonroot:nonroot
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s CMD wget --no-verbose --tries=1 --spider http://localhost:3101/v1/all || exit 1
 
 # Command to run the application
 ENTRYPOINT ["./atlas-core"]
