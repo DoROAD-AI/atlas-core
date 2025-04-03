@@ -9,11 +9,11 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://atlas.doroad.io/terms/",
+        "termsOfService": "http://atlas.doroad.dev/terms/",
         "contact": {
             "name": "Atlas API Support",
             "url": "https://github.com/DoROAD-AI/atlas-core/issues",
-            "email": "support@doroad.ai"
+            "email": "atlas-core@doroad.dev"
         },
         "license": {
             "name": "MIT",

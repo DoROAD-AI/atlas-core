@@ -7,11 +7,11 @@
     "info": {
         "description": "A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.",
         "title": "Atlas Core - Geographic Data API by DoROAD",
-        "termsOfService": "http://atlas.doroad.io/terms/",
+        "termsOfService": "http://atlas.doroad.dev/terms/",
         "contact": {
             "name": "Atlas API Support",
             "url": "https://github.com/DoROAD-AI/atlas-core/issues",
-            "email": "support@doroad.ai"
+            "email": "atlas-core@doroad.dev"
         },
         "license": {
             "name": "MIT",
