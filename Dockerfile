@@ -25,18 +25,14 @@ EXPOSE 3101
 # Set the working directory
 WORKDIR /app
 
-# Copy the built binary from the builder stage
-COPY --from=builder /app/atlas-core ./
+# Copy the built binary from the builder stage with proper ownership
+COPY --from=builder --chown=nonroot:nonroot /app/atlas-core ./
 
-# Create the data directory and copy the JSON files there
-COPY --from=builder /app/data /app/data
+# Copy the data directory with proper ownership
+COPY --from=builder --chown=nonroot:nonroot /app/data /app/data
 
-# Create the docs directory and copy the JSON files there
-COPY --from=builder /app/docs /app/docs
-
-# Set proper permissions for nonroot user
-USER root
-RUN chown -R nonroot:nonroot /app
+# Copy the docs directory with proper ownership
+COPY --from=builder --chown=nonroot:nonroot /app/docs /app/docs
 
 # Switch to nonroot user for security
 USER nonroot:nonroot
