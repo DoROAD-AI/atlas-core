@@ -19,7 +19,7 @@ The fastest way to get started with Atlas-Core is through our hosted API service
 
 - **Sign Up for API Access**: [https://portal.doroad.dev](https://portal.doroad.dev)
 - **API Base URL**: [https://api.doroad.dev](https://api.doroad.dev)
-- **Documentation**: [https://api.doroad.dev/swagger/index.html](https://api.doroad.dev/swagger/index.html)
+- **Documentation**: [https://api.doroad.dev](https://api.doroad.dev)
 
 ### Authentication
 
