@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.24.2 AS builder
+FROM golang:1.25.6 AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o atlas-core .
 
 # Runtime Stage
-FROM gcr.io/distroless/base-debian12
+FROM gcr.io/distroless/base-debian13
 
 # Expose the application port
 EXPOSE 3101
