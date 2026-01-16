@@ -17,7 +17,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o atlas-core .
 
 # Runtime Stage
-FROM gcr.io/distroless/base-debian12
+FROM gcr.io/distroless/base-debian13
 
 # Expose the application port
 EXPOSE 3101
