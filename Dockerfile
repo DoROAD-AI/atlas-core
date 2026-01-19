@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.25.6 AS builder
+FROM golang:1.26rc2 AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
