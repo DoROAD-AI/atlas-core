@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.25.6 AS builder
+FROM golang:1.26 AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o atlas-core .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gcr .
 
 # Runtime Stage
 FROM gcr.io/distroless/base-debian13
@@ -26,7 +26,7 @@ EXPOSE 3101
 WORKDIR /app
 
 # Copy the built binary from the builder stage with proper ownership
-COPY --from=builder --chown=nonroot:nonroot /app/atlas-core ./
+COPY --from=builder --chown=nonroot:nonroot /app/gcr ./
 
 # Copy the data directory with proper ownership
 COPY --from=builder --chown=nonroot:nonroot /app/data /app/data
@@ -38,4 +38,4 @@ COPY --from=builder --chown=nonroot:nonroot /app/docs /app/docs
 USER nonroot:nonroot
 
 # Command to run the application
-ENTRYPOINT ["./atlas-core"]
+ENTRYPOINT ["./gcr"]

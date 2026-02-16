@@ -12,12 +12,12 @@ const docTemplate = `{
         "termsOfService": "http://atlas.doroad.dev/terms/",
         "contact": {
             "name": "Atlas API Support",
-            "url": "https://github.com/DoROAD-AI/atlas-core/issues",
-            "email": "atlas-core@doroad.dev"
+            "url": "https://github.com/DoROAD-AI/gcr/issues",
+            "email": "gcr@doroad.dev"
         },
         "license": {
             "name": "MIT",
-            "url": "https://github.com/DoROAD-AI/atlas-core/blob/main/LICENSE"
+            "url": "https://github.com/DoROAD-AI/gcr/blob/main/LICENSE"
         },
         "version": "{{.Version}}"
     },
@@ -984,7 +984,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/v1",
 	Schemes:          []string{"https", "http"},
-	Title:            "Atlas Core - Geographic Data API by DoROAD",
+	Title:            "Global Country Registry (GCR) - Geographic Data API by DoROAD",
 	Description:      "A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

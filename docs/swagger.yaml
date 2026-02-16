@@ -236,17 +236,17 @@ definitions:
     type: object
 info:
   contact:
-    email: atlas-core@doroad.dev
+    email: gcr@doroad.dev
     name: Atlas API Support
-    url: https://github.com/DoROAD-AI/atlas-core/issues
+    url: https://github.com/DoROAD-AI/gcr/issues
   description: A comprehensive REST API providing detailed country information worldwide.
     This modern, high-performance service offers extensive data about countries, including
     demographics, geography, and international codes.
   license:
     name: MIT
-    url: https://github.com/DoROAD-AI/atlas-core/blob/main/LICENSE
+    url: https://github.com/DoROAD-AI/gcr/blob/main/LICENSE
   termsOfService: http://atlas.doroad.dev/terms/
-  title: Atlas Core - Geographic Data API by DoROAD
+  title: Global Country Registry (GCR) - Geographic Data API by DoROAD
   version: "1.0"
 paths:
   /alpha:

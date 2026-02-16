@@ -1,21 +1,21 @@
-# Atlas-Core 🌍
+# Global Country Registry (GCR) 🌍
 
-**Atlas-Core** is the open-source foundation of DoROAD's flagship Global Travel and Aviation Intelligence Data API. Built with modern Go practices, this powerful geographic information API provides detailed country data and geographic insights through a clean, RESTful interface.
+**Global Country Registry (GCR)** is the open-source foundation of DoROAD's flagship Global Travel and Aviation Intelligence Data API. Built with modern Go practices, this powerful geographic information API provides detailed country data and geographic insights through a clean, RESTful interface.
 
-## About Atlas-Core
+## About Global Country Registry (GCR)
 
-Atlas-Core brings enterprise-grade geographic data to the open-source community. By releasing this foundation, we aim to:
+GCR brings enterprise-grade geographic data to the open-source community. By releasing this foundation, we aim to:
 
 - Contribute valuable tools to developers working on travel, geographic, and AI applications
 - Build a community around geographic data standardization and enrichment
 - Provide a springboard for innovative applications in travel technology
 - Create awareness for the full Atlas product, which includes additional premium features
 
-## Using Atlas-Core
+## Using GCR
 
 ### Via DoROAD's Hosted Service
 
-The fastest way to get started with Atlas-Core is through our hosted API service:
+The fastest way to get started with GCR is through our hosted API service:
 
 - **Sign Up for API Access**: [https://portal.doroad.dev](https://portal.doroad.dev)
 - **API Base URL**: [https://api.doroad.dev](https://api.doroad.dev)
@@ -66,7 +66,7 @@ curl -H "dapi-key: your_api_key" https://api.doroad.dev/atlasc/countries?fields=
 
 ### AI Integration Capabilities
 
-Atlas-Core is designed to seamlessly integrate with AI and machine learning projects:
+GCR is designed to seamlessly integrate with AI and machine learning projects:
 
 - **Structured Geographic Data**: Perfect for training location-aware models
 - **Consistent Data Format**: Reliable structure for training data
@@ -82,7 +82,7 @@ Atlas-Core is designed to seamlessly integrate with AI and machine learning proj
 - Geographic classification models
 - Transport and logistics optimization
 
-## Self-Hosting Atlas-Core
+## Self-Hosting GCR
 
 ### Prerequisites
 
@@ -96,8 +96,8 @@ Atlas-Core is designed to seamlessly integrate with AI and machine learning proj
 
    ```bash
    # Clone the repository
-   git clone https://github.com/DoROAD-AI/atlas-core.git
-   cd atlas-core
+   git clone https://github.com/DoROAD-AI/gcr.git
+   cd gcr
 
    # Initialize the module
    go mod tidy
@@ -127,7 +127,7 @@ Atlas-Core is designed to seamlessly integrate with AI and machine learning proj
    ```bash
    go clean
    go build
-   ./atlas-core
+   ./gcr
    ```
 
 ### Docker Deployment
@@ -139,16 +139,16 @@ FROM golang:1.20-alpine
 WORKDIR /app
 COPY . .
 RUN go mod download
-RUN go build -o atlas-core
+RUN go build -o gcr
 EXPOSE 3101
-CMD ["./atlas-core"]
+CMD ["./gcr"]
 ```
 
 Build and run the Docker image:
 
 ```bash
-docker build -t atlas-core .
-docker run -p 3101:3101 -e ATLAS_ENV=production atlas-core
+docker build -t gcr .
+docker run -p 3101:3101 -e ATLAS_ENV=production gcr
 ```
 
 ## API Documentation
@@ -158,11 +158,11 @@ Complete API documentation is available through our Swagger UI:
 - **Hosted**: [https://api.doroad.dev](https://api.doroad.dev)
 - **Local**: http://localhost:3101/swagger/index.html
 
-## Difference Between Atlas-Core and Full Atlas
+## Difference Between GCR and Full Atlas
 
-Atlas-Core is our open-source offering that provides fundamental country data capabilities. The full Atlas product offers additional premium features:
+GCR is our open-source offering that provides fundamental country data capabilities. The full Atlas product offers additional premium features:
 
-| Feature | Atlas-Core |
+| Feature | GCR |
 |---------|------------|
 | Country Data | ✓ |
 | Field Filtering | ✓ |
@@ -179,7 +179,7 @@ For information on accessing the full Atlas product, please contact [atlas@doroa
 
 ## Contributing
 
-We welcome contributions to Atlas-Core! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+We welcome contributions to GCR! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -189,7 +189,7 @@ We welcome contributions to Atlas-Core! Please see our [Contributing Guidelines]
 
 ## License
 
-Atlas-Core is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+GCR is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
@@ -199,15 +199,15 @@ Atlas-Core is licensed under the MIT License - see the [LICENSE](LICENSE) file f
 
 ## Support and Contact
 
-- GitHub Issues: [https://github.com/DoROAD-AI/atlas-core/issues](https://github.com/DoROAD-AI/atlas-core/issues)
-- GitHub Discussions: [https://github.com/DoROAD-AI/atlas-core/discussions](https://github.com/DoROAD-AI/atlas-core/discussions)
+- GitHub Issues: [https://github.com/DoROAD-AI/gcr/issues](https://github.com/DoROAD-AI/gcr/issues)
+- GitHub Discussions: [https://github.com/DoROAD-AI/gcr/discussions](https://github.com/DoROAD-AI/gcr/discussions)
 - Email: [support@doroad.ai](mailto:support@doroad.ai)
 
 ## About DoROAD AI
 
 DoROAD (DoRoad B.V.) is a pioneering travel technology company headquartered in The Netherlands, revolutionizing the travel industry through advanced technology and unwavering security and privacy protection.
 
-Our vision extends beyond traditional travel technology, aiming to establish new standards for personalization, security, and efficiency in global travel management. By open-sourcing Atlas-Core, we're demonstrating our commitment to innovation and community collaboration.
+Our vision extends beyond traditional travel technology, aiming to establish new standards for personalization, security, and efficiency in global travel management. By open-sourcing GCR, we're demonstrating our commitment to innovation and community collaboration.
 
 ---
 

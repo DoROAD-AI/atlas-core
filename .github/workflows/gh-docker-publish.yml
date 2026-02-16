@@ -9,11 +9,11 @@ on:
   schedule:
     - cron: '30 14 * * *' # Runs at 2:30 PM UTC daily
   push:
-    branches: [ "atlas-core" ]
+    branches: [ "gcr" ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ "atlas-core" ]
+    branches: [ "gcr" ]
 
 env:
   # Use docker.io for Docker Hub if empty

@@ -1,4 +1,4 @@
-module github.com/DoROAD-AI/atlas-core
+module github.com/DoROAD-AI/gcr
 
 go 1.26
 

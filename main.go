@@ -1,4 +1,4 @@
-// main.go - Atlas-Core API entry point
+// main.go - Global Country Registry (GCR) API entry point
 package main
 
 import (
@@ -9,20 +9,20 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	v1 "github.com/DoROAD-AI/atlas-core/api/v1"
-	"github.com/DoROAD-AI/atlas-core/docs"
+	v1 "github.com/DoROAD-AI/gcr/api/v1"
+	"github.com/DoROAD-AI/gcr/docs"
 	"github.com/gin-contrib/cors"
 )
 
-// @title       Atlas Core - Geographic Data API by DoROAD
+// @title       Global Country Registry (GCR) - Geographic Data API by DoROAD
 // @version     1.0
 // @description A comprehensive REST API providing detailed country information worldwide. This modern, high-performance service offers extensive data about countries, including demographics, geography, and international codes.
 // @termsOfService http://atlas.doroad.dev/terms/
 // @contact.name  Atlas API Support
-// @contact.url   https://github.com/DoROAD-AI/atlas-core/issues
-// @contact.email atlas-core@doroad.dev
+// @contact.url   https://github.com/DoROAD-AI/gcr/issues
+// @contact.email gcr@doroad.dev
 // @license.name  MIT
-// @license.url   https://github.com/DoROAD-AI/atlas-core/blob/main/LICENSE
+// @license.url   https://github.com/DoROAD-AI/gcr/blob/main/LICENSE
 // @BasePath      /v1
 // @schemes       https http
 
@@ -36,7 +36,7 @@ func getHost() string {
 	case "dev":
 		return "atlas-dev.doroad.dev"
 	case "core":
-		return "atlas-core.doroad.dev"
+		return "gcr.doroad.dev"
 	default:
 		return "localhost:3101"
 	}
