@@ -761,7 +761,8 @@ const docTemplate = `{
                 "gini": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "number"
+                        "type": "number",
+                        "format": "float64"
                     }
                 },
                 "idd": {
